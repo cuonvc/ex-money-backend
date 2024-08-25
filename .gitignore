@@ -19,6 +19,9 @@ target/
 *.iml
 *.ipr
 
+#customize
+/src/main/resources/application-staging.yml
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
