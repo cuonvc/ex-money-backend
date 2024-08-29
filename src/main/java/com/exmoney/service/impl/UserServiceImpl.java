@@ -70,11 +70,11 @@ public class UserServiceImpl implements UserService {
 
         request.setEmail(request.getEmail().trim().toLowerCase());
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ServiceException(EMAIL_EXISTED);
+            throw new ServiceException(EMAIL_EXISTED, request.getEmail());
         }
 
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
-            throw new ServiceException(PASSWORD_NOT_MATCHED);
+            throw new ServiceException(PASSWORD_NOT_MATCHED, request.getPasswordConfirm());
         }
 
         User user = userMapper.regRequestToEntity(request);

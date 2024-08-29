@@ -10,27 +10,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RegRequest {
 
-    @NotNull(message = "Tên hiển thị không được để trống")
-    @NotBlank(message = "Tên hiển thị không được để trống")
-    @NotEmpty(message = "Tên hiển thị không được để trống")
-    @Size(min = 1, max = 14, message = "Tên phải có từ 3 đến 14 ký tự")
+    @NotNull(message = "validate.name_empty")
+    @NotBlank(message = "validate.name_empty")
+    @NotEmpty(message = "validate.name_empty")
+    @Size(min = 3, max = 14, message = "validate.name_size")
     private String name;
 
-    @Email(message = "Email không đúng định dạng")
-    @NotNull(message = "Email không được để trống")
-    @NotBlank(message = "Email không được để trống")
-    @NotEmpty(message = "Email không được để trống")
+    @Email(message = "validate.email_format")
+    @NotNull(message = "validate.email_empty")
+    @NotBlank(message = "validate.email_empty")
+    @NotEmpty(message = "validate.email_empty")
     private String email;
 
-    @NotEmpty(message = "Mật khẩu không được để trống")
-    @NotNull(message = "Mật khẩu không được để trống")
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, max = 20, message = "Mật khẩu phải có từ 6 đến 20 ký tự")
+    @NotEmpty(message = "validate.password_empty")
+    @NotNull(message = "validate.password_empty")
+    @NotBlank(message = "validate.password_empty")
+    @Size(min = 6, max = 20, message = "validate.password_size")
     private String password;
 
-    @NotEmpty(message = "Mật khẩu không được để trống")
-    @NotNull(message = "Mật khẩu không được để trống")
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, max = 20, message = "Mật khẩu phải có từ 6 đến 20 ký tự")
+    @NotEmpty(message = "validate.password_empty")
+    @NotNull(message = "validate.password_empty")
+    @NotBlank(message = "validate.password_empty")
+    @Size(min = 6, max = 20, message = "validate.password_size")
     private String passwordConfirm;
 }

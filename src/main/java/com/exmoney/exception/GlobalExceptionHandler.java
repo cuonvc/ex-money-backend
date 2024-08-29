@@ -8,18 +8,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+
+import static com.exmoney.util.Utils.getNowStr;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -31,14 +28,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
-        Map<String, String> errors = new HashMap<>();
+        List<String> errors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String field = ((FieldError) error).getField();
             String message = error.getDefaultMessage();
-            errors.put(field, message);
+            errors.add(message);
         });
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("status", HttpStatus.BAD_REQUEST.name());
+        resp.put("statusCode", HttpStatus.BAD_REQUEST.value());
+        resp.put("message", !errors.isEmpty() ? errors.get(0) : "Error -_-");
+        resp.put("data", new Object[]{}); //khong get duoc data tung field
+        resp.put("dateTime", getNowStr());
 
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(resp, HttpStatus.BAD_REQUEST);
     }
 
     @SneakyThrows

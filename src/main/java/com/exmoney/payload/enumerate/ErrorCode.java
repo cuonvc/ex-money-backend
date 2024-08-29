@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
 
-    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR.value()),
+    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "{internal_server_error}", HttpStatus.INTERNAL_SERVER_ERROR.value()),
     BAD_REQUEST("BAD_REQUEST", "Request sai định dạng", HttpStatus.BAD_REQUEST.value()),
     USER_NOT_FOUND("USER_NOT_FOUND", "Tài khoản không tồn tại", HttpStatus.NOT_FOUND.value()),
     INVALID_CREDENTIAL("INVALID_CREDENTIAL", "Tài khoản không hợp lệ", HttpStatus.FORBIDDEN.value()),
