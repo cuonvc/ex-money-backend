@@ -38,7 +38,8 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handle -> handle.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in", "/api/auth/active-account")
+                        .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in",
+                                "/api/auth/active-account", "/api/auth/token/renew")
                         .permitAll()
                         .requestMatchers("/api/auth/admin/*").hasAnyAuthority("ADMIN")
                         .anyRequest()

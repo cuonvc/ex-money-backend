@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Locale;
 
@@ -23,11 +25,17 @@ public class BeanConfiguration {
                 = new ReloadableResourceBundleMessageSource();
 
         messageSource.setBasenames(
-                "classpath:messages/language_vi",
-                "classpath:messages/language_us"
-                );
+                "classpath:messages/language"
+        );
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
+    }
+
+    @Bean
+    public LocaleResolver localeResolver() {
+        SessionLocaleResolver slr = new SessionLocaleResolver();
+        slr.setDefaultLocale(Locale.US);
+        return slr;
     }
 
     @Bean

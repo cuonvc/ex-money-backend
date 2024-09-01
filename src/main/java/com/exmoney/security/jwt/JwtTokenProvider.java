@@ -1,18 +1,19 @@
 package com.exmoney.security.jwt;
 
 import com.exmoney.entity.User;
-import com.exmoney.exception.APIException;
-import com.exmoney.exception.ResourceNotFoundException;
-import com.exmoney.repository.UserRepository;
+import com.exmoney.payload.dto.AccessTokenDto;
+import com.exmoney.service.CommonService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+
+import static com.exmoney.payload.enumerate.ErrorCode.*;
 
 @Component
 public class JwtTokenProvider {
@@ -20,10 +21,10 @@ public class JwtTokenProvider {
     private static final String SECRET_KEY = "SnNvbiB3ZWIgdG9rZW4gZm9yIG1pY3Jvc2VydmljZSBwcm9qZWN0";
     private static final Long expireTime = 7776000000L; //3-months
 
-    private final UserRepository userRepository;
+    private final CommonService commonService;
 
-    public JwtTokenProvider(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public JwtTokenProvider(CommonService commonService) {
+        this.commonService = commonService;
     }
 
     public String getEmailFromToken(String token) {
@@ -36,6 +37,7 @@ public class JwtTokenProvider {
     }
 
     //validate JWT token
+    //Check nếu 401 thì request renew access token
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -43,33 +45,39 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
+            commonService.throwException(JWT_INVALID_SIGNATURE, Locale.forLanguageTag("us"));
         } catch (MalformedJwtException e) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
+            commonService.throwException(JWT_INVALID_TOKEN, Locale.forLanguageTag("us"));
         } catch (ExpiredJwtException e) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Expired JWT token");
+            commonService.throwException(JWT_EXPIRED_TOKEN, Locale.forLanguageTag("us"));
         } catch (UnsupportedJwtException e) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Unsupported JWT token");
+            commonService.throwException(JWT_UNSUPPORTED_TOKEN, Locale.forLanguageTag("us"));
         } catch (IllegalArgumentException e) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "JWT claims string is empty");
+            commonService.throwException(JWT_CLAIM_IS_EMPTY, Locale.forLanguageTag("us"));
         }
+        return false;
     }
 
-    public String generateToken(String email) {
+    public AccessTokenDto generateToken(String email) {
 //        String email = authentication.getName();
         Date currentDate = new Date();
         Date expire = new Date(currentDate.getTime() + expireTime);
 
-        return Jwts.builder()
+        String accessToken = Jwts.builder()
                 .setClaims(claimsBuilder(email))
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(expire)
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+
+        return AccessTokenDto.builder()
+                .token(accessToken)
+                .tokenType("Bearer")
+                .expireDate(expire)
+                .build();
     }
     private Map<String, Object> claimsBuilder(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        User user = commonService.findUserByEmailOrThrow(email, Locale.getDefault());
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId());

@@ -15,9 +15,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProfileRequest {
 
-    @NotNull(message = "Tên hiển thị không được để trống")
-    @NotBlank(message = "Tên hiển thị không được để trống")
-    @NotEmpty(message = "Tên hiển thị không được để trống")
-    @Size(min = 1, max = 14, message = "Tên phải có từ 3 đến 14 ký tự")
+    @NotNull(message = "validate.name_empty")
+    @NotBlank(message = "validate.name_empty")
+    @NotEmpty(message = "validate.name_empty")
+    @Size(min = 3, max = 14, message = "validate.name_size")
     private String name;
 }

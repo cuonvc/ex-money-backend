@@ -2,12 +2,9 @@ package com.exmoney.service.impl;
 
 import com.exmoney.entity.RefreshToken;
 import com.exmoney.entity.User;
-import com.exmoney.exception.APIException;
-import com.exmoney.exception.ResourceNotFoundException;
-import com.exmoney.exception.ServiceException;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
-import com.exmoney.payload.enumerate.ErrorCode;
+import com.exmoney.payload.dto.AccessTokenDto;
 import com.exmoney.payload.mapper.TokenMapper;
 import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.request.auth.LoginRequest;
@@ -15,7 +12,6 @@ import com.exmoney.payload.request.auth.PasswordChangeRequest;
 import com.exmoney.payload.request.user.ProfileRequest;
 import com.exmoney.payload.request.auth.RegRequest;
 import com.exmoney.payload.response.user.PageResponseUsers;
-import com.exmoney.payload.response.auth.TokenObjectResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.repository.RefreshTokenRepository;
 import com.exmoney.repository.UserRepository;
@@ -30,9 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +34,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Utils.getNow;
@@ -53,7 +49,6 @@ public class UserServiceImpl implements UserService {
     private static final String COVER = "";
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final RefreshTokenRepository tokenRepository;
@@ -66,15 +61,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse<UserResponse>> register(RegRequest request) {
+    public ResponseEntity<BaseResponse<UserResponse>> register(RegRequest request, Locale locale) {
 
         request.setEmail(request.getEmail().trim().toLowerCase());
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ServiceException(EMAIL_EXISTED, request.getEmail());
+            commonService.throwException(EMAIL_EXISTED, locale);
         }
 
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
-            throw new ServiceException(PASSWORD_NOT_MATCHED, request.getPasswordConfirm());
+            commonService.throwException(PASSWORD_NOT_MATCHED, locale);
         }
 
         User user = userMapper.regRequestToEntity(request);
@@ -87,96 +82,86 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<TokenObjectResponse>> signIn(LoginRequest request) {
+    public ResponseEntity<BaseResponse<Object>> signIn(LoginRequest request, Locale locale) {
         request.setEmail(request.getEmail().trim().toLowerCase());
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ServiceException(USER_NOT_FOUND, request.getEmail()));
+        User user = commonService.findUserByEmailOrThrow(request.getEmail(), locale);
 
         if (!validPassword(request.getPassword(), user.getPassword())) {
-            throw new ServiceException(PASSWORD_NOT_MATCHED);
+            commonService.throwException(PASSWORD_INCORRECT, locale);
         }
 
-        String accessToken = jwtTokenProvider.generateToken(request.getEmail());
+        AccessTokenDto accessTokenObj = jwtTokenProvider.generateToken(request.getEmail());
         RefreshToken refreshToken = tokenService.generateTokenObject(user);
         UserResponse userResponse = userMapper.entityToResponse(user);
-        TokenObjectResponse response = TokenObjectResponse.builder()
-                .accessToken(accessToken)
-                .tokenType("Bearer")
-                .refreshToken(tokenMapper.mapToDto(refreshToken))
-                .userResponse(userResponse)
-                .build();
 
-        return responseFactory.success("Đăng nhập thành công", response);
+        Object[] repsonse = {accessTokenObj, tokenMapper.mapToDto(refreshToken), userResponse};
+
+        return responseFactory.success(commonService.getMessageSrc("sign_in.success", locale), repsonse);
     }
 
     @Override
-    public ResponseEntity<BaseResponse<String>> signOut() {
+    public ResponseEntity<BaseResponse<String>> signOut(Locale locale) {
         tokenService.clearToken(commonService.getCurrentUserId());
-        return responseFactory.success("Đã đăng xuất");
+        return responseFactory.success(commonService.getMessageSrc("sign_out.success", locale));
     }
 
     @Override
-    public ResponseEntity<BaseResponse<TokenObjectResponse>> renewAccessToken(String refreshToken) {
-        RefreshToken rt = tokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new ServiceException(INVALID_CREDENTIAL));
-
-        User user = userRepository.findById(rt.getUserId())
-                .orElseThrow(() -> new ServiceException(INTERNAL_SERVER_ERROR));
-
-        if (rt.getExpireDate().compareTo(new Date()) <= 0) {
-            throw new ServiceException(INVALID_CREDENTIAL);
+    public ResponseEntity<BaseResponse<Object>> renewAccessToken(String refreshToken) {
+        Optional<RefreshToken> refreshTokenOp = tokenRepository.findByToken(refreshToken);
+        if (refreshTokenOp.isEmpty()) {
+            commonService.throwException(INVALID_CREDENTIAL, Locale.forLanguageTag("us"));
         }
 
-        return responseFactory.success(
-                TokenObjectResponse.builder()
-                        .accessToken(jwtTokenProvider.generateToken(user.getEmail()))
-                        .refreshToken(tokenMapper.mapToDto(rt))
-                        .build()
-        );
+        RefreshToken rt = refreshTokenOp.get();
+        if (rt.getExpireDate().compareTo(new Date()) <= 0) {
+            commonService.throwException(INVALID_CREDENTIAL, Locale.forLanguageTag("us"));
+        }
+
+        User user = commonService.findUserByIdOrThrow(rt.getUserId(), Locale.forLanguageTag("us"));
+        AccessTokenDto accessToken = jwtTokenProvider.generateToken(user.getEmail());
+        Object[] response = {accessToken, rt, userMapper.entityToResponse(user)};
+        return responseFactory.success(response);
     }
 
     @Override
-    public ResponseEntity<BaseResponse<UserResponse>> editProfile(ProfileRequest request) {
-        User user = userRepository.findById(commonService.getCurrentUserId())
-                .orElseThrow(() -> new ServiceException(USER_NOT_FOUND));  //not happen
+    public ResponseEntity<BaseResponse<UserResponse>> editProfile(ProfileRequest request, Locale locale) {
+        User user = commonService.findUserByIdOrThrow(commonService.getCurrentUserId(), locale);  //not happen
 
         user = userMapper.profileToEntity(request, user);
         user.setUpdatedAt(getNow());
         UserResponse response = userMapper.entityToResponse(userRepository.save(user));
-        return responseFactory.success("Cập nhập trang cá nhân thành công!", response);
+        return responseFactory.success(response);
     }
 
     @Override
-    public ResponseEntity<BaseResponse<String>> changePassword(PasswordChangeRequest request) {
-        User user = userRepository.findById(commonService.getCurrentUserId())
-                .orElseThrow(() -> new ServiceException(USER_NOT_FOUND));
-
-        if (!request.getNewPassword().equals(request.getRetypePassword())) {
-            return responseFactory.fail(HttpStatus.BAD_REQUEST, "Mật khâu không trùng khớp");
-        }
+    public ResponseEntity<BaseResponse<String>> changePassword(PasswordChangeRequest request, Locale locale) {
+        User user = commonService.findUserByIdOrThrow(commonService.getCurrentUserId(), locale);
 
         if (!validPassword(request.getOldPassword(), user.getPassword())) {
-            return responseFactory.fail(HttpStatus.BAD_REQUEST, "Mật khẩu cũ không chính xác");
+            commonService.throwException(PASSWORD_INCORRECT, locale);
+        }
+
+        if (!request.getNewPassword().equals(request.getRetypePassword())) {
+            commonService.throwException(PASSWORD_NOT_MATCHED, locale);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        return responseFactory.success("Thiết lập mật khẩu thành công");
+        return responseFactory.success(commonService.getMessageSrc("password_change.success", locale));
     }
 
     @Override
-    public ResponseEntity<BaseResponse<UserResponse>> getAccount() {
-        User user = userRepository.findById(commonService.getCurrentUserId())
-                .orElse(new User());
+    public ResponseEntity<BaseResponse<UserResponse>> getAccount(Locale locale) {
+        User user = commonService.findUserByIdOrThrow(commonService.getCurrentUserId(), locale);
         UserResponse response = userMapper.entityToResponse(user);
 
         return responseFactory.success(response);
     }
 
     @Override
-    public ResponseEntity<BaseResponse<PageResponseUsers>> getAll(Integer pageNo, Integer pageSize, String sortBy, String sortDir) {
+    public ResponseEntity<BaseResponse<PageResponseUsers>> getAll(Integer pageNo, Integer pageSize, String sortBy, String sortDir, Locale locale) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -188,10 +173,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<UserResponse>> uploadAvatar(MultipartFile file) {
-        User user = userRepository.findById(commonService.getCurrentUserId())
-                .orElseThrow(() -> new ServiceException(INTERNAL_SERVER_ERROR));
-        return responseFactory.success("Cập nhật ảnh đại diện thành công.",
+    public ResponseEntity<BaseResponse<UserResponse>> uploadAvatar(MultipartFile file, Locale locale) {
+        User user = commonService.findUserByIdOrThrow(commonService.getCurrentUserId(), locale);
+        return responseFactory.success(commonService.getMessageSrc("image_update.success", locale),
                 userMapper.entityToResponse(userRepository.save(user)));
     }
 

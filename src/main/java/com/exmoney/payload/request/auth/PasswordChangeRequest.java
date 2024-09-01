@@ -11,15 +11,16 @@ import lombok.Data;
 @Builder(toBuilder = true)
 public class PasswordChangeRequest {
 
-    @NotBlank(message = "Mật khẩu cũ không được để trống")
-    @NotNull(message = "Mật khẩu cũ không được để trống")
-    @NotEmpty(message = "Mật khẩu cũ không được để trống")
+    @NotEmpty(message = "validate.password_empty")
+    @NotNull(message = "validate.password_empty")
+    @NotBlank(message = "validate.password_empty")
+    @Size(min = 6, max = 20, message = "validate.password_size")
     private String oldPassword;
 
-    @NotBlank(message = "Mật khẩu mới không được để trống")
-    @NotNull(message = "Mật khẩu mới không được để trống")
-    @NotEmpty(message = "Mật khẩu mới không được để trống")
-    @Size(min = 6, max = 20, message = "Mật khẩu phải chứa từ 6 đến 20 ký tự")
+    @NotEmpty(message = "validate.password_empty")
+    @NotNull(message = "validate.password_empty")
+    @NotBlank(message = "validate.password_empty")
+    @Size(min = 6, max = 20, message = "validate.password_size")
     private String newPassword;
 
     private String retypePassword;

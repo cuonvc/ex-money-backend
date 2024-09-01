@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.text.MessageFormat;
-import static com.exmoney.util.Utils.getNowStr;
+import java.time.LocalDateTime;
+
+import static com.exmoney.util.Utils.getNow;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -14,22 +16,23 @@ public class ServiceException extends RuntimeException {
     private String status;
     private int statusCode;
     private Object[] args;
-    private String dateTime; //để string vì modelMapper ko map đc localDateTime
+    private LocalDateTime dateTime;
 
-    public ServiceException(ErrorCode error) {
-        super(error.getMessage());
-        this.status = error.getStatus();
-        this.statusCode = error.getStatusCode();
-        this.dateTime = getNowStr();
+    public ServiceException(String message, String status, int statusCode, Object... args) {
+        super(message);
+        this.status = status;
+        this.statusCode = statusCode;
+        this.args = args;
+        this.dateTime = getNow();
     }
 
-    public ServiceException(ErrorCode error, Object... args) {
-        super(error.getMessage());
-        this.status = error.getStatus();
-        this.statusCode = error.getStatusCode();
-        this.args = args == null ? new Object[0] : args;
-        this.dateTime = getNowStr();
-    }
+//    public ServiceException(ErrorCode error, Object... args) {
+//        super();
+//        this.status = error.getStatus();
+//        this.statusCode = error.getStatusCode();
+//        this.args = args == null ? new Object[0] : args;
+//        this.dateTime = getNowStr();
+//    }
 
     public Object[] getArgs() {
         return args == null ? new Object[0] : args;

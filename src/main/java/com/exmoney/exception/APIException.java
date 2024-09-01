@@ -2,11 +2,11 @@ package com.exmoney.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class APIException extends RuntimeException {
     private HttpStatus status;

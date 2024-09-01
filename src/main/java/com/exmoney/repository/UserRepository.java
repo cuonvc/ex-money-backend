@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
 
-    @Query("SELECT u FROM User u WHERE u.email = :email AND u.status != 'DELETE'")
+    @Query("SELECT u FROM User u WHERE u.email = :email AND u.status != 'INACTIVE'")
     Optional<User> findByEmail(String email);
 }

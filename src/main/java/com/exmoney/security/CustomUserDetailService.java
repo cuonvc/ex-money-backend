@@ -1,8 +1,7 @@
 package com.exmoney.security;
 
 import com.exmoney.entity.User;
-import com.exmoney.exception.ResourceNotFoundException;
-import com.exmoney.repository.UserRepository;
+import com.exmoney.service.CommonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,18 +13,18 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final CommonService commonService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        User user = commonService.findUserByEmailOrThrow(email, Locale.getDefault());
 
         return new CustomUserDetail(user.getId(), user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRole()));
     }
