@@ -1,0 +1,8 @@
+SERVER_PORT: 8081
+
+DB_HOST: localhost
+DB_PORT: 5432
+DB_NAME: exmoney
+DB_DEFAULT_SCHEMA: exmoney-dev
+DB_USERNAME: postgres
+DB_PASSWORD: 1234

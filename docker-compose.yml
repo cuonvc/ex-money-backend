@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  redis:
+    container_name: redis
+    image: "redis"
+    network_mode: host
+
+  app:
+    container_name: exmoney-app
+    image: cuonvc/exmoney:staging
+    build: .
+    network_mode: host
