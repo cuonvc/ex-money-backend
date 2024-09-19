@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
+import static com.exmoney.util.Constant.DEFAULT_LOCALE;
 
 @Component
 public class JwtTokenProvider {
@@ -45,15 +46,15 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
-            commonService.throwException(JWT_INVALID_SIGNATURE, Locale.forLanguageTag("us"));
+            commonService.throwException(JWT_INVALID_SIGNATURE, DEFAULT_LOCALE, null);
         } catch (MalformedJwtException e) {
-            commonService.throwException(JWT_INVALID_TOKEN, Locale.forLanguageTag("us"));
+            commonService.throwException(JWT_INVALID_TOKEN, DEFAULT_LOCALE, null);
         } catch (ExpiredJwtException e) {
-            commonService.throwException(JWT_EXPIRED_TOKEN, Locale.forLanguageTag("us"));
+            commonService.throwException(JWT_EXPIRED_TOKEN, DEFAULT_LOCALE, null);
         } catch (UnsupportedJwtException e) {
-            commonService.throwException(JWT_UNSUPPORTED_TOKEN, Locale.forLanguageTag("us"));
+            commonService.throwException(JWT_UNSUPPORTED_TOKEN, DEFAULT_LOCALE, null);
         } catch (IllegalArgumentException e) {
-            commonService.throwException(JWT_CLAIM_IS_EMPTY, Locale.forLanguageTag("us"));
+            commonService.throwException(JWT_CLAIM_IS_EMPTY, DEFAULT_LOCALE, null);
         }
         return false;
     }
@@ -77,7 +78,7 @@ public class JwtTokenProvider {
                 .build();
     }
     private Map<String, Object> claimsBuilder(String email) {
-        User user = commonService.findUserByEmailOrThrow(email, Locale.getDefault());
+        User user = commonService.findUserByEmailOrThrow(email, Locale.getDefault(), null);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId());

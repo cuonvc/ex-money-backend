@@ -1,15 +1,6 @@
 server:
   port: ${SERVER_PORT}
 
-exmoney:
-  application:
-    oauth:
-      google:
-        api-get-info: https://www.googleapis.com/oauth2/v3/userinfo
-      github:
-        api-get-info: https://api.github.com/user
-        api-valid-token: https://github.com/login/oauth/access_token
-
 spring:
   application:
     name: exmoney
@@ -41,3 +32,19 @@ spring:
     multipart:
       max-request-size: 3MB
       max-file-size: 3MB
+
+exmoney:
+  application:
+    oauth:
+      google:
+        api-get-info: https://www.googleapis.com/oauth2/v3/userinfo
+      github:
+        api-get-info: https://api.github.com/user
+        api-valid-token: https://github.com/login/oauth/access_token
+    action_log:
+      user_sign_in: "action.user_sign_in"
+      user_sign_out: "action.user_sign_out"
+      renew_access_token: "action.renew_access_token"
+      user_update: "action.user_update"
+      user_change_password: "action.user_change_password"
+      user_update_avatar: "action.user_update_avatar"

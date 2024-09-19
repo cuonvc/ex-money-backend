@@ -1,8 +1,5 @@
 package com.exmoney.entity;
 
-import com.exmoney.payload.enumerate.Role;
-import com.exmoney.payload.enumerate.Status;
-import com.exmoney.payload.enumerate.UserProvider;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +9,9 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 
+import static com.exmoney.util.Constant.Role.USER_ROLE;
+import static com.exmoney.util.Constant.Status.ACTIVE;
+import static com.exmoney.util.Constant.UserProvider.SYSTEM_PROVIDER;
 import static com.exmoney.util.Utils.getNow;
 
 @Entity
@@ -40,13 +40,13 @@ public class User {
     private String avatarUrl;
 
     @Column(name = "role")
-    private String role = Role.USER.name();
+    private String role = USER_ROLE;
 
     @Column(name = "user_provider")
-    private String userProvider = UserProvider.SYSTEM.name();
+    private String userProvider = SYSTEM_PROVIDER;
 
     @Column(name = "status")
-    private String status = Status.ACTIVE.name();
+    private String status = ACTIVE;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -6,9 +6,6 @@ import com.exmoney.payload.OAuthUserInfo;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.dto.AccessTokenDto;
-import com.exmoney.payload.enumerate.Role;
-import com.exmoney.payload.enumerate.Status;
-import com.exmoney.payload.enumerate.UserProvider;
 import com.exmoney.payload.mapper.OAuthUserMapper;
 import com.exmoney.payload.mapper.TokenMapper;
 import com.exmoney.payload.mapper.UserMapper;
@@ -29,6 +26,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static com.exmoney.util.Constant.Role.USER_ROLE;
+import static com.exmoney.util.Constant.Status.ACTIVE;
+import static com.exmoney.util.Constant.UserProvider.GITHUB_PROVIDER;
+import static com.exmoney.util.Constant.UserProvider.GOOGLE_PROVIDER;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -52,6 +53,9 @@ public class OAuthServiceImpl implements OAuthService {
     @Value("${spring.security.oauth2.client.registration.github.client-secret}")
     private String githubClientSecret;
 
+    private static final String ACTION_GOOGLE_SIGN_IN = "action.google_sign_in";
+    private static final String ACTION_GITHUB_SIGN_IN = "action.github_sign_in";
+
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
     private final TokenService tokenService;
@@ -72,15 +76,15 @@ public class OAuthServiceImpl implements OAuthService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 GoogleResponseUser data = response.getBody();
                 log.info("response_user_info - {}", data);
-                return saveUser(oAuthUserMapper.toUserInfo(data), UserProvider.GOOGLE);
+                return saveUser(ACTION_GOOGLE_SIGN_IN, oAuthUserMapper.toUserInfo(data), GOOGLE_PROVIDER);
 
             } else {
                 log.info("Failure...");
-                return responseFactory.fail(HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
+                return responseFactory.fail(ACTION_GOOGLE_SIGN_IN, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
             }
         } catch (HttpClientErrorException e) {
             log.error("Failed request in try-catch - {}", e.getMessage());
-            return responseFactory.fail(HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
+            return responseFactory.fail(ACTION_GOOGLE_SIGN_IN, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
         }
     }
 
@@ -107,11 +111,11 @@ public class OAuthServiceImpl implements OAuthService {
         if (response.getStatusCode().is2xxSuccessful()) {
             log.info("Token - {}", response.getBody().getAccess_token());
             GithubResponseUser userInfo = getGithubUserInfo(response.getBody());
-            return saveUser(oAuthUserMapper.toUserInfo(userInfo), UserProvider.GITHUB);
+            return saveUser(ACTION_GITHUB_SIGN_IN, oAuthUserMapper.toUserInfo(userInfo), GITHUB_PROVIDER);
 
         } else {
             log.info("Failure...");
-            return responseFactory.fail(HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
+            return responseFactory.fail(ACTION_GITHUB_SIGN_IN, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
         }
     }
 
@@ -136,16 +140,16 @@ public class OAuthServiceImpl implements OAuthService {
         return null;
     }
 
-    private ResponseEntity<BaseResponse<Object>> saveUser(OAuthUserInfo userInfo, UserProvider provider) {
+    private ResponseEntity<BaseResponse<Object>> saveUser(String log, OAuthUserInfo userInfo, String provider) {
         User user = userRepository.findByEmail(userInfo.getEmail())
                 .orElse(User.builder()
                         .name(userInfo.getName())
                         .email(userInfo.getEmail())
                         .avatarUrl(userInfo.getAvatarUrl())
                         .createdAt(getNow())
-                        .role(Role.USER.name())
-                        .userProvider(provider.name())
-                        .status(Status.ACTIVE.name())
+                        .role(USER_ROLE)
+                        .userProvider(provider)
+                        .status(ACTIVE)
                         .build());
         user = userRepository.save(user);
 
@@ -159,6 +163,6 @@ public class OAuthServiceImpl implements OAuthService {
         AccessTokenDto accessToken = jwtTokenProvider.generateToken(user.getEmail());
 
         Object[] response = {accessToken, refreshToken, userMapper.entityToResponse(user)};
-        return responseFactory.success("Success", response);
+        return responseFactory.success(log, "Success", response);
     }
 }

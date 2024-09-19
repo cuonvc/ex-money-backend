@@ -10,4 +10,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.status != 'INACTIVE'")
     Optional<User> findByEmail(String email);
+
+    @Query("SELECT u FROM User u " +
+            "INNER JOIN RefreshToken r ON r.userId = u.id " +
+            "WHERE r.token = :refreshToken")
+    Optional<User> findByRfToken(String refreshToken);
 }
