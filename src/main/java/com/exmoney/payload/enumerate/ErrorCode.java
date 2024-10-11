@@ -18,6 +18,13 @@ public enum ErrorCode {
     EMAIL_EXISTED("EMAIL_EXISTED", "exception.email_existed", HttpStatus.BAD_REQUEST.value()),
     PASSWORD_NOT_MATCHED("PASSWORD_NOT_MATCHED", "exception.password_not_match", HttpStatus.UNAUTHORIZED.value()),
 
+    CATEGORY_NAME_EXISTED("CATEGORY_NAME_EXISTED", "exception.category_name_existed", HttpStatus.BAD_REQUEST.value()),
+    CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "exception.category_not_found", HttpStatus.NOT_FOUND.value()),
+    CATEGORY_DEFAULT_CANNOT_UPDATE("CATEGORY_DEFAULT_CANNOT_UPDATE", "exception.category_default_cannot_update", HttpStatus.BAD_REQUEST.value()),
+
+    WALLET_NOT_FOUND("WALLET_NOT_FOUND", "exception.wallet_not_found", HttpStatus.NOT_FOUND.value()),
+    WALLET_NAME_ALREADY_EXISTED("WALLET_NAME_ALREADY_EXISTED", "exception.wallet_name_already_existed", HttpStatus.BAD_REQUEST.value()),
+    WALLET_IN_USE_BY_USER("WALLET_IN_USE_BY_USER", "exception.wallet_in_use_by_user", HttpStatus.BAD_REQUEST.value()),
     ;
 
     private String status;

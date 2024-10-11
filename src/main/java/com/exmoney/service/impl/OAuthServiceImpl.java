@@ -53,8 +53,11 @@ public class OAuthServiceImpl implements OAuthService {
     @Value("${spring.security.oauth2.client.registration.github.client-secret}")
     private String githubClientSecret;
 
-    private static final String ACTION_GOOGLE_SIGN_IN = "action.google_sign_in";
-    private static final String ACTION_GITHUB_SIGN_IN = "action.github_sign_in";
+    @Value("${exmoney.application.action_log.user_sign_in_google}")
+    private String ActionGoogleSignIn;
+
+    @Value("${exmoney.application.action_log.user_sign_in_github}")
+    private String ActionGithubSignIn;
 
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
@@ -76,15 +79,15 @@ public class OAuthServiceImpl implements OAuthService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 GoogleResponseUser data = response.getBody();
                 log.info("response_user_info - {}", data);
-                return saveUser(ACTION_GOOGLE_SIGN_IN, oAuthUserMapper.toUserInfo(data), GOOGLE_PROVIDER);
+                return saveUser(ActionGoogleSignIn, oAuthUserMapper.toUserInfo(data), GOOGLE_PROVIDER);
 
             } else {
                 log.info("Failure...");
-                return responseFactory.fail(ACTION_GOOGLE_SIGN_IN, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
+                return responseFactory.fail(ActionGoogleSignIn, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
             }
         } catch (HttpClientErrorException e) {
             log.error("Failed request in try-catch - {}", e.getMessage());
-            return responseFactory.fail(ACTION_GOOGLE_SIGN_IN, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
+            return responseFactory.fail(ActionGoogleSignIn, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
         }
     }
 
@@ -111,11 +114,11 @@ public class OAuthServiceImpl implements OAuthService {
         if (response.getStatusCode().is2xxSuccessful()) {
             log.info("Token - {}", response.getBody().getAccess_token());
             GithubResponseUser userInfo = getGithubUserInfo(response.getBody());
-            return saveUser(ACTION_GITHUB_SIGN_IN, oAuthUserMapper.toUserInfo(userInfo), GITHUB_PROVIDER);
+            return saveUser(ActionGithubSignIn, oAuthUserMapper.toUserInfo(userInfo), GITHUB_PROVIDER);
 
         } else {
             log.info("Failure...");
-            return responseFactory.fail(ACTION_GITHUB_SIGN_IN, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
+            return responseFactory.fail(ActionGithubSignIn, HttpStatus.BAD_REQUEST, "Đăng nhập thất bại...", null);
         }
     }
 

@@ -21,6 +21,7 @@ import com.exmoney.security.jwt.JwtTokenProvider;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.TokenService;
 import com.exmoney.service.UserService;
+import com.exmoney.service.WalletService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository tokenRepository;
     private final TokenService tokenService;
+    private final WalletService walletService;
     private final UserMapper userMapper;
     private final TokenMapper tokenMapper;
     private final ResponseFactory responseFactory;
@@ -100,6 +102,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         entityManager.persist(user);
         tokenService.initRefreshToken(user);
+        walletService.initDefaultWallet(user.getId(), locale);
         UserResponse response = userMapper.entityToResponse(user);
         return responseFactory.success(null, response);
     }

@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.exmoney.util.Constant.API_BASE_ADMIN;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -42,6 +44,7 @@ public class SecurityConfiguration {
                                 "/api/auth/active-account", "/api/auth/token/renew")
                         .permitAll()
                         .requestMatchers("/api/auth/admin/*").hasAnyAuthority("ADMIN")
+                        .requestMatchers(API_BASE_ADMIN + "/**").hasAuthority("ADMIN")
                         .anyRequest()
                         .authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

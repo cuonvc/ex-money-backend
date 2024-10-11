@@ -41,10 +41,18 @@ exmoney:
       github:
         api-get-info: https://api.github.com/user
         api-valid-token: https://github.com/login/oauth/access_token
+    default:
+      wallet_name: default.wallet_name
+      wallet_description: default.wallet_description
     action_log:
+      user_sign_in_google: "action.google_sign_in"
+      user_sign_in_github: "action.github_sign_in"
       user_sign_in: "action.user_sign_in"
       user_sign_out: "action.user_sign_out"
       renew_access_token: "action.renew_access_token"
       user_update: "action.user_update"
       user_change_password: "action.user_change_password"
       user_update_avatar: "action.user_update_avatar"
+      expense_category_create: "action.expense_category_create"
+      expense_category_update: "action.expense_category_update"
+      wallet_create: "action.wallet_create"
