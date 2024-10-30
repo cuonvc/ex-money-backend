@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "================> GETTING SERVER LOGS <================";
 echo ".";
 echo ".";
