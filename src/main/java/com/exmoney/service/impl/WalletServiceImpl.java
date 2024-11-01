@@ -53,7 +53,7 @@ public class WalletServiceImpl implements WalletService {
 //        }
         Wallet wallet = new Wallet();
         wallet.setCreatedAt(getNow());
-        wallet.setName(defaultWalletName);
+        wallet.setName(defaultWalletName); //lưu là default.wallet_name luôn để có thể get dynamic
         wallet.setDescription(defaultWalletDescription);
         wallet.setOwnerUserId(userId);
         walletRepository.save(wallet);

@@ -22,13 +22,14 @@ public class ExpenseCategoryRequest {
     @Size(max = 30, message = "validate.category_name_size")
     private String name;
 
+    @Size(max = 100, message = "validate.category_desc_length")
     private String description;
 
     private String parentId;
 
-    @NotNull
-    @NotBlank
-    @NotEmpty
+    @NotNull(message = "validate.category_save_type")
+    @NotBlank(message = "validate.category_save_type")
+    @NotEmpty(message = "validate.category_save_type")
     private String saveType; //wallet or account
 
     private String refId; //walletId or userId - nullable: null -> userId

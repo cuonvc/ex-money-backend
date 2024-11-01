@@ -10,6 +10,7 @@ import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,11 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public String getMessageSrc(String messageCode, Locale locale) {
-        return messageSource.getMessage(messageCode, null, locale);
+        try {
+            return messageSource.getMessage(messageCode, null, locale);
+        } catch (NoSuchMessageException e) {
+            return messageCode;
+        }
     }
 
     @Override

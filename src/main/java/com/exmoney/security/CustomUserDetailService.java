@@ -26,7 +26,7 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = commonService.findUserByEmailOrThrow(email, Locale.getDefault(), null);
 
-        return new CustomUserDetail(user.getId(), user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRole()));
+        return new CustomUserDetail(user.getId(), user.getEmail(), user.getName(), user.getPassword(), mapRolesToAuthorities(user.getRole()));
     }
 
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(String role) {

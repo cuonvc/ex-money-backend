@@ -10,8 +10,6 @@ import org.hibernate.annotations.GenericGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static com.exmoney.util.Constant.Status.ACTIVE;
-
 @Entity
 @Table(name = "expense")
 @Data
@@ -37,11 +35,17 @@ public class Expense {
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @Column(name = "currency_unit", nullable = false)
+    @Column(name = "currency_unit")
     private String currencyUnit; //VND, EUR, USD, GBP
 
     @Column(name = "type")
     private String type;
+
+    @Column(name = "wallet_id")
+    private String walletId;
+
+    @Column(name = "user_id")
+    private String userId;
 
     @Column(name = "category_id")
     private String categoryId;
@@ -53,7 +57,7 @@ public class Expense {
     private String createdBy;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "updated_by")
     private String updatedBy;
