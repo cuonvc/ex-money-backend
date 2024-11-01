@@ -1,5 +1,6 @@
 package com.exmoney.service.impl;
 
+import com.exmoney.config.DefaultCategoryConfiguration;
 import com.exmoney.entity.ExpenseCategory;
 import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.CategorySaveType.ACCOUNT;
@@ -34,6 +36,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     private final WalletRepository walletRepository;
     private final ResponseFactory responseFactory;
     private final CommonService commonService;
+    private final DefaultCategoryConfiguration defaultCategoryConfiguration;
 
     @Value("${exmoney.application.action_log.expense_category_create}")
     private String categoryCreateLog;
@@ -112,6 +115,15 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
                 });
 
         return responseFactory.success(null, result);
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<Set<String>>> getAllDefault(Locale locale) {
+        //test với config YML file
+        Set<String> listCategoryName = defaultCategoryConfiguration.getCategories().stream()
+                .map(name -> commonService.getMessageSrc(name, locale))
+                .collect(Collectors.toSet());
+        return responseFactory.success(null, listCategoryName);
     }
 
     private void fetchChildren(ExpenseCategoryResponse response) {

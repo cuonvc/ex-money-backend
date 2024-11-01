@@ -13,5 +13,6 @@ public interface ExpenseCategoryService {
     ResponseEntity<BaseResponse<ExpenseCategory>> create(ExpenseCategoryRequest request, Locale locale);
     ResponseEntity<BaseResponse<ExpenseCategory>> update(String id, ExpenseCategoryRequest request, Locale locale);
     ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(String saveType, String refId, Locale locale);
+    ResponseEntity<BaseResponse<Set<String>>> getAllDefault(Locale locale);
     ResponseEntity<BaseResponse<ExpenseCategory>> detail(String id, Locale locale);
 }

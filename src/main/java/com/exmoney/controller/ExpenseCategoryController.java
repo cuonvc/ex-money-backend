@@ -41,6 +41,11 @@ public class ExpenseCategoryController {
         return expenseCategoryService.getAll(saveType, refId, locale);
     }
 
+    @GetMapping(API_BASE_USER + "/category/default-name-test")
+    public ResponseEntity<BaseResponse<Set<String>>> getDefault(@RequestParam Locale locale) {
+        return expenseCategoryService.getAllDefault(locale);
+    }
+
     //detail không cần get children
     @GetMapping(API_BASE_USER + "/category/{id}")
     public ResponseEntity<BaseResponse<ExpenseCategory>> detail(@RequestParam Locale locale,

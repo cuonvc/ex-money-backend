@@ -42,8 +42,17 @@ exmoney:
         api-get-info: https://api.github.com/user
         api-valid-token: https://github.com/login/oauth/access_token
     default:
-      wallet_name: default.wallet_name
-      wallet_description: default.wallet_description
+      wallet_name: "default.wallet_name"
+      wallet_description: "default.wallet_description"
+      categories:
+        - "default.category_home"
+        - "default.category_food"
+        - "default.category_fill"
+        - "default.category_phone"
+        - "default.category_pet"
+        - "default.category_relax"
+        - "default.category_tech"
+        - "default.category_other"
     action_log:
       user_sign_in_google: "action.google_sign_in"
       user_sign_in_github: "action.github_sign_in"
@@ -56,3 +65,4 @@ exmoney:
       expense_category_create: "action.expense_category_create"
       expense_category_update: "action.expense_category_update"
       wallet_create: "action.wallet_create"
+      expense_create: "action.expense_create"
