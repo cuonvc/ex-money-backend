@@ -86,8 +86,8 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Locale locale) {
-        List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId())
+    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(String walletId, Locale locale) {
+        List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId)
                 .stream().peek(e -> {
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));

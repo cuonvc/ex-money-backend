@@ -33,8 +33,9 @@ public class ExpenseController {
         return expenseService.detail(id, locale);
     }
 
-    @GetMapping(API_BASE_USER + "/expense/list")
-    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> list(@RequestParam Locale locale) {
-        return expenseService.listByUser(locale);
+    @GetMapping(API_BASE_USER + "/expense")
+    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> list(@RequestParam(value = "wallet_id", required = false) String walletId,
+                                                                    @RequestParam Locale locale) {
+        return expenseService.listByUser(walletId, locale);
     }
 }

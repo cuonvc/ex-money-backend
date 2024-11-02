@@ -40,6 +40,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
             "LEFT JOIN User u1 ON u1.id = e.userId " +
             "LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "LEFT JOIN ExpenseCategory c ON c.id = e.categoryId " +
-            "WHERE e.userId = :userId")
-    List<ExpenseResponse> findAccessByUser(String userId);
+            "WHERE e.userId = :userId " +
+            "AND (e.walletId = :walletId OR :walletId IS NULL OR :walletId = '')")
+    List<ExpenseResponse> findAccessByUser(String userId, String walletId);
 }
