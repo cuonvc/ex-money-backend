@@ -5,6 +5,7 @@ import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expense.ExpenseRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.service.ExpenseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @PostMapping(API_BASE_USER + "/expense")
-    public ResponseEntity<BaseResponse<ExpenseResponse>> create(@RequestBody ExpenseRequest request,
+    public ResponseEntity<BaseResponse<ExpenseResponse>> create(@Valid @RequestBody ExpenseRequest request,
                                                                 @RequestParam Locale locale) {
         return expenseService.create(request, locale);
     }

@@ -2,6 +2,7 @@ package com.exmoney.payload.request.expense;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 import java.math.BigDecimal;
 
@@ -16,7 +17,8 @@ public class ExpenseRequest {
     @Size(max = 100, message = "validate.expense_desc_length")
     private String description;
 
-    @Size(min = 0, max = 100000000, message = "validate.expense_amount_size")
+    @Range(min = 0, max = 100000000, message = "validate.expense_amount_size")
+    @NotNull(message = "validate.expense_amount_empty")
     private BigDecimal amount;
 
 //    private String currencyUnit; //VND, EUR, USD, GBP
