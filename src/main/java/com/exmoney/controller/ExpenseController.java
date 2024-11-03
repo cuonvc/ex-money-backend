@@ -34,7 +34,7 @@ public class ExpenseController {
         return expenseService.detail(id, locale);
     }
 
-    @GetMapping(API_BASE_USER + "/expense")
+    @GetMapping(API_BASE_USER + "/expense") //walletId is null or blank -> get by default wallet
     public ResponseEntity<BaseResponse<List<ExpenseResponse>>> list(@RequestParam(value = "wallet_id", required = false) String walletId,
                                                                     @RequestParam Locale locale) {
         return expenseService.listByUser(walletId, locale);
