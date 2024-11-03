@@ -41,7 +41,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
             "LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "LEFT JOIN ExpenseCategory c ON c.id = e.categoryId " +
             "WHERE e.userId = :userId " +
-            "AND w.isDefault = true AND :walletId = :walletId " +
             "AND (" +
             "   e.walletId = :walletId " +
             "   OR (" +
