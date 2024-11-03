@@ -3,6 +3,7 @@ package com.exmoney.controller;
 import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.wallet.WalletRequest;
+import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,8 @@ public class WalletController {
     }
 
     @GetMapping(API_BASE_USER + "/wallet/{id}")
-    public ResponseEntity<BaseResponse<Wallet>> detail(@RequestParam Locale locale,
-                                                       @PathVariable String id) {
+    public ResponseEntity<BaseResponse<WalletResponse>> detail(@RequestParam Locale locale,
+                                                               @PathVariable String id) {
         return walletService.detail(id, locale);
     }
 

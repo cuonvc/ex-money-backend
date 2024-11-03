@@ -8,6 +8,8 @@ import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.enumerate.ErrorCode;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.wallet.WalletRequest;
+import com.exmoney.payload.response.wallet.WalletResponse;
+import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.repository.UserRepository;
 import com.exmoney.repository.UserWalletRepository;
 import com.exmoney.repository.WalletRepository;
@@ -35,6 +37,7 @@ public class WalletServiceImpl implements WalletService {
     private final UserRepository userRepository;
     private final CommonService commonService;
     private final WalletMapper walletMapper;
+    private final ExpenseRepository expenseRepository;
     private final ResponseFactory responseFactory;
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
@@ -77,7 +80,7 @@ public class WalletServiceImpl implements WalletService {
         Wallet wallet = walletMapper.toEntity(request);
         wallet.setCreatedAt(getNow());
         wallet.setOwnerUserId(userId);
-        wallet.setDefault(false);
+        wallet.setIsDefault(false);
         wallet = walletRepository.save(wallet);
 
         userWalletRepository.save(
@@ -91,19 +94,22 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Wallet>> detail(String walletId, Locale locale) {
-        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, commonService.getCurrentUserId());
+    public ResponseEntity<BaseResponse<WalletResponse>> detail(String walletId, Locale locale) {
+        String currentUserId = commonService.getCurrentUserId();
+        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, currentUserId);
         if (wallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
         Wallet walletObj = wallet.get();
-        if (walletObj.isDefault()) {
+        if (walletObj.getIsDefault()) {
             walletObj.setName(commonService.getMessageSrc(walletObj.getName(), locale));
             walletObj.setDescription(commonService.getMessageSrc(walletObj.getDescription(), locale));
         }
+        WalletResponse response = walletMapper.toResponse(walletObj);
+        response.setExpenses(expenseRepository.findAccessByUser(currentUserId, walletId));
 
-        return responseFactory.success(null, walletObj);
+        return responseFactory.success(null, response);
     }
 
     @Override
@@ -112,7 +118,7 @@ public class WalletServiceImpl implements WalletService {
                 null,
                 walletRepository.findByUserId(commonService.getCurrentUserId(), isOwner)
                         .stream().peek(w -> {
-                            if (w.isDefault()) {
+                            if (w.getIsDefault()) {
                                 w.setName(commonService.getMessageSrc(w.getName(), locale));
                                 w.setDescription(commonService.getMessageSrc(w.getDescription(), locale));
                             }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static com.exmoney.util.Constant.Status.ACTIVE;
@@ -22,10 +23,19 @@ public class Wallet {
     private String status = ACTIVE;
 
     @Column(name = "is_default")
-    private boolean isDefault = true;
+    private Boolean isDefault = true;
 
     @Column(name = "owner_user_id")
     private String ownerUserId;
+
+    @Column(name = "total_income")
+    private BigDecimal totalIncome;
+
+    @Column(name = "total_expense")
+    private BigDecimal totalExpense;
+
+    @Column(name = "balance")
+    private BigDecimal balance;
 
     @Column(name = "name")
     private String name;
