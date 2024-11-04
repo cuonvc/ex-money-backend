@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -37,16 +38,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Locale locale = request.getLocale();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             if (error.getDefaultMessage() != null) {
-                String message = messageSource.getMessage(error.getDefaultMessage(), null, locale);
-                //add params to string message
-                if (error.getArguments() != null) {
-                    Object[] args = new Object[error.getArguments().length - 1];
-                    for (int i = 1; i < error.getArguments().length; i++) {
-                        args[i - 1] = error.getArguments()[i];
+                try {
+                    String message = messageSource.getMessage(error.getDefaultMessage(), null, locale);
+                    //add params to string message
+                    if (error.getArguments() != null) {
+                        Object[] args = new Object[error.getArguments().length - 1];
+                        for (int i = 1; i < error.getArguments().length; i++) {
+                            args[i - 1] = error.getArguments()[i];
+                        }
+                        message = MessageFormat.format(message, args);
                     }
-                    message = MessageFormat.format(message, args);
+                    errors.add(message);
+                } catch (NoSuchMessageException e) {
+                    errors.add(error.getDefaultMessage() + "{" + error.getArguments()[0] + "}");
                 }
-                errors.add(message);
             }
         });
         Map<String, Object> resp = new LinkedHashMap<>();

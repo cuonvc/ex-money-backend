@@ -19,6 +19,7 @@ public class ExpenseResponse {
     public static final String PROP_NAME = "name";
     public static final String PROP_DESC = "description";
     public static final String PROP_AMOUNT = "amount";
+    public static final String PROP_NEW_BALANCE = "newBalance";
     public static final String PROP_CURRENCY_UNIT =  "currencyUnit";
     public static final String PROP_TYPE = "type";
     public static final String PROP_WALLET_ID = "walletId";
@@ -37,6 +38,7 @@ public class ExpenseResponse {
     private String name;
     private String description;
     private BigDecimal amount;
+    private BigDecimal newBalance;
     private String currencyUnit;
     private String type;
     private String walletId;
@@ -56,6 +58,7 @@ public class ExpenseResponse {
         this.name = (String) response.get(PROP_NAME);
         this.description = (String) response.get(PROP_DESC);
         this.amount = (BigDecimal) response.get(PROP_AMOUNT);
+        this.newBalance = (BigDecimal) response.get(PROP_NEW_BALANCE);
         this.currencyUnit = (String) response.get(PROP_CURRENCY_UNIT);
         this.type = (String) response.get(PROP_TYPE);
         this.walletId = (String) response.get(PROP_WALLET_ID);

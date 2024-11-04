@@ -28,6 +28,11 @@ public class ExpenseRequest {
     @NotEmpty(message = "validate.expense_type_empty")
     private String type;
 
+    @NotNull
+    @NotBlank
+    @NotEmpty
+    private String entryType;
+
     @NotNull(message = "validate.expense_category_id_empty")
     @NotBlank(message = "validate.expense_category_id_empty")
     @NotEmpty(message = "validate.expense_category_id_empty")

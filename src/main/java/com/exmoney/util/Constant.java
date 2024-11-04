@@ -1,5 +1,6 @@
 package com.exmoney.util;
 
+import java.util.List;
 import java.util.Locale;
 
 public class Constant {
@@ -25,6 +26,13 @@ public class Constant {
     public static class CategorySaveType {
         public static final String WALLET = "WALLET";
         public static final String ACCOUNT = "ACCOUNT";
+    }
+
+    public static class ExpenseEntryType {
+        public static final String INCOME = "INCOME";
+        public static final String EXPENSE = "EXPENSE";
+
+        public static final List<String> ENTRY_TYPES = List.of(INCOME, EXPENSE);
     }
 
     //Loại chi tiêu từ đâu

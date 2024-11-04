@@ -44,6 +44,8 @@ exmoney:
     default:
       wallet_name: "default.wallet_name"
       wallet_description: "default.wallet_description"
+      expense_income_name: "default.expense_income_name"
+      expense_income_description: "default.expense_income_description"
       categories:
         - "default.category_home"
         - "default.category_food"

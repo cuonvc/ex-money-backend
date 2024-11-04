@@ -8,12 +8,14 @@ import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.enumerate.ErrorCode;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.wallet.WalletRequest;
+import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.repository.UserRepository;
 import com.exmoney.repository.UserWalletRepository;
 import com.exmoney.repository.WalletRepository;
 import com.exmoney.service.CommonService;
+import com.exmoney.service.ExpenseService;
 import com.exmoney.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +40,7 @@ public class WalletServiceImpl implements WalletService {
     private final CommonService commonService;
     private final WalletMapper walletMapper;
     private final ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
     private final ResponseFactory responseFactory;
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
@@ -107,7 +110,16 @@ public class WalletServiceImpl implements WalletService {
             walletObj.setDescription(commonService.getMessageSrc(walletObj.getDescription(), locale));
         }
         WalletResponse response = walletMapper.toResponse(walletObj);
-        response.setExpenses(expenseRepository.findAccessByUser(currentUserId, walletId));
+
+        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId)
+                .stream().peek(e -> {
+                    e.setWalletName(response.getName());
+                    e.setName(commonService.getMessageSrc(e.getName(), locale));
+                    e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
+                    e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
+                })
+                .toList();
+        response.setExpenses(expenseResponses);
 
         return responseFactory.success(null, response);
     }

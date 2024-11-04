@@ -35,6 +35,12 @@ public class Expense {
     @Column(name = "amount")
     private BigDecimal amount;
 
+    @Column(name = "new_balance")
+    private BigDecimal newBalance = BigDecimal.ZERO;
+
+    @Column(name = "entry_type")
+    private String entryType; //INCOME or EXPENSE
+
     @Column(name = "currency_unit")
     private String currencyUnit; //VND, EUR, USD, GBP
 
