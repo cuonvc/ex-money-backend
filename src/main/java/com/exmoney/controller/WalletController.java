@@ -34,6 +34,7 @@ public class WalletController {
     }
 
     @GetMapping(API_BASE_USER + "/wallet/list")
+    //Nếu is_owner = false -> get all ví có thể truy cập (không chỉ có ví khách)
     public ResponseEntity<BaseResponse<List<Wallet>>> listByUser(@RequestParam Locale locale,
                                                                  @RequestParam(name = "is_owner", defaultValue = "false") boolean isOwner) {
         return walletService.listByUser(isOwner, locale);

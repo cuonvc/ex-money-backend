@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class WalletResponse {
@@ -17,6 +18,7 @@ public class WalletResponse {
     BigDecimal totalExpense;
     BigDecimal balance;
     List<ExpenseResponse> expenses;
+    List<Map<String, String>> otherWallets;
     Boolean isDefault;
     String createdAt;
     String updatedAt;

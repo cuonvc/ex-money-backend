@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
@@ -99,17 +100,22 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public ResponseEntity<BaseResponse<WalletResponse>> detail(String walletId, Locale locale) {
         String currentUserId = commonService.getCurrentUserId();
-        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, currentUserId);
-        if (wallet.isEmpty()) {
+        List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
+        Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(walletId)).findFirst();
+        if (otpWallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
-        Wallet walletObj = wallet.get();
+        Wallet walletObj = otpWallet.get();
         if (walletObj.getIsDefault()) {
             walletObj.setName(commonService.getMessageSrc(walletObj.getName(), locale));
             walletObj.setDescription(commonService.getMessageSrc(walletObj.getDescription(), locale));
         }
         WalletResponse response = walletMapper.toResponse(walletObj);
+        List<Map<String, String>> walletMap = wallets.stream()
+                .map(w -> Map.of(w.getId(), w.getName()))
+                .toList();
+        response.setOtherWallets(walletMap);
 
         List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId)
                 .stream().peek(e -> {
