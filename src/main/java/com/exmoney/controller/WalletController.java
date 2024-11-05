@@ -27,9 +27,10 @@ public class WalletController {
         return walletService.create(request, locale);
     }
 
-    @GetMapping(API_BASE_USER + "/wallet/{id}")
+    @GetMapping(API_BASE_USER + "/wallet/detail")
+    //nếu walletId = null -> get default wallet
     public ResponseEntity<BaseResponse<WalletResponse>> detail(@RequestParam Locale locale,
-                                                               @PathVariable String id) {
+                                                               @RequestParam(required = false) String id) {
         return walletService.detail(id, locale);
     }
 

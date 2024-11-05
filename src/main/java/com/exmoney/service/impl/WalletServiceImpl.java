@@ -101,7 +101,11 @@ public class WalletServiceImpl implements WalletService {
     public ResponseEntity<BaseResponse<WalletResponse>> detail(String walletId, Locale locale) {
         String currentUserId = commonService.getCurrentUserId();
         List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
-        Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(walletId)).findFirst();
+        if (walletId == null || walletId.isEmpty()) {
+            walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
+        }
+        final String finalWalletId = walletId;
+        Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(finalWalletId)).findFirst();
         if (otpWallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
