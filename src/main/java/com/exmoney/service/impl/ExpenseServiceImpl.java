@@ -6,13 +6,18 @@ import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.ExpenseMapper;
+import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.expense.ExpenseRequest;
+import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.expenseCategory.ExpenseCategoryResponse;
+import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.repository.ExpenseCategoryRepository;
 import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.repository.WalletRepository;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
+import com.exmoney.service.ExpenseCategoryService;
 import com.exmoney.service.ExpenseService;
 import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseEntryType.ENTRY_TYPES;
@@ -44,6 +47,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final WalletRepository walletRepository;
     private final CommonService commonService;
     private final ResponseFactory responseFactory;
+    private final ExpenseCategoryService categoryService;
 
     @Value("${exmoney.application.default.expense_income_name}")
     private String expenseIncomeName;
@@ -132,5 +136,37 @@ public class ExpenseServiceImpl implements ExpenseService {
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                 }).toList();
         return responseFactory.success(null, list);
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(String walletId, Locale locale) {
+        String currentUserId = commonService.getCurrentUserId();
+        List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
+        if (walletId == null || walletId.isEmpty()) {
+            walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
+        }
+        final String finalWalletId = walletId;
+        Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(finalWalletId)).findFirst();
+        if (otpWallet.isEmpty()) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        List<Map<String, String>> walletMap = wallets.stream()
+                .map(w -> Map.of(w.getId(), w.getName()))
+                .toList();
+
+        ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>>
+                categories = categoryService.getAll(Constant.CategorySaveType.WALLET, walletId, locale);
+
+        Set<ExpenseCategoryResponse> categoryResponses = categories.getBody().getData()[0];
+
+        return responseFactory.success(null,
+                ExpenseEditResource.builder()
+                        .walletId(walletId)
+                        .walletName(otpWallet.get().getName())
+                        .otherWalletMap(walletMap)
+                        .categories(categoryResponses)
+                        .build()
+                );
     }
 }

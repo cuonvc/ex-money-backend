@@ -3,6 +3,7 @@ package com.exmoney.controller;
 import com.exmoney.entity.Expense;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expense.ExpenseRequest;
+import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -38,5 +39,12 @@ public class ExpenseController {
     public ResponseEntity<BaseResponse<List<ExpenseResponse>>> list(@RequestParam(value = "wallet_id", required = false) String walletId,
                                                                     @RequestParam Locale locale) {
         return expenseService.listByUser(walletId, locale);
+    }
+
+    @GetMapping(API_BASE_USER + "/expense/edit_resource")
+    //get resource for expense edit screen
+    public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(@RequestParam(value = "wallet_id", required = false) String walletId,
+                                                                                             @RequestParam Locale locale) {
+        return expenseService.getResourceForExpenseEdit(walletId, locale);
     }
 }
