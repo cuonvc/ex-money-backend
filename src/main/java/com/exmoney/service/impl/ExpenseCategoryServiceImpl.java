@@ -110,7 +110,9 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
         categoryRepository.findAllParentByRefIdAndSaveType(refId, saveType)
                 .forEach(parent -> {
                     ExpenseCategoryResponse response = categoryMapper.entityToResponse(parent);
-                    fetchChildren(response);
+                    response.setName(commonService.getMessageSrc(response.getName(), locale));
+                    response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
+                    fetchChildren(response, locale);
                     result.add(response);
                 });
 
@@ -126,12 +128,14 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
         return responseFactory.success(null, listCategoryName);
     }
 
-    private void fetchChildren(ExpenseCategoryResponse response) {
+    private void fetchChildren(ExpenseCategoryResponse response, Locale locale) {
         Set<ExpenseCategoryResponse> children = new HashSet<>();
         categoryRepository.findAllByParentId(response.getId())
                 .forEach(child -> {
                     ExpenseCategoryResponse subResponse = categoryMapper.entityToResponse(child);
-                    fetchChildren(subResponse);
+                    subResponse.setName(commonService.getMessageSrc(subResponse.getName(), locale));
+                    subResponse.setDescription(commonService.getMessageSrc(subResponse.getDescription(), locale));
+                    fetchChildren(subResponse, locale);
                     children.add(subResponse);
                 });
         response.setChildren(children);

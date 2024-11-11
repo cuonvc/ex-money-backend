@@ -21,10 +21,12 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
     Optional<ExpenseCategory> findByNameAndUserId(String name, String userId);
 
     @Query("SELECT c FROM ExpenseCategory c " +
-            "WHERE (c.refId = :refId AND c.saveType = :saveType) " +
-            "   OR (:saveType IS NULL AND c.type = 'DEFAULT') " +
+            "WHERE (" +
+            "   (c.refId = :refId AND c.saveType = :saveType) " +
+            "   OR c.type = 'DEFAULT' " +
+            ") " +
             "AND c.parentId IS NULL " +
-            "AND c.status = 'ACTIVE'")
+            "AND c.status = 'ACTIVE' AND :refId = :refId ")
     Set<ExpenseCategory> findAllParentByRefIdAndSaveType(String refId, String saveType);
 
     @Query("SELECT c FROM ExpenseCategory c " +
