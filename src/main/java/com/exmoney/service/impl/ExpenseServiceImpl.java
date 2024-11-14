@@ -73,7 +73,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         LocalDateTime entryDate;
-        if (request.getEntryDate() == null) {
+        if (request.getEntryDate() == null || request.getEntryDate().isEmpty()) {
             entryDate = getNow();
         } else {
             entryDate = clientToLocalDateTime(request.getEntryDate());
