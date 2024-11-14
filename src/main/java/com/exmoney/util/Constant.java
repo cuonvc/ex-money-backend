@@ -45,6 +45,10 @@ public class Constant {
         public static final String FROM_BANK_2 = "FROM_BANK_2";
         public static final String FROM_PAYPAL = "FROM_PAYPAL";
         public static final String FROM_MOMO = "FROM_MOMO";
+
+        public static final List<String> EXPENSE_TYPES = List.of(
+                MANUAL, FROM_NOTE, FROM_BANK_NOTI, FROM_BANK_1, FROM_BANK_2, FROM_PAYPAL, FROM_MOMO
+        );
     }
 
     public static class CurrencyUnit {

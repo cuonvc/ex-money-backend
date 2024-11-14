@@ -5,14 +5,10 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class ExpenseRequest {
-
-    @NotNull(message = "validate.expense_name_empty")
-    @NotBlank(message = "validate.expense_name_empty")
-    @NotEmpty(message = "validate.expense_name_empty")
-    private String name;
 
     @Size(max = 100, message = "validate.expense_desc_length")
     private String description;
@@ -32,6 +28,8 @@ public class ExpenseRequest {
     @NotBlank
     @NotEmpty
     private String entryType;
+
+    private String entryDate;
 
     @NotNull(message = "validate.expense_category_id_empty")
     @NotBlank(message = "validate.expense_category_id_empty")

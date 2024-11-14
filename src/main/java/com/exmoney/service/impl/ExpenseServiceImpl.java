@@ -27,14 +27,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseEntryType.ENTRY_TYPES;
 import static com.exmoney.util.Constant.ExpenseEntryType.INCOME;
+import static com.exmoney.util.Constant.ExpenseType.EXPENSE_TYPES;
 import static com.exmoney.util.Constant.ExpenseType.MANUAL;
 import static com.exmoney.util.Constant.Status.ACTIVE;
 import static com.exmoney.util.Constant.Status.PENDING;
+import static com.exmoney.util.Utils.clientToLocalDateTime;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -69,6 +72,13 @@ public class ExpenseServiceImpl implements ExpenseService {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
+        LocalDateTime entryDate;
+        if (request.getEntryDate() == null) {
+            entryDate = getNow();
+        } else {
+            entryDate = clientToLocalDateTime(request.getEntryDate());
+        }
+
         Optional<ExpenseCategory> optCategory = categoryRepository
                 .findByIdAndAccess(request.getCategoryId(), request.getWalletId(), currentUserId);
         if (optCategory.isEmpty()) {
@@ -76,24 +86,26 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         Expense expense = expenseMapper.toEntity(request);
+        expense.setEntryDate(entryDate);
         expense.setCreatedAt(getNow());
         expense.setCreatedBy(currentUserId);
         expense.setUserId(currentUserId);
-        expense.setStatus(request.getType().equals(MANUAL) ? ACTIVE : PENDING);
         amountDivision(expense, optWallet.get());
         if (!ENTRY_TYPES.contains(request.getEntryType())) {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
         }
         if (expense.getEntryType().equals(INCOME)) { //nếu là income, không set name, description
-            expense.setName(expenseIncomeName);
             expense.setDescription(expenseIncomeDescription);
             expense.setCategoryId(null);
         }
+        if (!EXPENSE_TYPES.contains(request.getType())) {
+            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
+        }
+        expense.setStatus(request.getType().equals(MANUAL) ? ACTIVE : PENDING);
         ExpenseResponse response = expenseMapper.toResponse(expenseRepository.save(expense));
         response.setWalletName(commonService.getMessageSrc(optWallet.get().getName(), locale));
         response.setUserName(userDetail.getName());
         response.setCategoryName(commonService.getMessageSrc(optCategory.get().getName(), locale));
-        response.setName(commonService.getMessageSrc(response.getName(), locale));
         response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
         return responseFactory.success(actionLogExpenseCreate, response);
     }
@@ -123,7 +135,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         ExpenseResponse response = optResponse.get();
         response.setWalletName(commonService.getMessageSrc(response.getWalletName(), locale));
         response.setCategoryName(commonService.getMessageSrc(response.getCategoryName(), locale));
-        response.setName(commonService.getMessageSrc(response.getName(), locale));
         response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
         return responseFactory.success(null, response);
     }

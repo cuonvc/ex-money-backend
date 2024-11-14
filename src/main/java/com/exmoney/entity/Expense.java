@@ -26,9 +26,6 @@ public class Expense {
     @Column(name = "status")
     private String status; //ACTIVE, PENDING, REJECTED, INACTIVE, DELETED
 
-    @Column(name = "name")
-    private String name;
-
     @Column(name = "description")
     private String description;
 
@@ -40,6 +37,9 @@ public class Expense {
 
     @Column(name = "entry_type")
     private String entryType; //INCOME or EXPENSE
+
+    @Column(name = "entry_date")
+    private LocalDateTime entryDate; //from client
 
     @Column(name = "currency_unit")
     private String currencyUnit; //VND, EUR, USD, GBP

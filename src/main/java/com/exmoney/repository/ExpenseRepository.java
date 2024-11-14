@@ -12,7 +12,8 @@ import static com.exmoney.payload.response.expense.ExpenseResponse.*;
 
 public interface ExpenseRepository extends JpaRepository<Expense, String> {
 
-    @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.name AS " + PROP_NAME +
+    @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
+            ", e.entryType AS " + PROP_ENTRY_TYPE +
             ", e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +
             ", e.currencyUnit AS " + PROP_CURRENCY_UNIT + ", e.type AS " + PROP_TYPE + ", e.walletId AS " + PROP_WALLET_ID +
             ", w.name AS " + PROP_WALLET_NAME + ", e.userId AS " + PROP_USER_ID + ", u1.name AS " + PROP_USER_NAME +
@@ -29,7 +30,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
             "AND (e.userId = :ownerId OR uw.userId = :ownerId)")
     Optional<ExpenseResponse> accessibleById(String id, String ownerId);
 
-    @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.name AS " + PROP_NAME +
+    @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
+            ", e.entryType AS " + PROP_ENTRY_TYPE +
             ", e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +
             ", e.currencyUnit AS " + PROP_CURRENCY_UNIT + ", e.type AS " + PROP_TYPE + ", e.walletId AS " + PROP_WALLET_ID +
             ", w.name AS " + PROP_WALLET_NAME + ", e.userId AS " + PROP_USER_ID + ", u1.name AS " + PROP_USER_NAME +

@@ -124,7 +124,6 @@ public class WalletServiceImpl implements WalletService {
         List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId)
                 .stream().peek(e -> {
                     e.setWalletName(response.getName());
-                    e.setName(commonService.getMessageSrc(e.getName(), locale));
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                 })
