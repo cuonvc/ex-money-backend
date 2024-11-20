@@ -50,9 +50,9 @@ public class ExpenseResponse {
     private Long categoryId;
     private String categoryName;
     private LocalDateTime createdAt;
-    private Long createdBy;
+    private String createdBy;
     private LocalDateTime updatedAt = LocalDateTime.now();
-    private Long updatedBy;
+    private String updatedBy;
 
     public ExpenseResponse(HashMap<String, Object> response) {
         this.id = (Long) response.get(PROP_ID);
@@ -71,8 +71,8 @@ public class ExpenseResponse {
         this.categoryId = (Long) response.get(PROP_CATEGORY_ID);
         this.categoryName = (String) response.get(PROP_CATEGORY_NAME);
         this.createdAt = (LocalDateTime) response.get(PROP_CREATED_AT);
-        this.createdBy = (Long) response.get(PROP_CREATED_BY);
+        this.createdBy = (String) response.get(PROP_CREATED_BY);
         this.updatedAt = (LocalDateTime) response.get(PROP_UPDATED_AT);
-        this.updatedBy = (Long) response.get(PROP_UPDATED_BY);
+        this.updatedBy = (String) response.get(PROP_UPDATED_BY);
     }
 }
