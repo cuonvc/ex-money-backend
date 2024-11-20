@@ -24,6 +24,8 @@ import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.CategorySaveType.ACCOUNT;
 import static com.exmoney.util.Constant.CategorySaveType.WALLET;
 import static com.exmoney.util.Constant.RecordType.CUSTOM;
+import static com.exmoney.util.Constant.RecordType.DEFAULT;
+import static com.exmoney.util.Constant.Role.ADMIN_ROLE;
 import static com.exmoney.util.Constant.Role.USER_ROLE;
 import static com.exmoney.util.Utils.getNow;
 
@@ -45,9 +47,25 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     private String categoryUpdateLog;
 
     @Override
+    public ResponseEntity<BaseResponse<ExpenseCategory>> createDefaultForAdmin(String name, String desc, Locale locale) {
+        if (commonService.getCurrentUser().getAuthorities().stream().filter(r -> r.getAuthority().equals(ADMIN_ROLE)).toList().isEmpty()) {
+            commonService.throwException(BAD_REQUEST, locale, "");
+        }
+        ExpenseCategory category = new ExpenseCategory();
+        category.setCreatedBy(0L);
+        category.setName(name);
+        category.setDescription(desc);
+        category.setParentId(null);
+        category.setType(DEFAULT);
+        category.setUpdatedAt(getNow());
+        categoryRepository.save(category);
+        return responseFactory.success("", category);
+    }
+
+    @Override
     public ResponseEntity<BaseResponse<ExpenseCategory>> create(ExpenseCategoryRequest request, Locale locale) {
 
-        String currentUserId = commonService.getCurrentUserId();
+        Long currentUserId = commonService.getCurrentUserId();
 
         if (request.getParentId() != null && categoryRepository.findById(request.getParentId()).isEmpty()) {
             commonService.throwException(CATEGORY_NOT_FOUND, locale, null, request.getParentId());
@@ -67,13 +85,13 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
 
         ExpenseCategory category = categoryMapper.toEntity(request);
         category.setCreatedAt(getNow());
-        category.setCreatedBy(USER_ROLE);
+        category.setCreatedBy(currentUserId);
         category.setType(CUSTOM);
         return responseFactory.success(categoryCreateLog, categoryRepository.save(category));
     }
 
     @Override
-    public ResponseEntity<BaseResponse<ExpenseCategory>> update(String id, ExpenseCategoryRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<ExpenseCategory>> update(Long id, ExpenseCategoryRequest request, Locale locale) {
 
         Optional<ExpenseCategory> category = categoryRepository.findById(id);
         if (category.isEmpty()) {
@@ -85,7 +103,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
             commonService.throwException(CATEGORY_DEFAULT_CANNOT_UPDATE, locale, null, entity.getName());
         }
 
-        String currentUserId = commonService.getCurrentUserId();
+        Long currentUserId = commonService.getCurrentUserId();
         Optional<ExpenseCategory> existedCategory = categoryRepository.findByNameAndUserId(request.getName(), currentUserId);
         //nếu cập nhật tên trùng với tên hiện tại của chính nó thì ko sao
         if (existedCategory.isPresent() && !existedCategory.get().getId().equals(entity.getId())) {
@@ -98,7 +116,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(String saveType, String refId, Locale locale) {
+    public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(String saveType, Long refId, Locale locale) {
         Set<ExpenseCategoryResponse> result = new HashSet<>();
         if (saveType == null || !List.of(ACCOUNT, WALLET).contains(saveType)) {
             saveType = null;
@@ -141,7 +159,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
         response.setChildren(children);
     }
 
-    public ResponseEntity<BaseResponse<ExpenseCategory>> detail(String id, Locale locale) {
+    public ResponseEntity<BaseResponse<ExpenseCategory>> detail(Long id, Locale locale) {
         Optional<ExpenseCategory> category = categoryRepository.findById(id);
         if (category.isEmpty()) {
             commonService.throwException(CATEGORY_NOT_FOUND, locale, null, id);

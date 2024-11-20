@@ -10,9 +10,10 @@ import java.util.Locale;
 import java.util.Set;
 
 public interface ExpenseCategoryService {
+    ResponseEntity<BaseResponse<ExpenseCategory>> createDefaultForAdmin(String name, String desc, Locale locale);
     ResponseEntity<BaseResponse<ExpenseCategory>> create(ExpenseCategoryRequest request, Locale locale);
-    ResponseEntity<BaseResponse<ExpenseCategory>> update(String id, ExpenseCategoryRequest request, Locale locale);
-    ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(String saveType, String refId, Locale locale);
+    ResponseEntity<BaseResponse<ExpenseCategory>> update(Long id, ExpenseCategoryRequest request, Locale locale);
+    ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(String saveType, Long refId, Locale locale);
     ResponseEntity<BaseResponse<Set<String>>> getAllDefault(Locale locale);
-    ResponseEntity<BaseResponse<ExpenseCategory>> detail(String id, Locale locale);
+    ResponseEntity<BaseResponse<ExpenseCategory>> detail(Long id, Locale locale);
 }

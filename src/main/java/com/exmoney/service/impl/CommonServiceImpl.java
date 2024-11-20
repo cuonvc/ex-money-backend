@@ -36,7 +36,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public String getCurrentUserId() {
+    public Long getCurrentUserId() {
         return getCurrentUser().getId();
     }
 
@@ -63,7 +63,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public User findUserByIdOrThrow(String id, Locale locale, String log) {
+    public User findUserByIdOrThrow(Long id, Locale locale, String log) {
         Optional<User> userOp = userRepository.findById(id);
         if (userOp.isEmpty()) {
             this.throwException(USER_NOT_FOUND, locale, log);
@@ -92,7 +92,7 @@ public class CommonServiceImpl implements CommonService {
                             .status(status)
                             .actionBy(actionBy)
                             .createdAt(getNow())
-                            .createdBy(actionBy.equals(ACTION_BY_USER) ? getCurrentUserId() : "")
+                            .createdBy(actionBy.equals(ACTION_BY_USER) ? getCurrentUserId() : 0)
                             .build()
             );
         }

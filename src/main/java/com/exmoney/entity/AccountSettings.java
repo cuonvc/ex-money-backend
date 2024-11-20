@@ -16,12 +16,11 @@ import java.time.LocalDateTime;
 public class AccountSettings {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

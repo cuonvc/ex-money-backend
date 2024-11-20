@@ -36,7 +36,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public void clearToken(String userId) {
+    public void clearToken(Long userId) {
         RefreshToken refreshToken = repository.findByUserId(userId).get();
 
         Date currentDate = new Date();

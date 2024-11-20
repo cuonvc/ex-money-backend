@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static com.exmoney.payload.response.expense.ExpenseResponse.*;
 
-public interface ExpenseRepository extends JpaRepository<Expense, String> {
+public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
             ", e.entryType AS " + PROP_ENTRY_TYPE +
@@ -28,7 +28,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
             "WHERE e.id = :id " +
             "AND e.status != 'DELETED' " +
             "AND (e.userId = :ownerId OR uw.userId = :ownerId)")
-    Optional<ExpenseResponse> accessibleById(String id, String ownerId);
+    Optional<ExpenseResponse> accessibleById(Long id, Long ownerId);
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
             ", e.entryType AS " + PROP_ENTRY_TYPE +
@@ -48,10 +48,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
             "AND (" +
             "   e.walletId = :walletId " +
             "   OR (" +
-            "       (:walletId IS NULL OR :walletId = '') " +
-            "       AND w.isDefault = true " +
+            "       :walletId IS NULL AND w.isDefault = true " +
             "   )" +
             ")"
     )
-    List<ExpenseResponse> findAccessByUser(String userId, String walletId);
+    List<ExpenseResponse> findAccessByUser(Long userId, Long walletId);
 }

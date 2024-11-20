@@ -18,9 +18,8 @@ import java.time.LocalDateTime;
 public class ActionLog {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "action_by")
     private String actionBy;
@@ -35,5 +34,5 @@ public class ActionLog {
     private LocalDateTime createdAt;
 
     @Column(name = "created_by")
-    private String createdBy;
+    private Long createdBy;
 }

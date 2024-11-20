@@ -18,9 +18,8 @@ import java.util.Date;
 public class RefreshToken {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "token")
     private String token;
@@ -29,5 +28,5 @@ public class RefreshToken {
     private Date expireDate;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 }

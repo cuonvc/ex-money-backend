@@ -18,18 +18,17 @@ import static com.exmoney.util.Constant.Status.ACTIVE;
 public class ExpenseCategory {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "status")
     private String status = ACTIVE;
 
     @Column(name = "parent_id")
-    private String parentId;
+    private Long parentId;
 
     @Column(name = "ref_id")
-    private String refId; //userId or walletId
+    private Long refId; //userId or walletId
 
     @Column(name = "save_type")
     private String saveType; //WALLET, ACCOUNT
@@ -53,11 +52,11 @@ public class ExpenseCategory {
     private LocalDateTime createdAt;
 
     @Column(name = "created_by")
-    private String createdBy;
+    private Long createdBy;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "updated_by")
-    private String updatedBy;
+    private Long updatedBy;
 }

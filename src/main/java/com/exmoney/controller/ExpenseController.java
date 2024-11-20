@@ -30,20 +30,20 @@ public class ExpenseController {
     }
 
     @GetMapping(API_BASE_USER + "/expense/{id}")
-    public ResponseEntity<BaseResponse<ExpenseResponse>> detail(@PathVariable("id") String id,
+    public ResponseEntity<BaseResponse<ExpenseResponse>> detail(@PathVariable("id") Long id,
                                                         @RequestParam Locale locale) {
         return expenseService.detail(id, locale);
     }
 
     @GetMapping(API_BASE_USER + "/expense") //walletId is null or blank -> get by default wallet
-    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> list(@RequestParam(value = "wallet_id", required = false) String walletId,
+    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> list(@RequestParam(value = "wallet_id", required = false) Long walletId,
                                                                     @RequestParam Locale locale) {
         return expenseService.listByUser(walletId, locale);
     }
 
     @GetMapping(API_BASE_USER + "/expense/edit_resource")
     //get resource for expense edit screen
-    public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(@RequestParam(value = "wallet_id", required = false) String walletId,
+    public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(@RequestParam(value = "wallet_id", required = false) Long walletId,
                                                                                              @RequestParam Locale locale) {
         return expenseService.getResourceForExpenseEdit(walletId, locale);
     }

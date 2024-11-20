@@ -54,7 +54,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public void initDefaultWallet(String userId, Locale locale) {
+    public void initDefaultWallet(Long userId, Locale locale) {
 //        if (!walletRepository.findByUserId(userId).isEmpty()) {
 //            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
 //        }
@@ -77,7 +77,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public ResponseEntity<BaseResponse<Wallet>> create(WalletRequest request, Locale locale) {
-        String userId = commonService.getCurrentUserId();
+        Long userId = commonService.getCurrentUserId();
         if (walletRepository.findByNameOfUser(request.getName(), userId).isPresent()) {
             commonService.throwException(WALLET_NAME_ALREADY_EXISTED, locale, null, request.getName());
         }
@@ -98,13 +98,13 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<WalletResponse>> detail(String walletId, Locale locale) {
-        String currentUserId = commonService.getCurrentUserId();
+    public ResponseEntity<BaseResponse<WalletResponse>> detail(Long walletId, Locale locale) {
+        Long currentUserId = commonService.getCurrentUserId();
         List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
-        if (walletId == null || walletId.isEmpty()) {
+        if (walletId == null) {
             walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
         }
-        final String finalWalletId = walletId;
+        final Long finalWalletId = walletId;
         Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(finalWalletId)).findFirst();
         if (otpWallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
@@ -116,7 +116,7 @@ public class WalletServiceImpl implements WalletService {
             walletObj.setDescription(commonService.getMessageSrc(walletObj.getDescription(), locale));
         }
         WalletResponse response = walletMapper.toResponse(walletObj);
-        List<Map<String, String>> walletMap = wallets.stream()
+        List<Map<Long, String>> walletMap = wallets.stream()
                 .map(w -> Map.of(w.getId(), w.getName()))
                 .toList();
         response.setOtherWallets(walletMap);
@@ -148,7 +148,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Wallet>> addUser(String walletId, String userId, Locale locale) {
+    public ResponseEntity<BaseResponse<Wallet>> addUser(Long walletId, Long userId, Locale locale) {
         commonService.findUserByIdOrThrow(userId, locale, null);
         if (walletRepository.findByIdAndUser(walletId, commonService.getCurrentUserId()).isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);

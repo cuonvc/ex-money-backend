@@ -7,21 +7,21 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface WalletRepository extends JpaRepository<Wallet, String> {
+public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
     @Query("SELECT w FROM Wallet w " +
             "INNER JOIN UserWallet uw ON uw.walletId = w.id " +
             "WHERE w.id = :id " +
             "AND w.status = 'ACTIVE' " +
             "AND uw.userId = :userId")
-    Optional<Wallet> findByIdAndUser(String id, String userId);
+    Optional<Wallet> findByIdAndUser(Long id, Long userId);
 
     @Query("SELECT w FROM Wallet w " +
             "INNER JOIN UserWallet uw ON uw.walletId = w.id " +
             "WHERE w.name = :name " +
             "AND w.ownerUserId = :userId " +
             "AND w.status = 'ACTIVE'")
-    Optional<Wallet> findByNameOfUser(String name, String userId);
+    Optional<Wallet> findByNameOfUser(String name, Long userId);
 
 //    @Query("SELECT w FROM Wallet w " +
 //            "INNER JOIN UserWallet uw ON uw.userId = :userId " +
@@ -34,5 +34,5 @@ public interface WalletRepository extends JpaRepository<Wallet, String> {
             "WHERE w.status = 'ACTIVE' " +
             "AND uw.userId = :userId " +
             "AND w.ownerUserId = (CASE WHEN :isOwner = true THEN :userId ELSE w.ownerUserId END)")
-    List<Wallet> findByUserId(String userId, boolean isOwner);
+    List<Wallet> findByUserId(Long userId, boolean isOwner);
 }

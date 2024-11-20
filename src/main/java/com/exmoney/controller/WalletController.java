@@ -30,7 +30,7 @@ public class WalletController {
     @GetMapping(API_BASE_USER + "/wallet/detail")
     //nếu walletId = null -> get default wallet
     public ResponseEntity<BaseResponse<WalletResponse>> detail(@RequestParam Locale locale,
-                                                               @RequestParam(required = false) String id) {
+                                                               @RequestParam(required = false) Long id) {
         return walletService.detail(id, locale);
     }
 
@@ -43,8 +43,8 @@ public class WalletController {
 
     @PutMapping(API_BASE_USER + "/wallet/add_user")
     public ResponseEntity<BaseResponse<Wallet>> addUser(@RequestParam Locale locale,
-                                                        @RequestParam(name = "wallet_id") String walletId,
-                                                        @RequestParam(name = "user_id") String userId) {
+                                                        @RequestParam(name = "wallet_id") Long walletId,
+                                                        @RequestParam(name = "user_id") Long userId) {
         return walletService.addUser(walletId, userId, locale);
     }
 }

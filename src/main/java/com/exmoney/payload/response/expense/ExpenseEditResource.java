@@ -11,8 +11,8 @@ import java.util.Set;
 @Data
 @Builder(toBuilder = true)
 public class ExpenseEditResource {
-    private String walletId;
+    private Long walletId;
     private String walletName;
-    private List<Map<String, String>> otherWalletMap;
+    private List<Map<Long, String>> otherWalletMap;
     private Set<ExpenseCategoryResponse> categories;
 }

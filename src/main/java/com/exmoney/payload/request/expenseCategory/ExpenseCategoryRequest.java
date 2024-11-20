@@ -25,12 +25,12 @@ public class ExpenseCategoryRequest {
     @Size(max = 100, message = "validate.category_desc_length")
     private String description;
 
-    private String parentId;
+    private Long parentId;
 
     @NotNull(message = "validate.category_save_type")
     @NotBlank(message = "validate.category_save_type")
     @NotEmpty(message = "validate.category_save_type")
     private String saveType; //wallet or account
 
-    private String refId; //walletId or userId - nullable: null -> userId
+    private Long refId; //walletId or userId - nullable: null -> userId
 }

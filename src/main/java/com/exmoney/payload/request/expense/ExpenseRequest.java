@@ -32,12 +32,8 @@ public class ExpenseRequest {
     private String entryDate;
 
     @NotNull(message = "validate.expense_category_id_empty")
-    @NotBlank(message = "validate.expense_category_id_empty")
-    @NotEmpty(message = "validate.expense_category_id_empty")
-    private String categoryId;
+    private Long categoryId;
 
     @NotNull(message = "validate.expense_wallet_id_empty")
-    @NotBlank(message = "validate.expense_wallet_id_empty")
-    @NotEmpty(message = "validate.expense_wallet_id_empty")
-    private String walletId;
+    private Long walletId;
 }

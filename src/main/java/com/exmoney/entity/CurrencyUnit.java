@@ -16,9 +16,8 @@ import java.time.LocalDateTime;
 public class CurrencyUnit {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "name")
     private String name;

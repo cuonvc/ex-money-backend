@@ -9,14 +9,14 @@ import java.util.Collection;
 @NoArgsConstructor
 public class CustomUserDetail implements UserDetails {
 
-    private String id;
+    private Long id;
     private String email;
     private String name;
     private String password;
 
     private Collection<? extends GrantedAuthority> grantedAuthorities;
 
-    public CustomUserDetail(String id, String email, String name, String password, Collection<? extends GrantedAuthority> grantedAuthorities) {
+    public CustomUserDetail(Long id, String email, String name, String password, Collection<? extends GrantedAuthority> grantedAuthorities) {
         this.id = id;
         this.email = email;
         this.name = name;
@@ -29,7 +29,7 @@ public class CustomUserDetail implements UserDetails {
         return grantedAuthorities;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 

@@ -66,7 +66,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     public ResponseEntity<BaseResponse<ExpenseResponse>> create(ExpenseRequest request, Locale locale) {
 
         CustomUserDetail userDetail = commonService.getCurrentUser();
-        String currentUserId = userDetail.getId();
+        Long currentUserId = userDetail.getId();
         Optional<Wallet> optWallet = walletRepository.findByIdAndUser(request.getWalletId(), currentUserId);
         if (optWallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
@@ -125,8 +125,8 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<ExpenseResponse>> detail(String id, Locale locale) {
-        String currentUserId = commonService.getCurrentUserId();
+    public ResponseEntity<BaseResponse<ExpenseResponse>> detail(Long id, Locale locale) {
+        Long currentUserId = commonService.getCurrentUserId();
         Optional<ExpenseResponse> optResponse = expenseRepository.accessibleById(id, currentUserId);
         if (optResponse.isEmpty()) {
             commonService.throwException(EXPENSE_NOT_FOUND, locale, null);
@@ -140,7 +140,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(String walletId, Locale locale) {
+    public ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Long walletId, Locale locale) {
         List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId)
                 .stream().peek(e -> {
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));
@@ -150,19 +150,19 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(String walletId, Locale locale) {
-        String currentUserId = commonService.getCurrentUserId();
+    public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(Long walletId, Locale locale) {
+        Long currentUserId = commonService.getCurrentUserId();
         List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
-        if (walletId == null || walletId.isEmpty()) {
+        if (walletId == null) {
             walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
         }
-        final String finalWalletId = walletId;
+        final Long finalWalletId = walletId;
         Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(finalWalletId)).findFirst();
         if (otpWallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
-        List<Map<String, String>> walletMap = wallets.stream()
+        List<Map<Long, String>> walletMap = wallets.stream()
                 .map(w -> Map.of(w.getId(), w.getName()))
                 .toList();
 

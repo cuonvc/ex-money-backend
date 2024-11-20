@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory, String> {
+public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory, Long> {
 
     @Query("SELECT c FROM ExpenseCategory c WHERE c.id = :id AND c.status = 'ACTIVE'")
-    Optional<ExpenseCategory> findById(String id);
+    Optional<ExpenseCategory> findById(Long id);
 
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE c.name = :name " +
             "AND c.type = 'DEFAULT' " +
             "OR (c.refId = :userId AND c.saveType = 'ACCOUNT') " +
             "AND c.status = 'ACTIVE'")
-    Optional<ExpenseCategory> findByNameAndUserId(String name, String userId);
+    Optional<ExpenseCategory> findByNameAndUserId(String name, Long userId);
 
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE (" +
@@ -27,12 +27,12 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
             ") " +
             "AND c.parentId IS NULL " +
             "AND c.status = 'ACTIVE' AND :refId = :refId ")
-    Set<ExpenseCategory> findAllParentByRefIdAndSaveType(String refId, String saveType);
+    Set<ExpenseCategory> findAllParentByRefIdAndSaveType(Long refId, String saveType);
 
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE c.parentId = :parentId " +
             "AND c.status = 'ACTIVE'")
-    Set<ExpenseCategory> findAllByParentId(String parentId);
+    Set<ExpenseCategory> findAllByParentId(Long parentId);
 
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE c.id = :id " +
@@ -44,5 +44,5 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
             "        OR (c.saveType = 'ACCOUNT' AND c.refId = :userId)" +
             "    )" +
             ")")
-    Optional<ExpenseCategory> findByIdAndAccess(String id, String walletId, String userId);
+    Optional<ExpenseCategory> findByIdAndAccess(Long id, Long walletId, Long userId);
 }

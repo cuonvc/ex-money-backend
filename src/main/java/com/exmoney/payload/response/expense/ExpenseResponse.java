@@ -34,7 +34,7 @@ public class ExpenseResponse {
     public static final String PROP_UPDATED_AT = "updatedAt";
     public static final String PROP_UPDATED_BY = "updatedBy";
 
-    private String id;
+    private Long id;
     private String status;
     private String description;
     private BigDecimal amount;
@@ -43,19 +43,19 @@ public class ExpenseResponse {
     private LocalDateTime entryDate;
     private String entryType;
     private String type;
-    private String walletId;
+    private Long walletId;
     private String walletName;
-    private String userId;
+    private Long userId;
     private String userName;
-    private String categoryId;
+    private Long categoryId;
     private String categoryName;
     private LocalDateTime createdAt;
-    private String createdBy;
+    private Long createdBy;
     private LocalDateTime updatedAt = LocalDateTime.now();
-    private String updatedBy;
+    private Long updatedBy;
 
     public ExpenseResponse(HashMap<String, Object> response) {
-        this.id = (String) response.get(PROP_ID);
+        this.id = (Long) response.get(PROP_ID);
         this.status = (String) response.get(PROP_STATUS);
         this.entryDate = (LocalDateTime) response.get(PROP_ENTRY_DATE);
         this.entryType = (String) response.get(PROP_ENTRY_TYPE);
@@ -64,15 +64,15 @@ public class ExpenseResponse {
         this.newBalance = (BigDecimal) response.get(PROP_NEW_BALANCE);
         this.currencyUnit = (String) response.get(PROP_CURRENCY_UNIT);
         this.type = (String) response.get(PROP_TYPE);
-        this.walletId = (String) response.get(PROP_WALLET_ID);
+        this.walletId = (Long) response.get(PROP_WALLET_ID);
         this.walletName = (String) response.get(PROP_WALLET_NAME);
-        this.userId = (String) response.get(PROP_USER_ID);
+        this.userId = (Long) response.get(PROP_USER_ID);
         this.userName = (String) response.get(PROP_USER_NAME);
-        this.categoryId = (String) response.get(PROP_CATEGORY_ID);
+        this.categoryId = (Long) response.get(PROP_CATEGORY_ID);
         this.categoryName = (String) response.get(PROP_CATEGORY_NAME);
         this.createdAt = (LocalDateTime) response.get(PROP_CREATED_AT);
-        this.createdBy = (String) response.get(PROP_CREATED_BY);
+        this.createdBy = (Long) response.get(PROP_CREATED_BY);
         this.updatedAt = (LocalDateTime) response.get(PROP_UPDATED_AT);
-        this.updatedBy = (String) response.get(PROP_UPDATED_BY);
+        this.updatedBy = (Long) response.get(PROP_UPDATED_BY);
     }
 }

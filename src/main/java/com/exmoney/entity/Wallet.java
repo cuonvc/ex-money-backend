@@ -15,9 +15,8 @@ import static com.exmoney.util.Constant.Status.ACTIVE;
 public class Wallet {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "status")
     private String status = ACTIVE;
@@ -26,16 +25,16 @@ public class Wallet {
     private Boolean isDefault = true;
 
     @Column(name = "owner_user_id")
-    private String ownerUserId;
+    private Long ownerUserId;
 
     @Column(name = "total_income")
-    private BigDecimal totalIncome;
+    private BigDecimal totalIncome = BigDecimal.ZERO;
 
     @Column(name = "total_expense")
-    private BigDecimal totalExpense;
+    private BigDecimal totalExpense = BigDecimal.ZERO;
 
     @Column(name = "balance")
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "name")
     private String name;

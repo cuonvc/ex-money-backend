@@ -19,9 +19,8 @@ import java.time.LocalDateTime;
 public class Expense {
 
     @Id
-    @GenericGenerator(name = "custom_id", strategy = "com.exmoney.util.CustomIdGenerator")
-    @GeneratedValue(generator = "custom_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "status")
     private String status; //ACTIVE, PENDING, REJECTED, INACTIVE, DELETED
@@ -48,23 +47,23 @@ public class Expense {
     private String type;
 
     @Column(name = "wallet_id")
-    private String walletId;
+    private Long walletId;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "category_id")
-    private String categoryId;
+    private Long categoryId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "created_by")
-    private String createdBy;
+    private Long createdBy;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "updated_by")
-    private String updatedBy;
+    private Long updatedBy;
 }

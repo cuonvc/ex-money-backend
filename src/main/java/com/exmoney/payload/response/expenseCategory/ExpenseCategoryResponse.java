@@ -17,7 +17,7 @@ import static com.exmoney.util.Constant.Status.ACTIVE;
 @AllArgsConstructor
 public class ExpenseCategoryResponse {
 
-    private String id;
+    private Long id;
     private String status = ACTIVE;
     private Set<ExpenseCategoryResponse> children = new HashSet<>();
     private String iconImage; //provide by system
@@ -26,9 +26,9 @@ public class ExpenseCategoryResponse {
     private String description;
     private String type; //DEFAULT, CUSTOM
     private String saveType;
-    private String refId;
+    private Long refId;
     private LocalDateTime createdAt;
-    private String createdBy;
+    private Long createdBy;
     private LocalDateTime updatedAt = LocalDateTime.now();
-    private String updatedBy;
+    private Long updatedBy;
 }

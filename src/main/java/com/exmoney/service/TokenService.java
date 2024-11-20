@@ -8,7 +8,7 @@ public interface TokenService {
 
     void initRefreshToken(User user);
 
-    void clearToken(String userId);
+    void clearToken(Long userId);
 
     RefreshToken generateTokenObject(User user);
 }
