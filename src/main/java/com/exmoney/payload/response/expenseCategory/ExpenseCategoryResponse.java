@@ -28,7 +28,7 @@ public class ExpenseCategoryResponse {
     private String saveType;
     private Long refId;
     private LocalDateTime createdAt;
-    private Long createdBy;
+    private String createdBy;
     private LocalDateTime updatedAt = LocalDateTime.now();
-    private Long updatedBy;
+    private String updatedBy;
 }

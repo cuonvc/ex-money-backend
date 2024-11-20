@@ -9,17 +9,17 @@ import java.util.Map;
 
 @Data
 public class WalletResponse {
-    Long id;
-    String status;
-    Long ownerUserId;
-    String name;
-    String description;
-    BigDecimal totalIncome;
-    BigDecimal totalExpense;
-    BigDecimal balance;
-    List<ExpenseResponse> expenses;
-    List<Map<Long, String>> otherWallets;
-    Boolean isDefault;
-    String createdAt;
-    String updatedAt;
+    private Long id;
+    private String status;
+    private Long ownerUserId;
+    private String name;
+    private String description;
+    private BigDecimal totalIncome;
+    private BigDecimal totalExpense;
+    private BigDecimal balance;
+    private List<ExpenseResponse> expenses;
+    private List<Map<Long, String>> otherWallets;
+    private Boolean isDefault;
+    private String createdAt;
+    private String updatedAt;
 }
