@@ -4,7 +4,10 @@ import com.exmoney.entity.Expense;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,4 +56,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             ")"
     )
     List<ExpenseResponse> findAccessByUser(Long userId, Long walletId);
+
+    @Query("SELECT e FROM Expense e " +
+            "WHERE e.userId = :userId " +
+            "AND e.status != 'DELETED' " +
+            "AND EXTRACT(YEAR FROM e.createdAt) = :year " +
+            "AND EXTRACT(MONTH FROM e.createdAt) = :month " +
+            "ORDER BY e.createdAt DESC"
+    )
+    List<Expense> findAllByOwner(Long userId, int year, int month);
 }
