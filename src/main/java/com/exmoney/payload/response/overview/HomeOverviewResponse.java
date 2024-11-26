@@ -1,6 +1,6 @@
 package com.exmoney.payload.response.overview;
 
-import com.exmoney.entity.Expense;
+import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,5 +18,5 @@ public class HomeOverviewResponse {
     private UserResponse user;
     private BigDecimal totalExpenseAmount;
     private BigDecimal moreThanLastMonth;
-    List<Expense> ownerExpenses;
+    List<ExpenseResponse> ownerExpenses;
 }

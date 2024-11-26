@@ -44,8 +44,8 @@ public class OverviewServiceImpl implements OverviewService {
         }
 
         log.info("LOCAL DATE TIME - {}", localDateTime);
-        List<Expense> expenses = expenseRepository.findAllByOwner(userId, localDateTime.getYear(), localDateTime.getMonthValue());
-        BigDecimal totalAmount = expenses.stream().map(Expense::getAmount)
+        List<ExpenseResponse> expenses = expenseRepository.findAllByOwner(userId, localDateTime.getYear(), localDateTime.getMonthValue());
+        BigDecimal totalAmount = expenses.stream().map(ExpenseResponse::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return responseFactory.success(
                 null,
