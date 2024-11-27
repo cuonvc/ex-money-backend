@@ -13,6 +13,6 @@ public interface WalletService {
     void initDefaultWallet(Long userId, Locale locale);
     ResponseEntity<BaseResponse<Wallet>> create(WalletRequest wallet, Locale locale);
     ResponseEntity<BaseResponse<WalletResponse>> detail(Long walletId, Locale locale);
-    ResponseEntity<BaseResponse<List<Wallet>>> listByUser(boolean isOwner, Locale locale);
+    ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(boolean isOwner, Locale locale);
     ResponseEntity<BaseResponse<Wallet>> addUser(Long walletId, Long userId, Locale locale);
 }

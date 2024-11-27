@@ -12,6 +12,7 @@ public class WalletResponse {
     private Long id;
     private String status;
     private Long ownerUserId;
+    private List<String> members;
     private String name;
     private String description;
     private BigDecimal totalIncome;
@@ -22,4 +23,6 @@ public class WalletResponse {
     private Boolean isDefault;
     private String createdAt;
     private String updatedAt;
+    private Long createdBy;
+    private Long updatedBy;
 }

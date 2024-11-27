@@ -136,17 +136,29 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<List<Wallet>>> listByUser(boolean isOwner, Locale locale) {
-        return responseFactory.success(
-                null,
-                walletRepository.findByUserId(commonService.getCurrentUserId(), isOwner)
-                        .stream().peek(w -> {
-                            if (w.getIsDefault()) {
-                                w.setName(commonService.getMessageSrc(w.getName(), locale));
-                                w.setDescription(commonService.getMessageSrc(w.getDescription(), locale));
-                            }
-                        }).toList()
-        );
+    public ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(boolean isOwner, Locale locale) {
+        Long userId = commonService.getCurrentUserId();
+        List<WalletResponse> responseList = walletRepository.findByUserId(userId, isOwner)
+                .stream().map(w -> {
+                    if (w.getIsDefault()) {
+                        w.setName(commonService.getMessageSrc(w.getName(), locale));
+                        w.setDescription(commonService.getMessageSrc(w.getDescription(), locale));
+                    }
+                    WalletResponse response = walletMapper.toResponse(w);
+                    List<String> memberList = userWalletRepository.findUserByWallet(w.getId());
+                    List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, w.getId())
+                            .stream().peek(e -> {
+                                e.setWalletName(response.getName());
+                                e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
+                                e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
+                            })
+                            .toList();
+                    response.setMembers(memberList);
+                    response.setExpenses(expenseResponses);
+                    return response;
+                }).toList();
+
+        return responseFactory.success(null, responseList);
     }
 
     @Override
