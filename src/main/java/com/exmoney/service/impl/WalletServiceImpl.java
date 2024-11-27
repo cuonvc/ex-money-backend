@@ -60,6 +60,7 @@ public class WalletServiceImpl implements WalletService {
 //        }
         Wallet wallet = new Wallet();
         wallet.setCreatedAt(getNow());
+        wallet.setCreatedBy(0L);
         wallet.setName(defaultWalletName); //lưu là default.wallet_name luôn để có thể get dynamic
         wallet.setDescription(defaultWalletDescription);
         wallet.setOwnerUserId(userId);
@@ -83,6 +84,7 @@ public class WalletServiceImpl implements WalletService {
         }
         Wallet wallet = walletMapper.toEntity(request);
         wallet.setCreatedAt(getNow());
+        wallet.setCreatedBy(userId);
         wallet.setOwnerUserId(userId);
         wallet.setIsDefault(false);
         wallet = walletRepository.save(wallet);
