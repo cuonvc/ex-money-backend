@@ -1,6 +1,6 @@
 SERVER_PORT: 8081
 
-DB_HOST: localhost
+DB_HOST: host.docker.internal
 DB_PORT: 5432
 DB_NAME: exmoney
 DB_DEFAULT_SCHEMA: exmoney-dev

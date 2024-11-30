@@ -6,4 +6,4 @@ echo ".";
 echo ".";
 echo ".";
 sleep 3
-sudo docker compose logs -f
+docker compose logs -f

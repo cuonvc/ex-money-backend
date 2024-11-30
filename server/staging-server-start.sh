@@ -8,8 +8,8 @@ echo ".";
 echo ".";
 cd ../
 mvn clean install
-sudo docker build -t cuonvc/exmoney:staging .
-sudo docker compose up -d
+docker build -t cuonvc/exmoney:staging .
+docker compose up -d
 echo "================> DOCKER STARTED <===============";
 echo ".";
 echo ".";
