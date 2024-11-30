@@ -37,14 +37,15 @@ public class WalletController {
     @GetMapping(API_BASE_USER + "/wallet/list")
     //Nếu is_owner = false -> get all ví có thể truy cập (không chỉ có ví khách)
     public ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(@RequestParam Locale locale,
-                                                                 @RequestParam(name = "is_owner", defaultValue = "false") boolean isOwner) {
+                                                                         @RequestParam(name = "is_owner", defaultValue = "false") boolean isOwner) {
         return walletService.listByUser(isOwner, locale);
     }
 
-    @PutMapping(API_BASE_USER + "/wallet/add_user")
-    public ResponseEntity<BaseResponse<Wallet>> addUser(@RequestParam Locale locale,
-                                                        @RequestParam(name = "wallet_id") Long walletId,
-                                                        @RequestParam(name = "user_id") Long userId) {
-        return walletService.addUser(walletId, userId, locale);
+    @PutMapping(API_BASE_USER + "/wallet/change_user")
+    public ResponseEntity<BaseResponse<Wallet>> changeUser(@RequestParam Locale locale,
+                                                           @RequestParam(name = "action") String action,
+                                                           @RequestParam(name = "wallet_id") Long walletId,
+                                                           @RequestParam(name = "user_id") Long userId) {
+        return walletService.changeUser(action, walletId, userId, locale);
     }
 }

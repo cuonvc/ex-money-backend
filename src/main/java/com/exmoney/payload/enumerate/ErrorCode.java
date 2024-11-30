@@ -25,6 +25,7 @@ public enum ErrorCode {
     WALLET_NOT_FOUND("WALLET_NOT_FOUND", "exception.wallet_not_found", HttpStatus.NOT_FOUND.value()),
     WALLET_NAME_ALREADY_EXISTED("WALLET_NAME_ALREADY_EXISTED", "exception.wallet_name_already_existed", HttpStatus.BAD_REQUEST.value()),
     WALLET_IN_USE_BY_USER("WALLET_IN_USE_BY_USER", "exception.wallet_in_use_by_user", HttpStatus.BAD_REQUEST.value()),
+    WALLET_NOT_CONTAINS_USER("WALLET_NOT_CONTAINS_USER", "exception.wallet_not_contains_user", HttpStatus.BAD_REQUEST.value()),
 
     EXPENSE_NOT_FOUND("EXPENSE_NOT_FOUND", "exception.expense_not_found", HttpStatus.NOT_FOUND.value()),
     ;

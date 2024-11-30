@@ -10,14 +10,14 @@ import java.util.Optional;
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
     @Query("SELECT w FROM Wallet w " +
-            "INNER JOIN UserWallet uw ON uw.walletId = w.id " +
+            "INNER JOIN UserWallet uw ON uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "WHERE w.id = :id " +
             "AND w.status = 'ACTIVE' " +
             "AND uw.userId = :userId")
     Optional<Wallet> findByIdAndUser(Long id, Long userId);
 
     @Query("SELECT w FROM Wallet w " +
-            "INNER JOIN UserWallet uw ON uw.walletId = w.id " +
+            "INNER JOIN UserWallet uw ON uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "WHERE w.name = :name " +
             "AND w.ownerUserId = :userId " +
             "AND w.status = 'ACTIVE'")
@@ -30,7 +30,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
 //    List<Wallet> findByUserId(String userId, boolean isOwner);
 
     @Query("SELECT w FROM Wallet w " +
-            "INNER JOIN UserWallet uw ON uw.walletId = w.id " +
+            "INNER JOIN UserWallet uw ON uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "WHERE w.status = 'ACTIVE' " +
             "AND uw.userId = :userId " +
             "AND w.ownerUserId = (CASE WHEN :isOwner = true THEN :userId ELSE w.ownerUserId END)")

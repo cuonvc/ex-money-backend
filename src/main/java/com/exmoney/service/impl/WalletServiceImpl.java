@@ -17,6 +17,7 @@ import com.exmoney.repository.WalletRepository;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.ExpenseService;
 import com.exmoney.service.WalletService;
+import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
+import static com.exmoney.util.Constant.Status.ACTIVE;
+import static com.exmoney.util.Constant.Status.DELETED;
+import static com.exmoney.util.Constant.WalletChangeUserAction.ADD;
+import static com.exmoney.util.Constant.WalletChangeUserAction.REMOVE;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -46,6 +51,10 @@ public class WalletServiceImpl implements WalletService {
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
     private String actionWalletCreate;
+    @Value("${exmoney.application.action_log.wallet_add_user}")
+    private String actionWalletAddUser;
+    @Value("${exmoney.application.action_log.wallet_remove_user}")
+    private String actionWalletRemoveUser;
 
     @Value("${exmoney.application.default.wallet_name}")
     private String defaultWalletName;
@@ -71,6 +80,7 @@ public class WalletServiceImpl implements WalletService {
                         .userId(userId)
                         .walletId(wallet.getId())
                         .updatedAt(getNow())
+                        .status(ACTIVE)
                         .build()
         );
     }
@@ -94,6 +104,7 @@ public class WalletServiceImpl implements WalletService {
                         .userId(userId)
                         .walletId(wallet.getId())
                         .updatedAt(getNow())
+                        .status(ACTIVE)
                         .build()
         );
         return responseFactory.success(actionWalletCreate, wallet);
@@ -103,7 +114,7 @@ public class WalletServiceImpl implements WalletService {
     public ResponseEntity<BaseResponse<WalletResponse>> detail(Long walletId, Locale locale) {
         Long currentUserId = commonService.getCurrentUserId();
         List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
-        if (walletId == null) {
+        if (walletId != null) {
             walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
         }
         final Long finalWalletId = walletId;
@@ -162,22 +173,42 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Wallet>> addUser(Long walletId, Long userId, Locale locale) {
+    public ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, Long userId, Locale locale) {
         commonService.findUserByIdOrThrow(userId, locale, null);
         if (walletRepository.findByIdAndUser(walletId, commonService.getCurrentUserId()).isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
-        if (walletRepository.findByIdAndUser(walletId, userId).isPresent()) {
-            commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
+
+        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, userId);
+        UserWallet userWallet = new UserWallet();
+        String actionLog = "";
+        if (action.equals(ADD)) {
+            if (wallet.isPresent()) {
+                commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
+            }
+            //must empty
+            userWallet = UserWallet.builder()
+                    .userId(userId)
+                    .walletId(walletId)
+                    .updatedAt(getNow())
+                    .status(ACTIVE)
+                    .build();
+            actionLog = actionWalletAddUser;
+        } else if (action.equals(REMOVE)) {
+            if (wallet.isEmpty()) {
+                commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
+            }
+            //must exist
+            userWallet = userWalletRepository.findByUserAndWallet(userId, walletId);
+            userWallet.setStatus(DELETED);
+            actionLog = actionWalletRemoveUser;
+        } else {
+            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
         }
 
-        userWalletRepository.save(
-          UserWallet.builder()
-                  .userId(userId)
-                  .walletId(walletId)
-                  .updatedAt(getNow())
-                  .build()
-        );
+
+        userWalletRepository.save(userWallet);
+        responseFactory.success(actionLog, userWallet);
         return responseFactory.success(null, null);
     }
 }

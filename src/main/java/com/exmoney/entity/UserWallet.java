@@ -29,4 +29,7 @@ public class UserWallet {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(name = "status")
+    private String status;
 }

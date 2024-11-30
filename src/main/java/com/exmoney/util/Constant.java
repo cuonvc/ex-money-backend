@@ -1,5 +1,6 @@
 package com.exmoney.util;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,6 +27,14 @@ public class Constant {
     public static class CategorySaveType {
         public static final String WALLET = "WALLET";
         public static final String ACCOUNT = "ACCOUNT";
+    }
+
+    public static class WalletChangeUserAction {
+        public static final String ADD = "ADD";
+        public static final String REMOVE = "REMOVE";
+        public static final String ABCXYZ = "abcxyz";
+
+        public static final List<String> actions = Arrays.asList(ADD,REMOVE,ABCXYZ);
     }
 
     public static class ExpenseEntryType {
