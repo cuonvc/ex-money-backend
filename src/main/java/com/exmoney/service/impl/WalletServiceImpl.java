@@ -174,8 +174,12 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
+        Long ownerId = commonService.getCurrentUserId();
         User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
-        if (walletRepository.findByIdAndUser(walletId, commonService.getCurrentUserId()).isEmpty()) {
+        if (targetUser.getId().equals(ownerId)) {
+            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
+        }
+        if (walletRepository.findByIdAndOwner(walletId, ownerId).isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 

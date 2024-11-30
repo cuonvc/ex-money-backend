@@ -17,6 +17,12 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     Optional<Wallet> findByIdAndUser(Long id, Long userId);
 
     @Query("SELECT w FROM Wallet w " +
+            "WHERE w.id = :id " +
+            "AND w.ownerUserId = :userId " +
+            "AND w.status = 'ACTIVE' ")
+    Optional<Wallet> findByIdAndOwner(Long id, Long userId);
+
+    @Query("SELECT w FROM Wallet w " +
             "INNER JOIN UserWallet uw ON uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "WHERE w.name = :name " +
             "AND w.ownerUserId = :userId " +
