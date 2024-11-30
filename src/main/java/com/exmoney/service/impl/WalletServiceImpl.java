@@ -173,7 +173,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
+    public ResponseEntity<BaseResponse<String>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
         Long ownerId = commonService.getCurrentUserId();
         User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
         if (targetUser.getId().equals(ownerId)) {
@@ -186,6 +186,7 @@ public class WalletServiceImpl implements WalletService {
         Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, targetUser.getId());
         UserWallet userWallet = new UserWallet();
         String actionLog = "";
+        String newUser = "";
         if (action.equals(ADD)) {
             if (wallet.isPresent()) {
                 commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
@@ -198,6 +199,7 @@ public class WalletServiceImpl implements WalletService {
                     .status(ACTIVE)
                     .build();
             actionLog = actionWalletAddUser;
+            newUser = targetUser.getName();
         } else if (action.equals(REMOVE)) {
             if (wallet.isEmpty()) {
                 commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
@@ -212,7 +214,6 @@ public class WalletServiceImpl implements WalletService {
 
 
         userWalletRepository.save(userWallet);
-        responseFactory.success(actionLog, userWallet);
-        return responseFactory.success(null, null);
+        return responseFactory.success(actionLog, newUser);
     }
 }
