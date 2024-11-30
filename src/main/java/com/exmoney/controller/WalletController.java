@@ -45,7 +45,7 @@ public class WalletController {
     public ResponseEntity<BaseResponse<Wallet>> changeUser(@RequestParam Locale locale,
                                                            @RequestParam(name = "action") String action,
                                                            @RequestParam(name = "wallet_id") Long walletId,
-                                                           @RequestParam(name = "user_id") Long userId) {
-        return walletService.changeUser(action, walletId, userId, locale);
+                                                           @RequestParam(name = "user_email") String userEmail) {
+        return walletService.changeUser(action, walletId, userEmail, locale);
     }
 }

@@ -14,5 +14,5 @@ public interface WalletService {
     ResponseEntity<BaseResponse<Wallet>> create(WalletRequest wallet, Locale locale);
     ResponseEntity<BaseResponse<WalletResponse>> detail(Long walletId, Locale locale);
     ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(boolean isOwner, Locale locale);
-    ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, Long userId, Locale locale);
+    ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, String userEmail, Locale locale);
 }

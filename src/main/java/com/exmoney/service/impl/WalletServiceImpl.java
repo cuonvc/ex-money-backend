@@ -173,13 +173,13 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, Long userId, Locale locale) {
-        commonService.findUserByIdOrThrow(userId, locale, null);
+    public ResponseEntity<BaseResponse<Wallet>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
+        User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
         if (walletRepository.findByIdAndUser(walletId, commonService.getCurrentUserId()).isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
-        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, userId);
+        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, targetUser.getId());
         UserWallet userWallet = new UserWallet();
         String actionLog = "";
         if (action.equals(ADD)) {
@@ -188,7 +188,7 @@ public class WalletServiceImpl implements WalletService {
             }
             //must empty
             userWallet = UserWallet.builder()
-                    .userId(userId)
+                    .userId(targetUser.getId())
                     .walletId(walletId)
                     .updatedAt(getNow())
                     .status(ACTIVE)
@@ -199,7 +199,7 @@ public class WalletServiceImpl implements WalletService {
                 commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
             }
             //must exist
-            userWallet = userWalletRepository.findByUserAndWallet(userId, walletId);
+            userWallet = userWalletRepository.findByUserAndWallet(targetUser.getId(), walletId);
             userWallet.setStatus(DELETED);
             actionLog = actionWalletRemoveUser;
         } else {
