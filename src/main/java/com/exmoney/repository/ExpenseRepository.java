@@ -24,7 +24,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             ", u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
             "LEFT JOIN Wallet w ON e.walletId = w.id " +
-            "LEFT JOIN UserWallet uw ON uw.userId = :ownerId AND uw.walletId = w.id " +
+            "LEFT JOIN UserWallet uw ON uw.userId = :ownerId AND uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "LEFT JOIN User u1 ON u1.id = e.userId " +
             "LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "LEFT JOIN ExpenseCategory c ON c.id = e.categoryId " +
@@ -42,7 +42,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             ", u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
             "LEFT JOIN Wallet w ON e.walletId = w.id " +
-            "LEFT JOIN UserWallet uw ON uw.userId = :userId AND uw.walletId = w.id " +
+            "LEFT JOIN UserWallet uw ON uw.userId = :userId AND uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "LEFT JOIN User u1 ON u1.id = e.userId " +
             "LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "LEFT JOIN ExpenseCategory c ON c.id = e.categoryId " +
@@ -66,7 +66,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             ", u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
             "LEFT JOIN Wallet w ON e.walletId = w.id " +
-            "LEFT JOIN UserWallet uw ON uw.userId = :userId AND uw.walletId = w.id " +
+            "LEFT JOIN UserWallet uw ON uw.userId = :userId AND uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "LEFT JOIN User u1 ON u1.id = e.userId " +
             "LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "LEFT JOIN ExpenseCategory c ON c.id = e.categoryId " +
