@@ -42,7 +42,7 @@ public class WalletController {
     }
 
     @PutMapping(API_BASE_USER + "/wallet/change_user")
-    public ResponseEntity<BaseResponse<String>> changeUser(@RequestParam Locale locale,
+    public ResponseEntity<BaseResponse<WalletResponse>> changeUser(@RequestParam Locale locale,
                                                            @RequestParam(name = "action") String action,
                                                            @RequestParam(name = "wallet_id") Long walletId,
                                                            @RequestParam(name = "user_email") String userEmail) {

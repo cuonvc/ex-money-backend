@@ -150,30 +150,32 @@ public class WalletServiceImpl implements WalletService {
     public ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(boolean isOwner, Locale locale) {
         Long userId = commonService.getCurrentUserId();
         List<WalletResponse> responseList = walletRepository.findByUserId(userId, isOwner)
-                .stream().map(w -> {
-                    if (w.getIsDefault()) {
-                        w.setName(commonService.getMessageSrc(w.getName(), locale));
-                        w.setDescription(commonService.getMessageSrc(w.getDescription(), locale));
-                    }
-                    WalletResponse response = walletMapper.toResponse(w);
-                    List<String> memberList = userWalletRepository.findUserByWallet(w.getId());
-                    List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, w.getId())
-                            .stream().peek(e -> {
-                                e.setWalletName(response.getName());
-                                e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
-                                e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
-                            })
-                            .toList();
-                    response.setMembers(memberList);
-                    response.setExpenses(expenseResponses);
-                    return response;
-                }).toList();
+                .stream().map(w -> toWalletResponse(w, userId, locale)).toList();
 
         return responseFactory.success(null, responseList);
     }
 
+    private WalletResponse toWalletResponse(Wallet wallet, Long userId, Locale locale) {
+        if (wallet.getIsDefault()) {
+            wallet.setName(commonService.getMessageSrc(wallet.getName(), locale));
+            wallet.setDescription(commonService.getMessageSrc(wallet.getDescription(), locale));
+        }
+        WalletResponse response = walletMapper.toResponse(wallet);
+        List<String> memberList = userWalletRepository.findUserByWallet(wallet.getId());
+        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId())
+                .stream().peek(e -> {
+                    e.setWalletName(response.getName());
+                    e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
+                    e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
+                })
+                .toList();
+        response.setMembers(memberList);
+        response.setExpenses(expenseResponses);
+        return response;
+    }
+
     @Override
-    public ResponseEntity<BaseResponse<String>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
+    public ResponseEntity<BaseResponse<WalletResponse>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
         Long ownerId = commonService.getCurrentUserId();
         User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
         if (targetUser.getId().equals(ownerId)) {
@@ -186,7 +188,6 @@ public class WalletServiceImpl implements WalletService {
         Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, targetUser.getId());
         UserWallet userWallet = new UserWallet();
         String actionLog = "";
-        String newUser = "";
         if (action.equals(ADD)) {
             if (wallet.isPresent()) {
                 commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
@@ -199,7 +200,6 @@ public class WalletServiceImpl implements WalletService {
                     .status(ACTIVE)
                     .build();
             actionLog = actionWalletAddUser;
-            newUser = targetUser.getName();
         } else if (action.equals(REMOVE)) {
             if (wallet.isEmpty()) {
                 commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
@@ -214,6 +214,9 @@ public class WalletServiceImpl implements WalletService {
 
 
         userWalletRepository.save(userWallet);
-        return responseFactory.success(actionLog, newUser);
+        WalletResponse response = wallet.isPresent()
+                ? toWalletResponse(wallet.get(), ownerId, locale)
+                : new WalletResponse();
+        return responseFactory.success(actionLog, response);
     }
 }
