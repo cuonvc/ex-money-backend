@@ -188,6 +188,7 @@ public class WalletServiceImpl implements WalletService {
         Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, targetUser.getId());
         UserWallet userWallet = new UserWallet();
         String actionLog = "";
+        Wallet toResponse = null;
         if (action.equals(ADD)) {
             if (wallet.isPresent()) {
                 commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
@@ -200,6 +201,7 @@ public class WalletServiceImpl implements WalletService {
                     .status(ACTIVE)
                     .build();
             actionLog = actionWalletAddUser;
+            toResponse = walletRepository.findById(walletId).get();
         } else if (action.equals(REMOVE)) {
             if (wallet.isEmpty()) {
                 commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
@@ -214,8 +216,9 @@ public class WalletServiceImpl implements WalletService {
 
 
         userWalletRepository.save(userWallet);
-        WalletResponse response = wallet.isPresent()
-                ? toWalletResponse(wallet.get(), ownerId, locale)
+
+        WalletResponse response = toResponse != null
+                ? toWalletResponse(toResponse, ownerId, locale)
                 : new WalletResponse();
         return responseFactory.success(actionLog, response);
     }
