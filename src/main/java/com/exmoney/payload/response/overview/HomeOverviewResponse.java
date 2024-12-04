@@ -15,8 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class HomeOverviewResponse {
+    private int currentMonth;
     private UserResponse user;
     private BigDecimal totalExpenseAmount;
     private BigDecimal moreThanLastMonth;
-    List<ExpenseResponse> ownerExpenses;
+    private List<ExpenseResponse> ownerExpenses;
 }

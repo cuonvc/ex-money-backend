@@ -55,6 +55,7 @@ public class OverviewServiceImpl implements OverviewService {
         return responseFactory.success(
                 null,
                 HomeOverviewResponse.builder()
+                        .currentMonth(localDateTime.getMonthValue())
                         .user(userResponse)
                         .totalExpenseAmount(totalAmount)
                         .moreThanLastMonth(BigDecimal.valueOf(300000)) //tạm
