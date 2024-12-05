@@ -178,6 +178,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse<WalletResponse>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
         Long ownerId = commonService.getCurrentUserId();
         User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
@@ -204,7 +205,6 @@ public class WalletServiceImpl implements WalletService {
                     .status(ACTIVE)
                     .build();
             actionLog = actionWalletAddUser;
-            toResponse = walletRepository.findById(walletId).get();
         } else if (action.equals(REMOVE)) {
             if (wallet.isEmpty()) {
                 commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
@@ -219,6 +219,7 @@ public class WalletServiceImpl implements WalletService {
 
 
         userWalletRepository.save(userWallet);
+        toResponse = walletRepository.findById(walletId).get();
 
         WalletResponse response = toResponse != null
                 ? toWalletResponse(toResponse, ownerId, locale)
