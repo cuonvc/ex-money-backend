@@ -6,9 +6,11 @@ import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.enumerate.ErrorCode;
+import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.wallet.WalletRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.repository.UserRepository;
@@ -42,12 +44,11 @@ public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
     private final UserWalletRepository userWalletRepository;
-    private final UserRepository userRepository;
     private final CommonService commonService;
     private final WalletMapper walletMapper;
     private final ExpenseRepository expenseRepository;
-    private final ExpenseService expenseService;
     private final ResponseFactory responseFactory;
+    private final UserMapper userMapper;
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
     private String actionWalletCreate;
@@ -161,7 +162,9 @@ public class WalletServiceImpl implements WalletService {
             wallet.setDescription(commonService.getMessageSrc(wallet.getDescription(), locale));
         }
         WalletResponse response = walletMapper.toResponse(wallet);
-        List<String> memberList = userWalletRepository.findUserByWallet(wallet.getId());
+        List<UserResponse> memberList = userWalletRepository.findUserByWallet(wallet.getId())
+                .stream().map(userMapper::entityToResponse)
+                .toList();
         List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId())
                 .stream().peek(e -> {
                     e.setWalletName(response.getName());

@@ -1,6 +1,7 @@
 package com.exmoney.payload.response.wallet;
 
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.user.UserResponse;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ public class WalletResponse {
     private Long id;
     private String status;
     private Long ownerUserId;
-    private List<String> members;
+    private List<UserResponse> members;
     private String name;
     private String description;
     private BigDecimal totalIncome;
