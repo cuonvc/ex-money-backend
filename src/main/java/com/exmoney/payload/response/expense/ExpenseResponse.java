@@ -25,8 +25,6 @@ public class ExpenseResponse {
     public static final String PROP_TYPE = "type";
     public static final String PROP_WALLET_ID = "walletId";
     public static final String PROP_WALLET_NAME = "walletName";
-    public static final String PROP_USER_ID = "userId";
-    public static final String PROP_USER_NAME = "userName";
     public static final String PROP_CATEGORY_ID = "categoryId";
     public static final String PROP_CATEGORY_NAME = "categoryName";
     public static final String PROP_CREATED_AT = "createdAt";
@@ -66,8 +64,6 @@ public class ExpenseResponse {
         this.type = (String) response.get(PROP_TYPE);
         this.walletId = (Long) response.get(PROP_WALLET_ID);
         this.walletName = (String) response.get(PROP_WALLET_NAME);
-        this.userId = (Long) response.get(PROP_USER_ID);
-        this.userName = (String) response.get(PROP_USER_NAME);
         this.categoryId = (Long) response.get(PROP_CATEGORY_ID);
         this.categoryName = (String) response.get(PROP_CATEGORY_NAME);
         this.createdAt = (LocalDateTime) response.get(PROP_CREATED_AT);
