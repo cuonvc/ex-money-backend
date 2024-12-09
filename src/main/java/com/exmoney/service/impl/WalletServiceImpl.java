@@ -135,7 +135,7 @@ public class WalletServiceImpl implements WalletService {
                 .toList();
         response.setOtherWallets(walletMap);
 
-        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId)
+        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId, null, null, null)
                 .stream().peek(e -> {
                     e.setWalletName(response.getName());
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
@@ -165,7 +165,7 @@ public class WalletServiceImpl implements WalletService {
         List<UserResponse> memberList = userWalletRepository.findUserByWallet(wallet.getId())
                 .stream().map(userMapper::entityToResponse)
                 .toList();
-        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId())
+        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId(), null, null, null)
                 .stream().peek(e -> {
                     e.setWalletName(response.getName());
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
