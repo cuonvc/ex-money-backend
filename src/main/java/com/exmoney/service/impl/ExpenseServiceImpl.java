@@ -2,6 +2,7 @@ package com.exmoney.service.impl;
 
 import com.exmoney.entity.Expense;
 import com.exmoney.entity.ExpenseCategory;
+import com.exmoney.entity.User;
 import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
@@ -9,16 +10,16 @@ import com.exmoney.payload.mapper.ExpenseMapper;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.expense.ExpenseRequest;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
+import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.expenseCategory.ExpenseCategoryResponse;
 import com.exmoney.payload.response.wallet.WalletResponse;
-import com.exmoney.repository.ExpenseCategoryRepository;
-import com.exmoney.repository.ExpenseRepository;
-import com.exmoney.repository.WalletRepository;
+import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.ExpenseCategoryService;
 import com.exmoney.service.ExpenseService;
+import com.exmoney.service.WalletService;
 import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseEntryType.ENTRY_TYPES;
@@ -51,6 +53,9 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final CommonService commonService;
     private final ResponseFactory responseFactory;
     private final ExpenseCategoryService categoryService;
+    private final UserWalletRepository userWalletRepository;
+    private final WalletService walletService;
+    private final UserRepository userRepository;
 
     @Value("${exmoney.application.default.expense_income_name}")
     private String expenseIncomeName;
@@ -140,6 +145,45 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
+    public ResponseEntity<BaseResponse<ExpenseFilterResource>> getResourceForExpenseFilter(Long walletId, Locale locale) {
+        CustomUserDetail currentUser = commonService.getCurrentUser();
+        List<Wallet> wallets = walletRepository.findByUserId(currentUser.getId(), false);
+        if (walletId == null) {
+            walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
+        }
+        final Long finalWalletId = walletId;
+        Optional<Wallet> otpWallet = wallets.stream().filter(w -> w.getId().equals(finalWalletId)).findFirst();
+        if (otpWallet.isEmpty()) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        Set<Map<Long, String>> walletMap = wallets.stream()
+                .map(w -> Map.of(w.getId(), walletService.getDisplayWalletName(w, currentUser.getId(), null, locale)))
+                .collect(Collectors.toSet());
+
+        ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>>
+                categories = categoryService.getAll(Constant.CategorySaveType.WALLET, walletId, locale);
+
+        Set<Map<Long, String>> categoryMap = categories.getBody().getData()[0]
+                .stream().map(c -> Map.of(c.getId(), c.getName()))
+                .collect(Collectors.toSet());
+
+        Set<Map<Long, String>> memberMap = userWalletRepository.findUserByWallet(finalWalletId)
+                .stream().map(u -> Map.of(u.getId(), u.getName()))
+                .collect(Collectors.toSet());
+
+        return responseFactory.success(null,
+                ExpenseFilterResource.builder()
+                        .walletId(finalWalletId)
+                        .walletName(walletService.getDisplayWalletName(otpWallet.get(), currentUser.getId(), null, locale))
+                        .members(memberMap)
+                        .otherWalletMap(walletMap)
+                        .categories(categoryMap)
+                .build()
+        );
+    }
+
+    @Override
     public ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Long walletId, String keyword,
                                                                           Long categoryId, Long createdby, Locale locale) {
         List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId, keyword, categoryId, createdby)
@@ -152,8 +196,8 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(Long walletId, Locale locale) {
-        Long currentUserId = commonService.getCurrentUserId();
-        List<Wallet> wallets = walletRepository.findByUserId(currentUserId, false);
+        CustomUserDetail currentUser = commonService.getCurrentUser();
+        List<Wallet> wallets = walletRepository.findByUserId(currentUser.getId(), false);
         if (walletId == null) {
             walletId = wallets.stream().filter(Wallet::getIsDefault).findFirst().get().getId();
         }
@@ -164,7 +208,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         List<Map<Long, String>> walletMap = wallets.stream()
-                .map(w -> Map.of(w.getId(), w.getName()))
+                .map(w -> Map.of(w.getId(), walletService.getDisplayWalletName(w, currentUser.getId(), null, locale)))
                 .toList();
 
         ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>>
@@ -175,7 +219,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         return responseFactory.success(null,
                 ExpenseEditResource.builder()
                         .walletId(walletId)
-                        .walletName(otpWallet.get().getName())
+                        .walletName(walletService.getDisplayWalletName(otpWallet.get(), currentUser.getId(), null, locale))
                         .otherWalletMap(walletMap)
                         .categories(categoryResponses)
                         .build()

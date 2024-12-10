@@ -10,6 +10,7 @@ public interface CommonService {
     CustomUserDetail getCurrentUser();
     Long getCurrentUserId();
     String getMessageSrc(String messageCode, Locale locale);
+    String getMessageSrcWithParam(String messageCode, Locale locale, Object... params);
     void throwException(ErrorCode errorCode, Locale locale, String log, Object... args);
     User findUserByIdOrThrow(Long id, Locale locale, String log);
     User findUserByEmailOrThrow(String email, Locale locale, String log);

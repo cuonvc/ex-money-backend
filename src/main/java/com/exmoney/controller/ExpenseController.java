@@ -4,6 +4,7 @@ import com.exmoney.entity.Expense;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expense.ExpenseRequest;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
+import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -33,6 +34,12 @@ public class ExpenseController {
     public ResponseEntity<BaseResponse<ExpenseResponse>> detail(@PathVariable("id") Long id,
                                                         @RequestParam Locale locale) {
         return expenseService.detail(id, locale);
+    }
+
+    @GetMapping(API_BASE_USER + "/expense/filter_resource")
+    public ResponseEntity<BaseResponse<ExpenseFilterResource>> getResourceForExpenseFilter(@RequestParam(value = "wallet_id", required = false) Long walletId,
+                                                                                           @RequestParam Locale locale) {
+        return expenseService.getResourceForExpenseFilter(walletId, locale);
     }
 
     @GetMapping(API_BASE_USER + "/expense") //walletId is null or blank -> get by default wallet

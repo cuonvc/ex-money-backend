@@ -50,6 +50,15 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    public String getMessageSrcWithParam(String messageCode, Locale locale, Object... params) {
+        try {
+            return messageSource.getMessage(messageCode, params, locale);
+        } catch (NoSuchMessageException e) {
+            return messageCode;
+        }
+    }
+
+    @Override
     public void throwException(ErrorCode errorCode, Locale locale, String log, Object... args) {
         if (log != null) {
             this.actionLog(log, ACTION_BY_USER, errorCode.getStatusCode());

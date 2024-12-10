@@ -49,6 +49,7 @@ public class WalletServiceImpl implements WalletService {
     private final ExpenseRepository expenseRepository;
     private final ResponseFactory responseFactory;
     private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
     private String actionWalletCreate;
@@ -225,5 +226,23 @@ public class WalletServiceImpl implements WalletService {
                 ? toWalletResponse(toResponse, ownerId, locale)
                 : new WalletResponse();
         return responseFactory.success(actionLog, response);
+    }
+
+    @Override
+    //hàm này dùng cho việc hiển thị tên ví mặc định của user này với user khác khi join chung ví (tránh nhầm lẫn)
+    public String getDisplayWalletName(Wallet wallet, Long currentUserId, String ownerWallet, Locale locale) {
+        if (wallet.getOwnerUserId().equals(currentUserId)) {
+            return commonService.getMessageSrc(wallet.getName(), locale); //nếu chính chủ, hiện như bình thường
+        } else {
+            if (wallet.getName().equals("default.wallet_name")) {
+                if (ownerWallet == null) {
+                    User owner = commonService.findUserByIdOrThrow(wallet.getOwnerUserId(), locale, null);
+                    ownerWallet = owner.getName();
+                }
+                return commonService.getMessageSrcWithParam("default.wallet_name_display_other_user", locale, ownerWallet);
+            } else {
+                return wallet.getName();
+            }
+        }
     }
 }
