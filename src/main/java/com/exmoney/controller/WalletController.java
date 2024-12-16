@@ -5,6 +5,7 @@ import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.wallet.WalletRequest;
 import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.service.WalletService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class WalletController {
 
     @PostMapping(API_BASE_USER + "/wallet")
     public ResponseEntity<BaseResponse<Wallet>> create(@RequestParam Locale locale,
-                                                       @RequestBody WalletRequest request) {
+                                                       @Valid @RequestBody WalletRequest request) {
         return walletService.create(request, locale);
     }
 
