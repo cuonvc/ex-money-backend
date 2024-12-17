@@ -12,6 +12,7 @@ public enum ErrorCode {
     JWT_CLAIM_IS_EMPTY("JWT_CLAIM_IS_EMPTY", "exception.jwt.claim_empty", HttpStatus.UNAUTHORIZED.value()),
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "exception.internal_server", HttpStatus.INTERNAL_SERVER_ERROR.value()),
     BAD_REQUEST("BAD_REQUEST", "exception.bad_request", HttpStatus.BAD_REQUEST.value()),
+    STATUS_INVALID("STATUS_INVALID", "exception.status_invalid", HttpStatus.BAD_REQUEST.value()),
     USER_NOT_FOUND("USER_NOT_FOUND", "exception.user_not_found", HttpStatus.NOT_FOUND.value()),
     PASSWORD_INCORRECT("PASSWORD_INCORRECT", "exception.password_incorrect", HttpStatus.BAD_REQUEST.value()),
     INVALID_CREDENTIAL("INVALID_CREDENTIAL", "exception.invalid_credential", HttpStatus.FORBIDDEN.value()),

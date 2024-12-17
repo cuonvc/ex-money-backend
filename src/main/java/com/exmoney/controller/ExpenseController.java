@@ -30,6 +30,13 @@ public class ExpenseController {
         return expenseService.create(request, locale);
     }
 
+    @PutMapping(API_BASE_USER + "/expense/{id}")
+    public ResponseEntity<BaseResponse<ExpenseResponse>> update(@PathVariable Long id,
+                                                                @Valid @RequestBody ExpenseRequest request,
+                                                                @RequestParam Locale locale) {
+        return expenseService.update(id, request, locale);
+    }
+
     @GetMapping(API_BASE_USER + "/expense/{id}")
     public ResponseEntity<BaseResponse<ExpenseResponse>> detail(@PathVariable("id") Long id,
                                                         @RequestParam Locale locale) {

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +15,14 @@ import java.util.Optional;
 import static com.exmoney.payload.response.expense.ExpenseResponse.*;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
+
+
+    @Query("SELECT e FROM Expense e " +
+            "WHERE e.id = :id " +
+            "AND e.createdBy = :userId " +
+            "AND e.status = 'ACTIVE'")
+    Expense findByIdAndOwner(Long id, Long userId);
+
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
             "   , e.entryType AS " + PROP_ENTRY_TYPE +
             "   , e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +

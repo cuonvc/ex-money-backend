@@ -12,6 +12,7 @@ import java.util.Locale;
 
 public interface ExpenseService {
     ResponseEntity<BaseResponse<ExpenseResponse>> create(ExpenseRequest request, Locale locale);
+    ResponseEntity<BaseResponse<ExpenseResponse>> update(Long id, ExpenseRequest request, Locale locale);
     ResponseEntity<BaseResponse<ExpenseResponse>> detail(Long id, Locale locale);
     ResponseEntity<BaseResponse<ExpenseFilterResource>> getResourceForExpenseFilter(Long walletId, Locale locale);
     ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Long walletId, String keyword, Long categoryId, Long createdBy, Locale locale);

@@ -1,9 +1,6 @@
 package com.exmoney.service.impl;
 
-import com.exmoney.entity.Expense;
-import com.exmoney.entity.ExpenseCategory;
-import com.exmoney.entity.User;
-import com.exmoney.entity.Wallet;
+import com.exmoney.entity.*;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.ExpenseMapper;
@@ -33,8 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
-import static com.exmoney.util.Constant.ExpenseEntryType.ENTRY_TYPES;
-import static com.exmoney.util.Constant.ExpenseEntryType.INCOME;
+import static com.exmoney.util.Constant.ExpenseEntryType.*;
 import static com.exmoney.util.Constant.ExpenseType.EXPENSE_TYPES;
 import static com.exmoney.util.Constant.ExpenseType.MANUAL;
 import static com.exmoney.util.Constant.Status.ACTIVE;
@@ -56,6 +52,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final UserWalletRepository userWalletRepository;
     private final WalletService walletService;
     private final UserRepository userRepository;
+    private final ExpenseHistoryRepository expenseHistoryRepository;
 
     @Value("${exmoney.application.default.expense_income_name}")
     private String expenseIncomeName;
@@ -65,6 +62,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Value("${exmoney.application.action_log.expense_create}")
     private String actionLogExpenseCreate;
+
+    @Value("${exmoney.application.action_log.expense_update}")
+    private String actionLogExpenseUpdate;
 
     @Override
     @Transactional
@@ -91,11 +91,12 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         Expense expense = expenseMapper.toEntity(request);
+        Wallet wallet = optWallet.get();
         expense.setEntryDate(entryDate);
         expense.setCreatedAt(getNow());
         expense.setCreatedBy(currentUserId);
         expense.setUserId(currentUserId);
-        amountDivision(expense, optWallet.get());
+        amountDivision(expense, wallet);
         if (!ENTRY_TYPES.contains(request.getEntryType())) {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
         }
@@ -107,12 +108,81 @@ public class ExpenseServiceImpl implements ExpenseService {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
         }
         expense.setStatus(request.getType().equals(MANUAL) ? ACTIVE : PENDING);
-        ExpenseResponse response = expenseMapper.toResponse(expenseRepository.save(expense));
-        response.setWalletName(commonService.getMessageSrc(optWallet.get().getName(), locale));
+
+        expense = expenseRepository.save(expense);
+        wallet = walletRepository.save(wallet);
+
+        return doResponse(expense, wallet, optCategory.get(), userDetail, locale, true);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BaseResponse<ExpenseResponse>> update(Long id, ExpenseRequest request, Locale locale) {
+        CustomUserDetail userDetail = commonService.getCurrentUser();
+        Long currentUserId = userDetail.getId();
+        Expense expense = expenseRepository.findByIdAndOwner(id, currentUserId);
+        if (expense == null) {
+            commonService.throwException(EXPENSE_NOT_FOUND, locale, null);
+        }
+
+        Wallet wallet = walletRepository.findById(expense.getWalletId()).orElse(null);
+        if (wallet == null) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        Optional<ExpenseCategory> optCategory = categoryRepository
+                .findByIdAndAccess(request.getCategoryId(), request.getWalletId(), currentUserId);
+        if (optCategory.isEmpty()) {
+            commonService.throwException(CATEGORY_NOT_FOUND, locale, null, request.getCategoryId());
+        }
+
+        ExpenseHistory history = expenseMapper.toHistory(expense);
+        expenseHistoryRepository.save(history);
+
+        resetOldAmountInWallet(expense, wallet); //xóa số tiền cũ của expense
+        if (expense.getEntryType().equals(EXPENSE)) {
+            expense.setDescription(request.getDescription());
+            expense.setCategoryId(request.getCategoryId());
+        }
+        expense.setAmount(request.getAmount());
+        expense.setUpdatedAt(getNow());
+        if (request.getEntryDate() != null && !request.getEntryDate().isEmpty()) {
+            LocalDateTime entryDate = clientToLocalDateTime(request.getEntryDate());
+            expense.setEntryDate(entryDate);
+        }
+
+        amountDivision(expense, wallet); //update lại số tiền
+        expense = expenseRepository.save(expense);
+        wallet = walletRepository.save(wallet);
+
+        return doResponse(expense, wallet, optCategory.get(), userDetail, locale, false);
+    }
+
+    private ResponseEntity<BaseResponse<ExpenseResponse>> doResponse(Expense expense, Wallet wallet,
+                                                                     ExpenseCategory category, CustomUserDetail userDetail,
+                                                                     Locale locale, boolean doCreate) {
+        ExpenseResponse response = expenseMapper.toResponse(expense);
+        response.setWalletName(commonService.getMessageSrc(wallet.getName(), locale));
         response.setUserName(userDetail.getName());
-        response.setCategoryName(commonService.getMessageSrc(optCategory.get().getName(), locale));
+        response.setCategoryName(commonService.getMessageSrc(category.getName(), locale));
         response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
-        return responseFactory.success(actionLogExpenseCreate, response);
+
+        String log = doCreate ? actionLogExpenseCreate : actionLogExpenseUpdate;
+        return responseFactory.success(log, response);
+    }
+
+    private void resetOldAmountInWallet(Expense expense, Wallet wallet) {
+        //khôi phục số dư ví khi chưa thêm expense
+        BigDecimal oldBalance;
+        if (expense.getEntryType().equals(INCOME)) {
+            oldBalance = wallet.getBalance().subtract(expense.getAmount());
+            wallet.setTotalIncome(wallet.getTotalIncome().subtract(expense.getAmount()));
+        } else {
+            oldBalance = wallet.getBalance().add(expense.getAmount());
+            wallet.setTotalExpense(wallet.getTotalExpense().subtract(expense.getAmount()));
+        }
+
+        wallet.setBalance(oldBalance);
     }
 
     private void amountDivision(Expense expense, Wallet wallet) {

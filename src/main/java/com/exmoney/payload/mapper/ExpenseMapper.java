@@ -1,15 +1,14 @@
 package com.exmoney.payload.mapper;
 
 import com.exmoney.entity.Expense;
+import com.exmoney.entity.ExpenseHistory;
 import com.exmoney.payload.request.expense.ExpenseRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
-import org.mapstruct.Builder;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import jakarta.persistence.Id;
+import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 
-import static com.exmoney.payload.response.expense.ExpenseResponse.PROP_ENTRY_DATE;
+import static com.exmoney.payload.response.expense.ExpenseResponse.*;
 
 @Component
 @Mapper(componentModel = "spring",
@@ -21,4 +20,7 @@ public interface ExpenseMapper {
     Expense toEntity(ExpenseRequest request);
 
     ExpenseResponse toResponse(Expense expense);
+
+    @Mapping(target = "expenseId", source = "id")
+    ExpenseHistory toHistory(Expense expense);
 }
