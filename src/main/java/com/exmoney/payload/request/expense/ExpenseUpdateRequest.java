@@ -1,14 +1,16 @@
 package com.exmoney.payload.request.expense;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
-public class ExpenseRequest {
+public class ExpenseUpdateRequest {
 
     @Size(max = 100, message = "validate.expense_desc_length")
     private String description;
@@ -17,23 +19,8 @@ public class ExpenseRequest {
     @NotNull(message = "validate.expense_amount_empty")
     private BigDecimal amount;
 
-//    private String currencyUnit; //VND, EUR, USD, GBP
-
-    @NotNull(message = "validate.expense_type_empty")
-    @NotBlank(message = "validate.expense_type_empty")
-    @NotEmpty(message = "validate.expense_type_empty")
-    private String type;
-
-    @NotNull
-    @NotBlank
-    @NotEmpty
-    private String entryType;
-
     private String entryDate;
 
     @NotNull(message = "validate.expense_category_id_empty")
     private Long categoryId;
-
-    @NotNull(message = "validate.expense_wallet_id_empty")
-    private Long walletId;
 }

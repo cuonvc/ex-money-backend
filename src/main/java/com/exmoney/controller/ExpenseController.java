@@ -1,8 +1,8 @@
 package com.exmoney.controller;
 
-import com.exmoney.entity.Expense;
 import com.exmoney.payload.common.BaseResponse;
-import com.exmoney.payload.request.expense.ExpenseRequest;
+import com.exmoney.payload.request.expense.ExpenseCreateRequest;
+import com.exmoney.payload.request.expense.ExpenseUpdateRequest;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
@@ -25,14 +25,14 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @PostMapping(API_BASE_USER + "/expense")
-    public ResponseEntity<BaseResponse<ExpenseResponse>> create(@Valid @RequestBody ExpenseRequest request,
+    public ResponseEntity<BaseResponse<ExpenseResponse>> create(@Valid @RequestBody ExpenseCreateRequest request,
                                                                 @RequestParam Locale locale) {
         return expenseService.create(request, locale);
     }
 
     @PutMapping(API_BASE_USER + "/expense/{id}")
     public ResponseEntity<BaseResponse<ExpenseResponse>> update(@PathVariable Long id,
-                                                                @Valid @RequestBody ExpenseRequest request,
+                                                                @Valid @RequestBody ExpenseUpdateRequest request,
                                                                 @RequestParam Locale locale) {
         return expenseService.update(id, request, locale);
     }

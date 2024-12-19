@@ -4,13 +4,12 @@ import com.exmoney.entity.*;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.ExpenseMapper;
-import com.exmoney.payload.mapper.WalletMapper;
-import com.exmoney.payload.request.expense.ExpenseRequest;
+import com.exmoney.payload.request.expense.ExpenseCreateRequest;
+import com.exmoney.payload.request.expense.ExpenseUpdateRequest;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.expenseCategory.ExpenseCategoryResponse;
-import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
@@ -68,7 +67,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse<ExpenseResponse>> create(ExpenseRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<ExpenseResponse>> create(ExpenseCreateRequest request, Locale locale) {
 
         CustomUserDetail userDetail = commonService.getCurrentUser();
         Long currentUserId = userDetail.getId();
@@ -117,7 +116,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse<ExpenseResponse>> update(Long id, ExpenseRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<ExpenseResponse>> update(Long id, ExpenseUpdateRequest request, Locale locale) {
         CustomUserDetail userDetail = commonService.getCurrentUser();
         Long currentUserId = userDetail.getId();
         Expense expense = expenseRepository.findByIdAndOwner(id, currentUserId);
@@ -131,7 +130,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         Optional<ExpenseCategory> optCategory = categoryRepository
-                .findByIdAndAccess(request.getCategoryId(), request.getWalletId(), currentUserId);
+                .findByIdAndAccess(request.getCategoryId(), wallet.getId(), currentUserId);
         if (optCategory.isEmpty()) {
             commonService.throwException(CATEGORY_NOT_FOUND, locale, null, request.getCategoryId());
         }
