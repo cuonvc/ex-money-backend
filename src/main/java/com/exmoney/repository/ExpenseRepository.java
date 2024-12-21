@@ -24,7 +24,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     Expense findByIdAndOwner(Long id, Long userId);
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
-            "   , e.entryType AS " + PROP_ENTRY_TYPE +
+            "   , e.entryType AS " + PROP_ENTRY_TYPE + ", c.iconImage AS " +PROP_CATEGORY_ICON_IMAGE +
             "   , e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +
             "   , e.currencyUnit AS " + PROP_CURRENCY_UNIT + ", e.type AS " + PROP_TYPE + ", e.walletId AS " + PROP_WALLET_ID +
             "   , w.name AS " + PROP_WALLET_NAME +
@@ -70,7 +70,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
-            "   , e.entryType AS " + PROP_ENTRY_TYPE +
+            "   , e.entryType AS " + PROP_ENTRY_TYPE + ", c.iconImage AS " +PROP_CATEGORY_ICON_IMAGE +
             "   , e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +
             "   , e.currencyUnit AS " + PROP_CURRENCY_UNIT + ", e.type AS " + PROP_TYPE + ", e.walletId AS " + PROP_WALLET_ID +
             "   , w.name AS " + PROP_WALLET_NAME +
@@ -89,7 +89,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     Optional<ExpenseResponse> accessibleById(Long id, Long ownerId);
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
-            "   , e.entryType AS " + PROP_ENTRY_TYPE +
+            "   , e.entryType AS " + PROP_ENTRY_TYPE + ", c.iconImage AS " +PROP_CATEGORY_ICON_IMAGE +
             "   , e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +
             "   , e.currencyUnit AS " + PROP_CURRENCY_UNIT + ", e.type AS " + PROP_TYPE + ", e.walletId AS " + PROP_WALLET_ID +
             "   , w.name AS " + PROP_WALLET_NAME +

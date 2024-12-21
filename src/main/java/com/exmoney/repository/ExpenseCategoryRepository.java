@@ -13,6 +13,9 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
     @Query("SELECT c FROM ExpenseCategory c WHERE c.id = :id AND c.status = 'ACTIVE'")
     Optional<ExpenseCategory> findById(Long id);
 
+    @Query("SELECT c FROM ExpenseCategory c WHERE c.name = :name AND c.type = 'DEFAULT'")
+    Optional<ExpenseCategory> findDefaultByName(String name);
+
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE c.name = :name " +
             "AND c.type = 'DEFAULT' " +
@@ -26,7 +29,7 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
             "   OR c.type = 'DEFAULT' " +
             ") " +
             "AND c.parentId IS NULL " +
-            "AND c.status = 'ACTIVE' AND :refId = :refId ")
+            "AND c.status = 'ACTIVE'")
     Set<ExpenseCategory> findAllParentByRefIdAndSaveType(Long refId, String saveType);
 
     @Query("SELECT c FROM ExpenseCategory c " +

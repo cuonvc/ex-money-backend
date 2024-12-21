@@ -18,6 +18,7 @@ public class ExpenseResponse {
     public static final String PROP_STATUS = "status";
     public static final String PROP_DESC = "description";
     public static final String PROP_AMOUNT = "amount";
+    public static final String PROP_CATEGORY_ICON_IMAGE = "categoryIconImage";
     public static final String PROP_NEW_BALANCE = "newBalance";
     public static final String PROP_CURRENCY_UNIT =  "currencyUnit";
     public static final String PROP_ENTRY_DATE = "entryDate";
@@ -36,6 +37,7 @@ public class ExpenseResponse {
     private String status;
     private String description;
     private BigDecimal amount;
+    private String categoryIconImage;
     private BigDecimal newBalance;
     private String currencyUnit;
     private LocalDateTime entryDate;
@@ -59,6 +61,7 @@ public class ExpenseResponse {
         this.entryType = (String) response.get(PROP_ENTRY_TYPE);
         this.description = (String) response.get(PROP_DESC);
         this.amount = (BigDecimal) response.get(PROP_AMOUNT);
+        this.categoryIconImage = (String) response.get(PROP_CATEGORY_ICON_IMAGE);
         this.newBalance = (BigDecimal) response.get(PROP_NEW_BALANCE);
         this.currencyUnit = (String) response.get(PROP_CURRENCY_UNIT);
         this.type = (String) response.get(PROP_TYPE);

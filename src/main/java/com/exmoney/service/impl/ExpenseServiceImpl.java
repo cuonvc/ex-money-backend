@@ -163,6 +163,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         ExpenseResponse response = expenseMapper.toResponse(expense);
         response.setWalletName(commonService.getMessageSrc(wallet.getName(), locale));
         response.setUserName(userDetail.getName());
+        response.setCategoryIconImage(category.getIconImage());
         response.setCategoryName(commonService.getMessageSrc(category.getName(), locale));
         response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
 
