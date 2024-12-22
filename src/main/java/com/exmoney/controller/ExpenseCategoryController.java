@@ -22,7 +22,7 @@ public class ExpenseCategoryController {
 
     private final ExpenseCategoryService expenseCategoryService;
 
-    //thêm ở đây thì phải thêm cả ở file yml + file properties nữa
+    //thêm ở đây thì phải thêm cả ở file yml + file properties + application nữa
     @PostMapping(API_BASE_ADMIN + "/category")
     public ResponseEntity<BaseResponse<ExpenseCategory>> createDefault(@RequestParam String name,
                                                                        @RequestParam String description,

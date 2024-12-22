@@ -21,7 +21,7 @@ public enum ErrorCode {
 
     CATEGORY_NAME_EXISTED("CATEGORY_NAME_EXISTED", "exception.category_name_existed", HttpStatus.BAD_REQUEST.value()),
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "exception.category_not_found", HttpStatus.NOT_FOUND.value()),
-    CATEGORY_DEFAULT_CANNOT_UPDATE("CATEGORY_DEFAULT_CANNOT_UPDATE", "exception.category_default_cannot_update", HttpStatus.BAD_REQUEST.value()),
+    DEFAULT_CATEGORY_CANNOT_UPDATE("DEFAULT_CATEGORY_CANNOT_UPDATE", "exception.default_category_cannot_update", HttpStatus.BAD_REQUEST.value()),
 
     WALLET_NOT_FOUND("WALLET_NOT_FOUND", "exception.wallet_not_found", HttpStatus.NOT_FOUND.value()),
     WALLET_NAME_ALREADY_EXISTED("WALLET_NAME_ALREADY_EXISTED", "exception.wallet_name_already_existed", HttpStatus.BAD_REQUEST.value()),

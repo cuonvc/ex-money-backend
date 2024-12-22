@@ -100,7 +100,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
 
         ExpenseCategory entity = category.get();
         if (!entity.getType().equals(CUSTOM)) {
-            commonService.throwException(CATEGORY_DEFAULT_CANNOT_UPDATE, locale, null, entity.getName());
+            commonService.throwException(DEFAULT_CATEGORY_CANNOT_UPDATE, locale, null, entity.getName());
         }
 
         Long currentUserId = commonService.getCurrentUserId();
