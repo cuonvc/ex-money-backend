@@ -19,4 +19,5 @@ public interface ExpenseService {
     ResponseEntity<BaseResponse<ExpenseFilterResource>> getResourceForExpenseFilter(Long walletId, Locale locale);
     ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Long walletId, String keyword, Long categoryId, Long createdBy, Locale locale);
     ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(Long walletId, Locale locale);
+    void rollback(Long id, Locale locale);
 }

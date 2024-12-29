@@ -174,34 +174,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         return responseFactory.success(log, response);
     }
 
-    private void resetOldAmountInWallet(Expense expense, Wallet wallet) {
-        //khôi phục số dư ví khi chưa thêm expense
-        BigDecimal oldBalance;
-        if (expense.getEntryType().equals(INCOME)) {
-            oldBalance = wallet.getBalance().subtract(expense.getAmount());
-            wallet.setTotalIncome(wallet.getTotalIncome().subtract(expense.getAmount()));
-        } else {
-            oldBalance = wallet.getBalance().add(expense.getAmount());
-            wallet.setTotalExpense(wallet.getTotalExpense().subtract(expense.getAmount()));
-        }
-
-        wallet.setBalance(oldBalance);
-    }
-
-    private void amountDivision(Expense expense, Wallet wallet) {
-        BigDecimal newBalance;
-        if (expense.getEntryType().equals(INCOME)) {
-            newBalance = wallet.getBalance().add(expense.getAmount());
-            wallet.setTotalIncome(wallet.getTotalIncome().add(expense.getAmount()));
-        } else {
-            newBalance = wallet.getBalance().subtract(expense.getAmount());
-            wallet.setTotalExpense(wallet.getTotalExpense().add(expense.getAmount()));
-        }
-
-        expense.setNewBalance(newBalance);
-        wallet.setBalance(newBalance);
-    }
-
     @Override
     public ResponseEntity<BaseResponse<ExpenseResponse>> detail(Long id, Locale locale) {
         Long currentUserId = commonService.getCurrentUserId();
@@ -321,5 +293,57 @@ public class ExpenseServiceImpl implements ExpenseService {
                         .categories(categoryResponses)
                         .build()
                 );
+    }
+
+    @Override
+    @Transactional
+    public void rollback(Long id, Locale locale) {
+        Expense expense = expenseRepository.findById(id).orElse(null);
+        if (expense == null) {
+            commonService.throwException(EXPENSE_NOT_FOUND, locale, null);
+        }
+        if (expense.getStatus().equals(ACTIVE)) {
+            commonService.throwException(EXPENSE_IS_ACTIVE, locale, null);
+        }
+
+        //lưu lịch sử lại cái đã
+        ExpenseHistory history = expenseMapper.toHistory(expense);
+        expenseHistoryRepository.save(history);
+
+        Wallet wallet = walletRepository.findById(expense.getWalletId()).orElse(null);
+        if (wallet == null) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        expense.setStatus(ACTIVE);
+        amountDivision(expense, wallet);
+    }
+
+    private void resetOldAmountInWallet(Expense expense, Wallet wallet) {
+        //khôi phục số dư ví khi chưa thêm expense
+        BigDecimal oldBalance;
+        if (expense.getEntryType().equals(INCOME)) {
+            oldBalance = wallet.getBalance().subtract(expense.getAmount()); //trừ đi số tiền đã thêm vào
+            wallet.setTotalIncome(wallet.getTotalIncome().subtract(expense.getAmount())); //trừ đi số tiền đã thêm vào income
+        } else {
+            oldBalance = wallet.getBalance().add(expense.getAmount()); //cộng lại số tiền đã bị trừ bởi chi tiêu này
+            wallet.setTotalExpense(wallet.getTotalExpense().subtract(expense.getAmount())); //trừ đi số tiền đã thêm vào expense
+        }
+
+        wallet.setBalance(oldBalance);
+    }
+
+    private void amountDivision(Expense expense, Wallet wallet) {
+        BigDecimal newBalance;
+        if (expense.getEntryType().equals(INCOME)) {
+            newBalance = wallet.getBalance().add(expense.getAmount());
+            wallet.setTotalIncome(wallet.getTotalIncome().add(expense.getAmount()));
+        } else {
+            newBalance = wallet.getBalance().subtract(expense.getAmount());
+            wallet.setTotalExpense(wallet.getTotalExpense().add(expense.getAmount()));
+        }
+
+        expense.setNewBalance(newBalance);
+        wallet.setBalance(newBalance);
     }
 }

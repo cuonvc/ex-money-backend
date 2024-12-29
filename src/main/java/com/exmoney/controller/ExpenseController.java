@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Locale;
 
+import static com.exmoney.util.Constant.API_BASE_ADMIN;
 import static com.exmoney.util.Constant.API_BASE_USER;
 
 @RestController
@@ -69,5 +70,11 @@ public class ExpenseController {
     public ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(@RequestParam(value = "wallet_id", required = false) Long walletId,
                                                                                              @RequestParam Locale locale) {
         return expenseService.getResourceForExpenseEdit(walletId, locale);
+    }
+
+    @PutMapping(API_BASE_ADMIN + "/expense/rollback/{id}")
+    public ResponseEntity rollback(@PathVariable Long id, @RequestParam Locale locale) {
+        expenseService.rollback(id, locale);
+        return ResponseEntity.ok().build();
     }
 }
