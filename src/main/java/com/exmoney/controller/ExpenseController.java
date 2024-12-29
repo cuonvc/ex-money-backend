@@ -39,8 +39,14 @@ public class ExpenseController {
 
     @GetMapping(API_BASE_USER + "/expense/{id}")
     public ResponseEntity<BaseResponse<ExpenseResponse>> detail(@PathVariable("id") Long id,
-                                                        @RequestParam Locale locale) {
+                                                                @RequestParam Locale locale) {
         return expenseService.detail(id, locale);
+    }
+
+    @DeleteMapping(API_BASE_USER + "/expense/{id}")
+    public ResponseEntity<BaseResponse<String>> delete(@PathVariable("id") Long id,
+                                                                @RequestParam Locale locale) {
+        return expenseService.delete(id, locale);
     }
 
     @GetMapping(API_BASE_USER + "/expense/filter_resource")

@@ -71,3 +71,4 @@ exmoney:
       wallet_remove_user: "action.wallet_remove_user"
       expense_create: "action.expense_create"
       expense_update: "action.expense_update"
+      expense_delete: "action.expense_delete"

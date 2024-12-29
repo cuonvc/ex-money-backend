@@ -32,8 +32,7 @@ import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseEntryType.*;
 import static com.exmoney.util.Constant.ExpenseType.EXPENSE_TYPES;
 import static com.exmoney.util.Constant.ExpenseType.MANUAL;
-import static com.exmoney.util.Constant.Status.ACTIVE;
-import static com.exmoney.util.Constant.Status.PENDING;
+import static com.exmoney.util.Constant.Status.*;
 import static com.exmoney.util.Utils.clientToLocalDateTime;
 import static com.exmoney.util.Utils.getNow;
 
@@ -64,6 +63,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Value("${exmoney.application.action_log.expense_update}")
     private String actionLogExpenseUpdate;
+
+    @Value("${exmoney.application.action_log.expense_delete}")
+    private String actionLogExpenseDelete;
 
     @Override
     @Transactional
@@ -121,8 +123,12 @@ public class ExpenseServiceImpl implements ExpenseService {
         Long currentUserId = userDetail.getId();
         Expense expense = expenseRepository.findByIdAndOwner(id, currentUserId);
         if (expense == null) {
-            commonService.throwException(EXPENSE_NOT_FOUND, locale, null);
+            commonService.throwException(EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE, locale, null);
         }
+
+        //clone sang history đã rồi làm gì thì làm
+        ExpenseHistory history = expenseMapper.toHistory(expense);
+        expenseHistoryRepository.save(history);
 
         Wallet wallet = walletRepository.findById(expense.getWalletId()).orElse(null);
         if (wallet == null) {
@@ -134,9 +140,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (optCategory.isEmpty()) {
             commonService.throwException(CATEGORY_NOT_FOUND, locale, null, request.getCategoryId());
         }
-
-        ExpenseHistory history = expenseMapper.toHistory(expense);
-        expenseHistoryRepository.save(history);
 
         resetOldAmountInWallet(expense, wallet); //xóa số tiền cũ của expense
         if (expense.getEntryType().equals(EXPENSE)) {
@@ -212,6 +215,30 @@ public class ExpenseServiceImpl implements ExpenseService {
         response.setCategoryName(commonService.getMessageSrc(response.getCategoryName(), locale));
         response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
         return responseFactory.success(null, response);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BaseResponse<String>> delete(Long id, Locale locale) {
+        Long currentUserId = commonService.getCurrentUserId();
+        Expense expense = expenseRepository.findByIdAndOwner(id, currentUserId);
+        if (expense == null) {
+            commonService.throwException(EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE, locale, null);
+        }
+
+        //clone sang history đã rồi làm gì thì làm
+        ExpenseHistory history = expenseMapper.toHistory(expense);
+        expenseHistoryRepository.save(history);
+
+        Wallet wallet = walletRepository.findById(expense.getWalletId()).orElse(null);
+        if (wallet == null) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        resetOldAmountInWallet(expense, wallet);
+        expense.setUpdatedAt(getNow());
+        expense.setStatus(DELETED);
+        return responseFactory.success(actionLogExpenseDelete, "expense_delete.success", locale, null);
     }
 
     @Override

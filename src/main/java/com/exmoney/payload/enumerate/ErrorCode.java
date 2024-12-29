@@ -29,6 +29,7 @@ public enum ErrorCode {
     WALLET_NOT_CONTAINS_USER("WALLET_NOT_CONTAINS_USER", "exception.wallet_not_contains_user", HttpStatus.BAD_REQUEST.value()),
 
     EXPENSE_NOT_FOUND("EXPENSE_NOT_FOUND", "exception.expense_not_found", HttpStatus.NOT_FOUND.value()),
+    EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE("EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE", "exception.expense_not_found_or_not_accessible", HttpStatus.NOT_FOUND.value()),
     ;
 
     private String status;
