@@ -78,7 +78,6 @@ public class ExmoneyApplication implements CommandLineRunner {
 
 	public static final Map<String, String> DEFAULT_CATEGORY_NAME_MAP_IMAGE = Map.ofEntries(
 
-			Map.entry("default.category.income", "income"),
 			Map.entry("default.category.health", "health"),
 			Map.entry("default.category.gym", "gym"),
 			Map.entry("default.category.shopping", "shopping"),
