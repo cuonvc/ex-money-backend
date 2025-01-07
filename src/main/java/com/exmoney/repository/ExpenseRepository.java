@@ -4,10 +4,6 @@ import com.exmoney.entity.Expense;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import javax.swing.text.html.Option;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -107,4 +103,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "ORDER BY e.createdAt DESC"
     )
     List<ExpenseResponse> findAllByOwner(Long userId, int year, int month);
+
+    @Query("SELECT DATE(e.entryDate), SUM(e.amount) " +
+            "FROM Expense e " +
+            "   INNER JOIN User u ON u.id = e.userId " +
+            "WHERE e.userId = :ownerId " +
+            "AND (DATE(e.entryDate) BETWEEN DATE(:startDate) AND DATE(:endDate)) " +
+            "GROUP BY DATE(e.entryDate) " +
+            "ORDER BY DATE(e.entryDate)")
+    List<Object[]> findEachDay(Long ownerId, LocalDateTime startDate, LocalDateTime endDate);
 }

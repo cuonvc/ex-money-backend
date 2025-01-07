@@ -8,7 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class HomeOverviewResponse {
     private BigDecimal totalExpenseAmount;
     private BigDecimal moreThanLastMonth;
     private List<ExpenseResponse> ownerExpenses;
+    Map<LocalDate, BigDecimal> dayMapAmount;
 }

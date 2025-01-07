@@ -1,7 +1,5 @@
 package com.exmoney.service.impl;
 
-import com.exmoney.entity.Expense;
-import com.exmoney.entity.User;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.UserMapper;
@@ -9,19 +7,20 @@ import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.overview.HomeOverviewResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.repository.ExpenseRepository;
-import com.exmoney.repository.UserRepository;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.OverviewService;
-import com.exmoney.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Locale;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +59,20 @@ public class OverviewServiceImpl implements OverviewService {
                         .totalExpenseAmount(totalAmount)
                         .moreThanLastMonth(BigDecimal.valueOf(300000)) //tạm
                         .ownerExpenses(expenses)
+                        .dayMapAmount(dayMapAmount(localDateTime, userId))
                         .build()
         );
+    }
+
+    private Map<LocalDate, BigDecimal> dayMapAmount(LocalDateTime now, Long ownerId) {
+        LocalDateTime startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
+        List<Object[]> rawData = expenseRepository.findEachDay(ownerId, startOfMonth, endOfMonth);
+
+        return rawData.stream()
+                .collect(Collectors.toMap(
+                        row -> ((java.sql.Date) row[0]).toLocalDate(),
+                        row -> (BigDecimal) row[1]
+                ));
     }
 }
