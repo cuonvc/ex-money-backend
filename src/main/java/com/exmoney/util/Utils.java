@@ -4,6 +4,7 @@ import com.exmoney.exception.APIException;
 import com.exmoney.exception.ServiceException;
 import org.springframework.http.HttpStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -26,5 +27,9 @@ public class Utils {
         } catch (Exception e) {
             throw new ServiceException("Invalid date time formatter", HttpStatus.BAD_REQUEST.name(), 400);
         }
+    }
+
+    public static BigDecimal divideAmount(BigDecimal amount) {
+        return amount.divide(BigDecimal.valueOf(1000));
     }
 }

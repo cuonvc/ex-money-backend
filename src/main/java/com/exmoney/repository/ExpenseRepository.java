@@ -2,13 +2,17 @@ package com.exmoney.repository;
 
 import com.exmoney.entity.Expense;
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.overview.WeekMapAmount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static com.exmoney.payload.response.expense.ExpenseResponse.*;
+import static com.exmoney.payload.response.overview.WeekMapAmount.PROP_DATE;
+import static com.exmoney.payload.response.overview.WeekMapAmount.PROP_WEEK;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
@@ -98,18 +102,22 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   INNER JOIN ExpenseCategory c ON c.id = e.categoryId " +
             "WHERE e.userId = :userId " +
             "   AND e.status != 'DELETED' " +
-            "   AND EXTRACT(YEAR FROM e.createdAt) = :year " +
-            "   AND EXTRACT(MONTH FROM e.createdAt) = :month " +
+            "   AND EXTRACT(YEAR FROM e.entryDate) = :year " +
+            "   AND EXTRACT(MONTH FROM e.entryDate) = :month " +
             "ORDER BY e.createdAt DESC"
     )
     List<ExpenseResponse> findAllByOwner(Long userId, int year, int month);
 
-    @Query("SELECT DATE(e.entryDate), SUM(e.amount) " +
-            "FROM Expense e " +
-            "   INNER JOIN User u ON u.id = e.userId " +
-            "WHERE e.userId = :ownerId " +
-            "AND (DATE(e.entryDate) BETWEEN DATE(:startDate) AND DATE(:endDate)) " +
-            "GROUP BY DATE(e.entryDate) " +
-            "ORDER BY DATE(e.entryDate)")
-    List<Object[]> findEachDay(Long ownerId, LocalDateTime startDate, LocalDateTime endDate);
+//    @Query("SELECT new map ( " +
+//            "   DATE_TRUNC('WEEK', e.entryDate) AS " + PROP_DATE +
+//            "   ,0 AS " + PROP_WEEK + //map later
+//            "   ,SUM(e.amount) AS " + PROP_AMOUNT + ") " +
+//            "FROM Expense e " +
+//            "   INNER JOIN User u ON u.id = e.userId " +
+//            "WHERE e.userId = :ownerId " +
+//            "   AND (DATE(e.entryDate) BETWEEN DATE(:startDate) AND DATE(:endDate))" +
+//            "   AND e.status != 'DELETE' " +
+//            "GROUP BY " + PROP_DATE + " " +
+//            "ORDER BY " + PROP_DATE)
+//    List<WeekMapAmount> findEachWeekByOwner(Long ownerId, LocalDate startDate, LocalDate endDate);
 }

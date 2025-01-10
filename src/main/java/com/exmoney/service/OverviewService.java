@@ -7,5 +7,5 @@ import org.springframework.http.ResponseEntity;
 import java.util.Locale;
 
 public interface OverviewService {
-    ResponseEntity<BaseResponse<HomeOverviewResponse>> getHomeOverview(Integer month, Locale locale);
+    ResponseEntity<BaseResponse<HomeOverviewResponse>> getHomeOverview(Integer month, Integer year, Locale locale);
 }

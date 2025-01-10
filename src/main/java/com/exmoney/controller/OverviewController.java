@@ -21,7 +21,8 @@ public class OverviewController {
 
     @GetMapping(API_BASE_USER + "/overview")
     public ResponseEntity<BaseResponse<HomeOverviewResponse>> getHomeOverview(@RequestParam(required = false) Integer month,
+                                                                              @RequestParam(required = false) Integer year,
                                                                               @RequestParam Locale locale) {
-        return overviewService.getHomeOverview(month, locale);
+        return overviewService.getHomeOverview(month, year, locale);
     }
 }

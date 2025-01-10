@@ -5,6 +5,7 @@ import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.overview.HomeOverviewResponse;
+import com.exmoney.payload.response.overview.WeekMapAmount;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.service.CommonService;
@@ -15,12 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static com.exmoney.util.Utils.divideAmount;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +32,17 @@ public class OverviewServiceImpl implements OverviewService {
     private final ResponseFactory responseFactory;
 
     @Override
-    public ResponseEntity<BaseResponse<HomeOverviewResponse>> getHomeOverview(Integer month, Locale locale) {
+    public ResponseEntity<BaseResponse<HomeOverviewResponse>> getHomeOverview(Integer month, Integer year, Locale locale) {
         Long userId = commonService.getCurrentUserId();
         UserResponse userResponse = userMapper.entityToResponse(commonService.findUserByIdOrThrow(userId, locale, null));
 
         LocalDateTime localDateTime = LocalDateTime.now();
         if (month != null && month >= 1 && month <= 12) {
             localDateTime = localDateTime.withMonth(month);
+        }
+
+        if (year != null) {
+            localDateTime = localDateTime.withYear(year);
         }
 
         log.info("LOCAL DATE TIME - {}", localDateTime);
@@ -59,20 +62,42 @@ public class OverviewServiceImpl implements OverviewService {
                         .totalExpenseAmount(totalAmount)
                         .moreThanLastMonth(BigDecimal.valueOf(300000)) //tạm
                         .ownerExpenses(expenses)
-                        .dayMapAmount(dayMapAmount(localDateTime, userId))
+                        .weekMapAmount(weekMapAmount(expenses))
                         .build()
         );
     }
 
-    private Map<LocalDate, BigDecimal> dayMapAmount(LocalDateTime now, Long ownerId) {
-        LocalDateTime startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
-        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
-        List<Object[]> rawData = expenseRepository.findEachDay(ownerId, startOfMonth, endOfMonth);
+    private List<WeekMapAmount> weekMapAmount(List<ExpenseResponse> expenses) {
+        BigDecimal amtWeek1 = BigDecimal.ZERO;
+        BigDecimal amtWeek2 = BigDecimal.ZERO;
+        BigDecimal amtWeek3 = BigDecimal.ZERO;
+        BigDecimal amtWeek4 = BigDecimal.ZERO;
+        BigDecimal amtWeek5 = BigDecimal.ZERO;
 
-        return rawData.stream()
-                .collect(Collectors.toMap(
-                        row -> ((java.sql.Date) row[0]).toLocalDate(),
-                        row -> (BigDecimal) row[1]
-                ));
+        for (ExpenseResponse expense : expenses) {
+            LocalDateTime entryDate = expense.getEntryDate();
+            int dayOfMonth = entryDate.getDayOfMonth();
+
+            //expense list đã đảm bảo all entry date chỉ nằm trong tháng này
+            if (dayOfMonth <= 7) {
+                amtWeek1 = amtWeek1.add(expense.getAmount());
+            } else if (dayOfMonth > 7 && dayOfMonth <= 14) {
+                amtWeek2 = amtWeek2.add(expense.getAmount());
+            } else if (dayOfMonth > 14 && dayOfMonth <= 21) {
+                amtWeek3 = amtWeek3.add(expense.getAmount());
+            } else if (dayOfMonth > 21 && dayOfMonth <= 28) {
+                amtWeek4 = amtWeek4.add(expense.getAmount());
+            } else {
+                amtWeek5 = amtWeek5.add(expense.getAmount());
+            }
+        }
+
+        return Arrays.asList(
+          new WeekMapAmount(1, divideAmount(amtWeek1)),
+          new WeekMapAmount(2, divideAmount(amtWeek2)),
+          new WeekMapAmount(3, divideAmount(amtWeek3)),
+          new WeekMapAmount(4, divideAmount(amtWeek4)),
+          new WeekMapAmount(5, divideAmount(amtWeek5))
+        );
     }
 }
