@@ -20,7 +20,7 @@ import static com.exmoney.util.Constant.DEFAULT_LOCALE;
 public class JwtTokenProvider {
 
     private static final String SECRET_KEY = "SnNvbiB3ZWIgdG9rZW4gZm9yIG1pY3Jvc2VydmljZSBwcm9qZWN0";
-    private static final Long expireTime = 60000L;
+    private static final Long expireTime = 6000000L;
 
     private final CommonService commonService;
 

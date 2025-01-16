@@ -4,6 +4,7 @@ import com.exmoney.entity.User;
 import com.exmoney.entity.UserWallet;
 import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
+import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.enumerate.ErrorCode;
 import com.exmoney.payload.mapper.UserMapper;
@@ -16,6 +17,7 @@ import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.repository.UserRepository;
 import com.exmoney.repository.UserWalletRepository;
 import com.exmoney.repository.WalletRepository;
+import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.ExpenseService;
 import com.exmoney.service.WalletService;
@@ -32,6 +34,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
+import static com.exmoney.util.Constant.NotificationComponent.*;
+import static com.exmoney.util.Constant.NotificationIdentityType.USER;
+import static com.exmoney.util.Constant.NotificationPriority.HIGH;
+import static com.exmoney.util.Constant.NotificationType.WALLET;
 import static com.exmoney.util.Constant.Status.ACTIVE;
 import static com.exmoney.util.Constant.Status.DELETED;
 import static com.exmoney.util.Constant.WalletChangeUserAction.ADD;
@@ -181,19 +187,21 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public ResponseEntity<BaseResponse<WalletResponse>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
-        Long ownerId = commonService.getCurrentUserId();
+        CustomUserDetail userDetail = commonService.getCurrentUser();
         User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
-        if (targetUser.getId().equals(ownerId)) {
+        if (targetUser.getId().equals(userDetail.getId())) {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
         }
-        if (walletRepository.findByIdAndOwner(walletId, ownerId).isEmpty()) {
+        if (walletRepository.findByIdAndOwner(walletId, userDetail.getId()).isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
         Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, targetUser.getId());
         UserWallet userWallet = new UserWallet();
         String actionLog = "";
-        Wallet toResponse = null;
+        String notiTitle = "";
+        String notiContent = "";
+        Wallet toResponse = walletRepository.findById(walletId).get();
         if (action.equals(ADD)) {
             if (wallet.isPresent()) {
                 commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
@@ -206,6 +214,8 @@ public class WalletServiceImpl implements WalletService {
                     .status(ACTIVE)
                     .build();
             actionLog = actionWalletAddUser;
+            notiTitle = commonService.getMessageSrcWithParam("notify.title.wallet_add_user", locale);
+            notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_add_user", locale, userDetail.getUsername(), toResponse.getName());
         } else if (action.equals(REMOVE)) {
             if (wallet.isEmpty()) {
                 commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
@@ -214,17 +224,29 @@ public class WalletServiceImpl implements WalletService {
             userWallet = userWalletRepository.findByUserAndWallet(targetUser.getId(), walletId);
             userWallet.setStatus(DELETED);
             actionLog = actionWalletRemoveUser;
+            notiTitle = commonService.getMessageSrcWithParam("notify.title.wallet_remove_user", locale);
+            notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_remove_user", locale, userDetail.getUsername(), toResponse.getName());
         } else {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
         }
 
 
         userWalletRepository.save(userWallet);
-        toResponse = walletRepository.findById(walletId).get();
 
         WalletResponse response = toResponse != null
-                ? toWalletResponse(toResponse, ownerId, locale)
+                ? toWalletResponse(toResponse, userDetail.getId(), locale)
                 : new WalletResponse();
+
+        commonService.pushNotification(NotificationBuilder.builder()
+                .priority(HIGH)
+                .identifyType(USER)
+                .identifier(targetUser.getId())
+                .fcmData(Map.of(
+                        TITLE, notiTitle,
+                        CONTENT, notiContent,
+                        TYPE, WALLET))
+                .build());
+
         return responseFactory.success(actionLog, response);
     }
 

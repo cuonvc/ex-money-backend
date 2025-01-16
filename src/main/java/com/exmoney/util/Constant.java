@@ -60,6 +60,40 @@ public class Constant {
         );
     }
 
+    public static class DeviceStatus {
+        public static final String ACTIVE = "ACTIVE";
+        public static final String INACTIVE = "INACTIVE";
+
+        public static final String DELETED = "DELETED";
+    }
+
+    public static class NotificationComponent {
+        public static final String TITLE = "TITLE";
+        public static final String CONTENT = "CONTENT";
+        public static final String TYPE = "TYPE";
+    }
+
+    public static class NotificationIdentityType {
+        public static final String USER = "USER";
+        public static final String GROUP = "GROUP";
+    }
+
+    public static class NotificationType {
+        public static final String USER = "USER";
+        public static final String WALLET = "WALLET";
+        public static final String EXPENSE = "EXPENSE";
+        public static final String CATEGORY = "CATEGORY";
+        public static final String OTHER = "OTHER";
+        public static final String SYSTEM = "SYSTEM";
+    }
+
+    public static class NotificationPriority {
+        public static final String LOW = "LOW";
+        public static final String NORMAL = "NORMAL";
+        public static final String HIGH = "HIGH";
+        public static final String CRITICAL = "CRITICAL";
+    }
+
     public static class CurrencyUnit {
         public static final String EUR = "EUR"; //Chau Au
         public static final String GBP = "GBP"; //Bang Anh

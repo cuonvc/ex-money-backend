@@ -7,18 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.exmoney.util.Constant.RecordType.DEFAULT;
 import static com.exmoney.util.Utils.getNow;
 
+@EnableAsync
 @SpringBootApplication
 @Slf4j
 @RequiredArgsConstructor

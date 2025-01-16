@@ -41,7 +41,8 @@ public class SecurityConfiguration {
                 .exceptionHandling(handle -> handle.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in",
-                                "/api/auth/active-account", "/api/auth/token/renew")
+                                "/api/auth/active-account", "/api/auth/token/renew",
+                                "/api/test/**")
                         .permitAll()
                         .requestMatchers("/api/auth/admin/*").hasAnyAuthority("ADMIN")
                         .requestMatchers(API_BASE_ADMIN + "/**").hasAuthority("ADMIN")

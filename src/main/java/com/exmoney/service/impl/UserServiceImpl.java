@@ -1,5 +1,6 @@
 package com.exmoney.service.impl;
 
+import com.exmoney.entity.DeviceInfo;
 import com.exmoney.entity.RefreshToken;
 import com.exmoney.entity.User;
 import com.exmoney.exception.ServiceException;
@@ -8,12 +9,14 @@ import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.dto.AccessTokenDto;
 import com.exmoney.payload.mapper.TokenMapper;
 import com.exmoney.payload.mapper.UserMapper;
+import com.exmoney.payload.request.auth.DeviceInfoRequest;
 import com.exmoney.payload.request.auth.LoginRequest;
 import com.exmoney.payload.request.auth.PasswordChangeRequest;
 import com.exmoney.payload.request.user.ProfileRequest;
 import com.exmoney.payload.request.auth.RegRequest;
 import com.exmoney.payload.response.user.PageResponseUsers;
 import com.exmoney.payload.response.user.UserResponse;
+import com.exmoney.repository.DeviceInfoRepository;
 import com.exmoney.repository.RefreshTokenRepository;
 import com.exmoney.repository.UserRepository;
 import com.exmoney.security.CustomUserDetailService;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +52,7 @@ import java.util.Optional;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.DEFAULT_LOCALE;
+import static com.exmoney.util.Constant.DeviceStatus.ACTIVE;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -74,6 +79,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final DeviceInfoRepository deviceInfoRepository;
     private final RefreshTokenRepository tokenRepository;
     private final TokenService tokenService;
     private final WalletService walletService;
@@ -108,6 +114,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse<Object>> signIn(LoginRequest request, Locale locale) {
         request.setEmail(request.getEmail().trim().toLowerCase());
 
@@ -123,6 +130,25 @@ public class UserServiceImpl implements UserService {
         AccessTokenDto accessTokenObj = jwtTokenProvider.generateToken(request.getEmail());
         RefreshToken refreshToken = tokenService.generateTokenObject(user);
         UserResponse userResponse = userMapper.entityToResponse(user);
+
+        DeviceInfoRequest deviceInfo = request.getDeviceInfo();
+        if (deviceInfo != null) {
+            LocalDateTime now = getNow();
+            DeviceInfo device = deviceInfoRepository.findByUserId(user.getId())
+                    .orElse(DeviceInfo.builder()
+                            .userId(user.getId())
+                            .createdAt(now)
+                            .build());
+
+            device.setOs(deviceInfo.getOs());
+            device.setDeviceId(deviceInfo.getDeviceId());
+            device.setVersion(deviceInfo.getVersion());
+            device.setDeviceName(deviceInfo.getDeviceName());
+            device.setDeviceToken(deviceInfo.getDeviceToken());
+            device.setStatus(ACTIVE);
+            device.setUpdatedAt(now);
+            deviceInfoRepository.save(device);
+        }
 
         Object[] repsonse = {accessTokenObj, tokenMapper.mapToDto(refreshToken), userResponse};
 

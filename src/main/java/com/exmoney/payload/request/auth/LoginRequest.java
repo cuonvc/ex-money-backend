@@ -3,6 +3,7 @@ package com.exmoney.payload.request.auth;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -22,5 +23,5 @@ public class LoginRequest {
     @Size(min = 6, max = 20, message = "validate.password_size")
     private String password;
 
-    private String deviceToken;
+    private DeviceInfoRequest deviceInfo;
 }
