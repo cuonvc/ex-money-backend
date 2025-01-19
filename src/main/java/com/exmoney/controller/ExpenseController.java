@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,8 +62,10 @@ public class ExpenseController {
                                                                     @RequestParam(value = "keyword", required = false) String keyword,
                                                                     @RequestParam(value = "category_id", required = false) Long categoryId,
                                                                     @RequestParam(value = "created_by", required = false) Long createdBy,
+                                                                    @RequestParam(value = "start_time", required = false) String startTime,
+                                                                    @RequestParam(value = "end_time", required = false) String endTime,
                                                                     @RequestParam Locale locale) {
-        return expenseService.listByUser(walletId, keyword, categoryId, createdBy, locale);
+        return expenseService.listByUser(walletId, keyword, categoryId, createdBy, startTime, endTime, locale);
     }
 
     @GetMapping(API_BASE_USER + "/expense/edit_resource")

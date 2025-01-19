@@ -254,8 +254,12 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Long walletId, String keyword,
-                                                                          Long categoryId, Long createdby, Locale locale) {
-        List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId, keyword, categoryId, createdby)
+                                                                          Long categoryId, Long createdby,
+                                                                          String startTime, String endTime,
+                                                                          Locale locale) {
+        LocalDateTime startDateVal = clientToLocalDateTime(startTime);
+        LocalDateTime endDateVal = clientToLocalDateTime(endTime);
+        List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId, keyword, categoryId, createdby, startDateVal, endDateVal)
                 .stream().peek(e -> {
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));

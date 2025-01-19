@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,10 +64,15 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "       :createdBy IS NULL " +
             "       OR e.createdBy = :createdBy " +
             "   ) " +
+            //filter by range time
+            "   AND (" +
+            "       (cast(:startDate as DATE) IS NULL OR cast(:endDate as DATE) IS NULL) " +
+            "       OR (e.entryDate BETWEEN :startDate AND :endDate) " +
+            "   )" +
             "ORDER BY e.updatedAt DESC, e.id DESC "
     )
         //có thể không phải người tạo nhưng chung ví với người tạo thì vẫn xem được (nhưng không update được)
-    List<ExpenseResponse> findAccessByUser(Long currentUserId, Long walletId, String keyword, Long categoryId, Long createdBy);
+    List<ExpenseResponse> findAccessByUser(Long currentUserId, Long walletId, String keyword, Long categoryId, Long createdBy, LocalDateTime startDate, LocalDateTime endDate);
 
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +

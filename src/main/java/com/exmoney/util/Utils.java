@@ -22,6 +22,9 @@ public class Utils {
 
     public static LocalDateTime clientToLocalDateTime(String dateTimeStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (dateTimeStr == null || dateTimeStr.isEmpty()) {
+            return null;
+        }
         try {
             return LocalDateTime.parse(dateTimeStr, formatter);
         } catch (Exception e) {
