@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
@@ -48,5 +49,12 @@ public class WalletController {
                                                            @RequestParam(name = "wallet_id") Long walletId,
                                                            @RequestParam(name = "user_email") String userEmail) {
         return walletService.changeUser(action, walletId, userEmail, locale);
+    }
+
+    @PutMapping(API_BASE_USER + "/wallet/expense_limit")
+    public ResponseEntity<BaseResponse<BigDecimal>> changeExpenseLimit(@RequestParam Locale locale,
+                                                                   @RequestParam(name = "wallet_id") Long walletId,
+                                                                   @RequestParam(name = "amount") BigDecimal amount ) {
+        return walletService.changeExpenseLimit(walletId, amount, locale);
     }
 }

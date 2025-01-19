@@ -19,6 +19,7 @@ public class WalletResponse {
     private BigDecimal totalIncome;
     private BigDecimal totalExpense;
     private BigDecimal balance;
+    private BigDecimal expenseLimit;
     private List<ExpenseResponse> expenses;
     private List<Map<Long, String>> otherWallets;
     private Boolean isDefault;

@@ -36,6 +36,9 @@ public class Wallet {
     @Column(name = "balance")
     private BigDecimal balance = BigDecimal.ZERO;
 
+    @Column(name = "expense_limit")
+    private BigDecimal expenseLimit;
+
     @Column(name = "name")
     private String name;
 

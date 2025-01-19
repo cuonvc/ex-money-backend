@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,6 +43,7 @@ import static com.exmoney.util.Constant.Status.ACTIVE;
 import static com.exmoney.util.Constant.Status.DELETED;
 import static com.exmoney.util.Constant.WalletChangeUserAction.ADD;
 import static com.exmoney.util.Constant.WalletChangeUserAction.REMOVE;
+import static com.exmoney.util.Utils.getMaxWithZero;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -63,6 +65,8 @@ public class WalletServiceImpl implements WalletService {
     private String actionWalletAddUser;
     @Value("${exmoney.application.action_log.wallet_remove_user}")
     private String actionWalletRemoveUser;
+    @Value("action.wallet_change_expense_limit")
+    private String actionWalletChangeExpenseLimit;
 
     @Value("${exmoney.application.default.wallet_name}")
     private String defaultWalletName;
@@ -266,5 +270,22 @@ public class WalletServiceImpl implements WalletService {
                 return wallet.getName();
             }
         }
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<BigDecimal>> changeExpenseLimit(Long walletId, BigDecimal amount, Locale locale) {
+        Long userId = commonService.getCurrentUser().getId();
+        Optional<Wallet> wallet = walletRepository.findByIdAndOwner(walletId, userId);
+        if (wallet.isEmpty()) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        Wallet walletObj = wallet.get();
+        walletObj.setExpenseLimit(getMaxWithZero(amount));
+        walletRepository.save(walletObj);
+
+        return responseFactory.success(
+                actionWalletChangeExpenseLimit, walletObj.getExpenseLimit()
+        );
     }
 }

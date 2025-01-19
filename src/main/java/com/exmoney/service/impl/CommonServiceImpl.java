@@ -167,9 +167,11 @@ public class CommonServiceImpl implements CommonService {
         if (builder.getIdentifyType().equals(USER)) {
             deviceTokenList = Collections.singleton(deviceInfoRepository.findDeviceTokenByUserId(builder.getIdentifier()));
         } else if (builder.getIdentifyType().equals(GROUP)){
-            NotificationGroup group = notificationGroupRepository.getReferenceById(builder.getIdentifier());
-            Set<Long> userIds = this.stringToIdList(group.getUserList());
-            deviceTokenList = deviceInfoRepository.findListDeviceToken(userIds);
+            NotificationGroup group = notificationGroupRepository.findEntityById(builder.getIdentifier());
+            if (group != null) {
+                Set<Long> userIds = this.stringToIdList(group.getUserList());
+                deviceTokenList = deviceInfoRepository.findListDeviceToken(userIds);
+            }
         }
 
         sendNotificationAsync(deviceTokenList, builder.getFcmData());

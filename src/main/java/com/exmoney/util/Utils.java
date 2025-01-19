@@ -35,4 +35,8 @@ public class Utils {
     public static BigDecimal divideAmount(BigDecimal amount) {
         return amount.divide(BigDecimal.valueOf(1000));
     }
+
+    public static BigDecimal getMaxWithZero(BigDecimal amount) {
+        return amount.max(BigDecimal.ZERO);
+    }
 }
