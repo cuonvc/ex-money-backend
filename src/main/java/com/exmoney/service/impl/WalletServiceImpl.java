@@ -3,6 +3,7 @@ package com.exmoney.service.impl;
 import com.exmoney.entity.User;
 import com.exmoney.entity.UserWallet;
 import com.exmoney.entity.Wallet;
+import com.exmoney.entity.WalletHistory;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
@@ -13,10 +14,7 @@ import com.exmoney.payload.request.wallet.WalletRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.payload.response.wallet.WalletResponse;
-import com.exmoney.repository.ExpenseRepository;
-import com.exmoney.repository.UserRepository;
-import com.exmoney.repository.UserWalletRepository;
-import com.exmoney.repository.WalletRepository;
+import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.ExpenseService;
@@ -29,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,6 +37,7 @@ import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.NotificationComponent.*;
 import static com.exmoney.util.Constant.NotificationIdentityType.USER;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
+import static com.exmoney.util.Constant.NotificationPriority.NORMAL;
 import static com.exmoney.util.Constant.NotificationType.WALLET;
 import static com.exmoney.util.Constant.Status.ACTIVE;
 import static com.exmoney.util.Constant.Status.DELETED;
@@ -57,7 +57,7 @@ public class WalletServiceImpl implements WalletService {
     private final ExpenseRepository expenseRepository;
     private final ResponseFactory responseFactory;
     private final UserMapper userMapper;
-    private final UserRepository userRepository;
+    private final WalletHistoryRepository walletHistoryRepository;
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
     private String actionWalletCreate;
@@ -273,16 +273,43 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse<BigDecimal>> changeExpenseLimit(Long walletId, BigDecimal amount, Locale locale) {
         Long userId = commonService.getCurrentUser().getId();
+        LocalDateTime now = getNow();
         Optional<Wallet> wallet = walletRepository.findByIdAndOwner(walletId, userId);
         if (wallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
         Wallet walletObj = wallet.get();
+        WalletHistory history = walletMapper.entityToHistory(walletObj);
+        history.setUpdatedAt(now);
+        history.setCreatedAt(now);
+        history.setUpdatedBy(userId);
+        history.setCreatedBy(userId);
+
         walletObj.setExpenseLimit(getMaxWithZero(amount));
         walletRepository.save(walletObj);
+        walletHistoryRepository.save(history);
+
+        String notiTitle = commonService.getMessageSrcWithParam(
+                "notify.title.wallet_change_limit", locale);
+        String notiContent = commonService.getMessageSrcWithParam(
+                "notify.content.wallet_change_limit",
+                locale, userId, walletObj.getName(), history.getExpenseLimit(), walletObj.getExpenseLimit());
+
+        commonService.pushNotification(
+                NotificationBuilder.builder()
+                        .identifier(userId)
+                        .identifyType(USER)
+                        .priority(NORMAL)
+                        .fcmData(Map.of(
+                                TITLE, notiTitle,
+                                CONTENT, notiContent,
+                                TYPE, WALLET))
+                        .build()
+        );
 
         return responseFactory.success(
                 actionWalletChangeExpenseLimit, walletObj.getExpenseLimit()
