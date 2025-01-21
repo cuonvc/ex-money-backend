@@ -2,6 +2,7 @@ package com.exmoney.service.impl;
 
 import com.exmoney.entity.*;
 import com.exmoney.payload.common.BaseResponse;
+import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.ExpenseMapper;
 import com.exmoney.payload.request.expense.ExpenseCreateRequest;
@@ -12,10 +13,7 @@ import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.expenseCategory.ExpenseCategoryResponse;
 import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
-import com.exmoney.service.CommonService;
-import com.exmoney.service.ExpenseCategoryService;
-import com.exmoney.service.ExpenseService;
-import com.exmoney.service.WalletService;
+import com.exmoney.service.*;
 import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +30,10 @@ import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseEntryType.*;
 import static com.exmoney.util.Constant.ExpenseType.EXPENSE_TYPES;
 import static com.exmoney.util.Constant.ExpenseType.MANUAL;
+import static com.exmoney.util.Constant.NotificationComponent.*;
+import static com.exmoney.util.Constant.NotificationPriority.CRITICAL;
+import static com.exmoney.util.Constant.NotificationPriority.HIGH;
+import static com.exmoney.util.Constant.NotificationType.WALLET;
 import static com.exmoney.util.Constant.Status.*;
 import static com.exmoney.util.Utils.clientToLocalDateTime;
 import static com.exmoney.util.Utils.getNow;
@@ -51,6 +53,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final WalletService walletService;
     private final UserRepository userRepository;
     private final ExpenseHistoryRepository expenseHistoryRepository;
+    private final NotificationService notificationService;
 
     @Value("${exmoney.application.default.expense_income_name}")
     private String expenseIncomeName;
@@ -104,6 +107,27 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (expense.getEntryType().equals(INCOME)) { //nếu là income, không set name, description
             expense.setDescription(expenseIncomeDescription);
             expense.setCategoryId(null);
+        } else {
+            if (wallet.getExpenseLimit() != null
+                    && wallet.getExpenseLimit().compareTo(wallet.getTotalExpense().add(expense.getAmount())) <= 0) {
+                String title = commonService.getMessageSrc(
+                        "notify.title.wallet_reached_expense_limit",
+                        locale);
+                String content = commonService.getMessageSrcWithParam(
+                        "notify.content.wallet_reached_expense_limit",
+                        locale, wallet.getName(), 100
+                );
+                notificationService.pushNotification(
+                        NotificationBuilder.builder()
+                                .userIdList(Set.of(currentUserId))
+                                .priority(CRITICAL)
+                                .fcmData(Map.of(
+                                        TITLE, title,
+                                        CONTENT, content,
+                                        TYPE, EXPENSE)
+                                )
+                        .build());
+            }
         }
         if (!EXPENSE_TYPES.contains(request.getType())) {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
