@@ -6,14 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class NotificationBuilder {
-    private Long identifier; //userId or groupId
-    private String identifyType; //user or group
+    private Set<Long> userIdList;
     private String priority;
     private Map<String, String> fcmData;
 }

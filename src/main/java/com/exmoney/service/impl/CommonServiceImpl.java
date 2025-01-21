@@ -1,33 +1,23 @@
 package com.exmoney.service.impl;
 
 import com.exmoney.entity.*;
-import com.exmoney.entity.Notification;
 import com.exmoney.exception.ServiceException;
-import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.enumerate.ErrorCode;
 import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
-import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.USER_NOT_FOUND;
 import static com.exmoney.util.Constant.ActionBy.ACTION_BY_USER;
-import static com.exmoney.util.Constant.NotificationComponent.*;
-import static com.exmoney.util.Constant.NotificationIdentityType.GROUP;
-import static com.exmoney.util.Constant.NotificationIdentityType.USER;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -38,11 +28,6 @@ public class CommonServiceImpl implements CommonService {
     private final MessageSource messageSource;
     private final UserRepository userRepository;
     private final ActionLogRepository actionLogRepository;
-    private final NotificationRepository notificationRepository;
-    private final NotificationIdentityRepository notificationIdentityRepository;
-    private final NotificationGroupRepository notificationGroupRepository;
-    private final FirebaseMessaging firebaseMessaging;
-    private final DeviceInfoRepository deviceInfoRepository;
 
     @Override
     public CustomUserDetail getCurrentUser() {
@@ -137,79 +122,5 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public Set<Long> stringToIdList(String idList) {
         return Arrays.stream(idList.split(", ")).map(Long::valueOf).collect(Collectors.toSet());
-    }
-
-    @Override
-    @Transactional
-    public void pushNotification(NotificationBuilder builder) {
-        log.info("========> Trigger notification sending");
-        LocalDateTime now = getNow();
-        Map<String, String> fcmData = builder.getFcmData();
-        Notification notification = notificationRepository.save(
-                Notification.builder()
-                        .title(fcmData.get(TITLE))
-                        .content(fcmData.get(CONTENT))
-                        .type(fcmData.get(TYPE))
-                        .priority(builder.getPriority())
-                        .createdAt(now)
-                        .updatedAt(now)
-                        .build());
-
-        NotificationIdentity identity = notificationIdentityRepository.save(
-                NotificationIdentity.builder()
-                        .notificationId(notification.getId())
-                        .identityType(builder.getIdentifyType())
-                        .identityId(builder.getIdentifier())
-                        .seen(false)
-                        .build());
-
-        Set<String> deviceTokenList = new HashSet<>();
-        if (builder.getIdentifyType().equals(USER)) {
-            deviceTokenList = Collections.singleton(deviceInfoRepository.findDeviceTokenByUserId(builder.getIdentifier()));
-        } else if (builder.getIdentifyType().equals(GROUP)){
-            NotificationGroup group = notificationGroupRepository.findEntityById(builder.getIdentifier());
-            if (group != null) {
-                Set<Long> userIds = this.stringToIdList(group.getUserList());
-                deviceTokenList = deviceInfoRepository.findListDeviceToken(userIds);
-            }
-        }
-
-        sendNotificationAsync(deviceTokenList, builder.getFcmData());
-    }
-
-    @Async
-    protected void sendNotificationAsync(Set<String> deviceTokenList, Map<String, String> data) {
-        if (!data.get(TITLE).isEmpty() && !data.get(CONTENT).isEmpty()) {
-            log.info("LOGGGGG PUSH NOTI - {} - {} - {}", deviceTokenList.toString(), data);
-
-            deviceTokenList.forEach(token -> {
-                Message message = Message.builder()
-                        .setToken(token)
-                        .putAllData(data)
-                        .setAndroidConfig(AndroidConfig.builder()
-                                .setPriority(AndroidConfig.Priority.HIGH)
-                                .build())
-                        .setNotification(com.google.firebase.messaging.Notification.builder()
-                                .setTitle(data.get(TITLE))
-                                .setBody(data.get(CONTENT))
-                                .build())
-                        .setApnsConfig(ApnsConfig.builder()
-                                .setAps(Aps.builder()
-                                        .setContentAvailable(true)
-                                        .build())
-                                .build())
-                        .build();
-                String resp = null;
-                try {
-                    resp = firebaseMessaging.sendAsync(message).get();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } else {
-            log.warn("==============> PUSH DATA NOT FOUND");
-        }
     }
 }

@@ -20,7 +20,6 @@ public interface CommonService {
     User findUserByEmailOrThrow(String email, Locale locale, String log);
     void actionLog(String log, String actionBy, int status);
     void actionLogAnonymous(String email);
-    void pushNotification(NotificationBuilder builder);
     String idListToString(Set<Long> idList);
     Set<Long> stringToIdList(String idList);
 }

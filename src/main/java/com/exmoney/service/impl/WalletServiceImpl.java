@@ -1,13 +1,9 @@
 package com.exmoney.service.impl;
 
-import com.exmoney.entity.User;
-import com.exmoney.entity.UserWallet;
-import com.exmoney.entity.Wallet;
-import com.exmoney.entity.WalletHistory;
+import com.exmoney.entity.*;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
-import com.exmoney.payload.enumerate.ErrorCode;
 import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.wallet.WalletRequest;
@@ -17,9 +13,8 @@ import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
-import com.exmoney.service.ExpenseService;
+import com.exmoney.service.NotificationService;
 import com.exmoney.service.WalletService;
-import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.NotificationComponent.*;
-import static com.exmoney.util.Constant.NotificationIdentityType.USER;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
 import static com.exmoney.util.Constant.NotificationPriority.NORMAL;
 import static com.exmoney.util.Constant.NotificationType.WALLET;
@@ -53,6 +45,7 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final UserWalletRepository userWalletRepository;
     private final CommonService commonService;
+    private final NotificationService notificationService;
     private final WalletMapper walletMapper;
     private final ExpenseRepository expenseRepository;
     private final ResponseFactory responseFactory;
@@ -241,10 +234,9 @@ public class WalletServiceImpl implements WalletService {
                 ? toWalletResponse(toResponse, userDetail.getId(), locale)
                 : new WalletResponse();
 
-        commonService.pushNotification(NotificationBuilder.builder()
+        notificationService.pushNotification(NotificationBuilder.builder()
+                .userIdList(Set.of(targetUser.getId()))
                 .priority(HIGH)
-                .identifyType(USER)
-                .identifier(targetUser.getId())
                 .fcmData(Map.of(
                         TITLE, notiTitle,
                         CONTENT, notiContent,
@@ -283,6 +275,7 @@ public class WalletServiceImpl implements WalletService {
         }
 
         Wallet walletObj = wallet.get();
+        //lưu lại lịch sử cái đã
         WalletHistory history = walletMapper.entityToHistory(walletObj);
         history.setUpdatedAt(now);
         history.setCreatedAt(now);
@@ -297,17 +290,18 @@ public class WalletServiceImpl implements WalletService {
                 "notify.title.wallet_change_limit", locale);
         String notiContent = commonService.getMessageSrcWithParam(
                 "notify.content.wallet_change_limit",
-                locale, userId, walletObj.getName(), history.getExpenseLimit(), walletObj.getExpenseLimit());
+                locale, walletObj.getName(), history.getExpenseLimit(), walletObj.getExpenseLimit());
 
-        commonService.pushNotification(
+        notificationService.pushNotification(
                 NotificationBuilder.builder()
-                        .identifier(userId)
-                        .identifyType(USER)
+                        .userIdList(userWalletRepository.findUserByWallet(walletId).stream()
+                                .map(User::getId).collect(Collectors.toSet()))
                         .priority(NORMAL)
                         .fcmData(Map.of(
                                 TITLE, notiTitle,
                                 CONTENT, notiContent,
-                                TYPE, WALLET))
+                                TYPE, WALLET)
+                        )
                         .build()
         );
 
