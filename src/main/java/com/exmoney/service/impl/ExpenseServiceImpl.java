@@ -16,6 +16,7 @@ import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.*;
 import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import static com.exmoney.util.Constant.Status.*;
 import static com.exmoney.util.Utils.clientToLocalDateTime;
 import static com.exmoney.util.Utils.getNow;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService {
@@ -108,26 +110,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             expense.setDescription(expenseIncomeDescription);
             expense.setCategoryId(null);
         } else {
-            if (wallet.getExpenseLimit() != null
-                    && wallet.getExpenseLimit().compareTo(wallet.getTotalExpense().add(expense.getAmount())) <= 0) {
-                String title = commonService.getMessageSrc(
-                        "notify.title.wallet_reached_expense_limit",
-                        locale);
-                String content = commonService.getMessageSrcWithParam(
-                        "notify.content.wallet_reached_expense_limit",
-                        locale, wallet.getName(), 100
-                );
-                notificationService.pushNotification(
-                        NotificationBuilder.builder()
-                                .userIdList(Set.of(currentUserId))
-                                .priority(CRITICAL)
-                                .fcmData(Map.of(
-                                        TITLE, title,
-                                        CONTENT, content,
-                                        TYPE, EXPENSE)
-                                )
-                        .build());
-            }
+            warningChecker(wallet, locale, currentUserId);
         }
         if (!EXPENSE_TYPES.contains(request.getType())) {
             commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
@@ -138,6 +121,53 @@ public class ExpenseServiceImpl implements ExpenseService {
         wallet = walletRepository.save(wallet);
 
         return doResponse(expense, wallet, optCategory.get(), userDetail, locale, true);
+    }
+
+    private void warningChecker(Wallet wallet, Locale locale, Long currentUserId) {
+        if (wallet.getExpenseLimit() != null) {
+
+            BigDecimal percentReached = getPercentReached(wallet);
+            if (percentReached.compareTo(BigDecimal.ZERO) > 0) {
+
+                String title = commonService.getMessageSrc(
+                        "notify.title.wallet_reached_expense_limit",
+                        locale);
+                String content = commonService.getMessageSrcWithParam(
+                        "notify.content.wallet_reached_expense_limit",
+                        locale, wallet.getName(), percentReached);
+
+                notificationService.pushNotification(
+                        NotificationBuilder.builder()
+                                .userIdList(Set.of(currentUserId))
+                                .priority(CRITICAL)
+                                .fcmData(Map.of(
+                                        TITLE, title,
+                                        CONTENT, content,
+                                        TYPE, EXPENSE)
+                                )
+                                .build()
+                );
+            }
+        }
+    }
+
+    private static BigDecimal getPercentReached(Wallet wallet) {
+        BigDecimal percentReached = BigDecimal.ZERO;
+
+        BigDecimal newPercent = wallet.getTotalExpense()
+                .divide(wallet.getExpenseLimit(), 4, BigDecimal.ROUND_HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+
+        if (newPercent.compareTo(BigDecimal.valueOf(100)) >= 0) {
+            percentReached = BigDecimal.valueOf(100);
+        } else if (newPercent.compareTo(wallet.getExpenseWarningLevel3()) >= 0) {
+            percentReached = wallet.getExpenseWarningLevel3();
+        } else if (newPercent.compareTo(wallet.getExpenseWarningLevel2()) >= 0) {
+            percentReached = wallet.getExpenseWarningLevel2();
+        } else if (newPercent.compareTo(wallet.getExpenseWarningLevel1()) >= 0) {
+            percentReached = wallet.getExpenseWarningLevel1();
+        }
+        return percentReached;
     }
 
     @Override
@@ -178,6 +208,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         amountDivision(expense, wallet); //update lại số tiền
+        warningChecker(wallet, locale, currentUserId);
         expense = expenseRepository.save(expense);
         wallet = walletRepository.save(wallet);
 
