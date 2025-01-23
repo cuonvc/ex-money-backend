@@ -39,6 +39,15 @@ public class Wallet {
     @Column(name = "expense_limit")
     private BigDecimal expenseLimit;
 
+    @Column(name = "expense_warning_level1")
+    private BigDecimal expenseWarningLevel1;
+
+    @Column(name = "expense_warning_level2")
+    private BigDecimal expenseWarningLevel2;
+
+    @Column(name = "expense_warning_level3")
+    private BigDecimal expenseWarningLevel3;
+
     @Column(name = "name")
     private String name;
 

@@ -3,6 +3,7 @@ package com.exmoney.controller;
 import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.wallet.WalletRequest;
+import com.exmoney.payload.request.wallet.WalletSettingRequest;
 import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.service.WalletService;
 import jakarta.validation.Valid;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,10 +51,10 @@ public class WalletController {
         return walletService.changeUser(action, walletId, userEmail, locale);
     }
 
-    @PutMapping(API_BASE_USER + "/wallet/expense_limit")
-    public ResponseEntity<BaseResponse<BigDecimal>> changeExpenseLimit(@RequestParam Locale locale,
-                                                                   @RequestParam(name = "wallet_id") Long walletId,
-                                                                   @RequestParam(name = "amount") BigDecimal amount ) {
-        return walletService.changeExpenseLimit(walletId, amount, locale);
+    @PutMapping(API_BASE_USER + "/wallet/setting")
+    public ResponseEntity<BaseResponse<WalletResponse>> setting(@RequestParam Locale locale,
+                                                            @RequestParam(name = "wallet_id") Long walletId,
+                                                            @RequestBody WalletSettingRequest request) {
+        return walletService.setting(walletId, request, locale);
     }
 }

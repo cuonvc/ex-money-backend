@@ -7,6 +7,7 @@ import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.wallet.WalletRequest;
+import com.exmoney.payload.request.wallet.WalletSettingRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.payload.response.wallet.WalletResponse;
@@ -266,7 +267,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse<BigDecimal>> changeExpenseLimit(Long walletId, BigDecimal amount, Locale locale) {
+    public ResponseEntity<BaseResponse<WalletResponse>> setting(Long walletId, WalletSettingRequest request, Locale locale) {
         Long userId = commonService.getCurrentUser().getId();
         LocalDateTime now = getNow();
         Optional<Wallet> wallet = walletRepository.findByIdAndOwner(walletId, userId);
@@ -282,7 +283,19 @@ public class WalletServiceImpl implements WalletService {
         history.setUpdatedBy(userId);
         history.setCreatedBy(userId);
 
-        walletObj.setExpenseLimit(getMaxWithZero(amount));
+        if (request.getTotalExpenseLimit() != null) {
+            walletObj.setExpenseLimit(getMaxWithZero(request.getTotalExpenseLimit()));
+        }
+        if (request.getExpenseWarningLevel1() != null) {
+            walletObj.setExpenseWarningLevel1(getMaxWithZero(request.getExpenseWarningLevel1()));
+        }
+        if (request.getExpenseWarningLevel2() != null) {
+            walletObj.setExpenseWarningLevel2(getMaxWithZero(request.getExpenseWarningLevel2()));
+        }
+        if (request.getExpenseWarningLevel3() != null) {
+            walletObj.setExpenseWarningLevel3(getMaxWithZero(request.getExpenseWarningLevel3()));
+        }
+
         walletRepository.save(walletObj);
         walletHistoryRepository.save(history);
 
@@ -305,8 +318,8 @@ public class WalletServiceImpl implements WalletService {
                         .build()
         );
 
-        return responseFactory.success(
-                actionWalletChangeExpenseLimit, walletObj.getExpenseLimit()
+        return responseFactory.success(actionWalletChangeExpenseLimit,
+                toWalletResponse(walletObj, userId, locale)
         );
     }
 }
