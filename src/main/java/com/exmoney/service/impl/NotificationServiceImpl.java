@@ -64,7 +64,6 @@ public class NotificationServiceImpl implements NotificationService {
         sendNotificationAsync(deviceTokenList, builder.getFcmData());
     }
 
-    @Async
     protected void sendNotificationAsync(Set<String> deviceTokenList, Map<String, String> data) {
         if (!data.get(TITLE).isEmpty() && !data.get(CONTENT).isEmpty()) {
             log.info("LOGGGGG PUSH NOTI - {} - {} - {}", deviceTokenList.toString(), data);
@@ -88,12 +87,10 @@ public class NotificationServiceImpl implements NotificationService {
                         .build();
                 String resp = null;
                 try {
-                    resp = firebaseMessaging.sendAsync(message).get();
+                    resp = firebaseMessaging.send(message);
                     log.info("==========> PUSH NOTI - data: {} - {}", data, resp);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
+                } catch (FirebaseMessagingException e) {
+                    e.printStackTrace(); //không throw để continue tới token tiếp theo nếu token hiện tại lỗi
                 }
             });
         } else {
