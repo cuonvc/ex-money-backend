@@ -19,7 +19,8 @@ public enum ErrorCode {
     EMAIL_EXISTED("EMAIL_EXISTED", "exception.email_existed", HttpStatus.BAD_REQUEST.value()),
     PASSWORD_NOT_MATCHED("PASSWORD_NOT_MATCHED", "exception.password_not_match", HttpStatus.UNAUTHORIZED.value()),
 
-    CATEGORY_NAME_EXISTED("CATEGORY_NAME_EXISTED", "exception.category_name_existed", HttpStatus.BAD_REQUEST.value()),
+    CATEGORY_NAME_EXISTED_BY_WALLET("CATEGORY_NAME_EXISTED_BY_WALLET", "exception.category_name_existed_by_wallet", HttpStatus.BAD_REQUEST.value()),
+    CATEGORY_NAME_EXISTED_BY_ACCOUNT("CATEGORY_NAME_EXISTED_BY_ACCOUNT", "exception.category_name_existed_by_account", HttpStatus.BAD_REQUEST.value()),
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "exception.category_not_found", HttpStatus.NOT_FOUND.value()),
     DEFAULT_CATEGORY_CANNOT_UPDATE("DEFAULT_CATEGORY_CANNOT_UPDATE", "exception.default_category_cannot_update", HttpStatus.BAD_REQUEST.value()),
 

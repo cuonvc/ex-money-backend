@@ -5,6 +5,7 @@ import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expenseCategory.ExpenseCategoryRequest;
 import com.exmoney.payload.response.expenseCategory.ExpenseCategoryResponse;
 import com.exmoney.service.ExpenseCategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,16 +32,22 @@ public class ExpenseCategoryController {
     }
 
     @PostMapping(API_BASE_USER + "/category")
-    public ResponseEntity<BaseResponse<ExpenseCategory>> create(@RequestParam Locale locale,
-                                                                @RequestBody ExpenseCategoryRequest request) {
+    public ResponseEntity<BaseResponse<ExpenseCategoryResponse>> create(@RequestParam Locale locale,
+                                                                @RequestBody @Valid ExpenseCategoryRequest request) {
         return expenseCategoryService.create(request, locale);
     }
 
     @PutMapping(API_BASE_USER + "/category/{id}")
-    public ResponseEntity<BaseResponse<ExpenseCategory>> update(@RequestParam Locale locale,
+    public ResponseEntity<BaseResponse<ExpenseCategoryResponse>> update(@RequestParam Locale locale,
                                                                 @PathVariable Long id,
-                                                                @RequestBody ExpenseCategoryRequest request) {
+                                                                @RequestBody @Valid ExpenseCategoryRequest request) {
         return expenseCategoryService.update(id, request, locale);
+    }
+
+    @DeleteMapping(API_BASE_USER + "/category/{id}")
+    public ResponseEntity<BaseResponse<Boolean>> delete(@RequestParam Locale locale,
+                                                        @PathVariable Long id) {
+        return expenseCategoryService.delete(id, locale);
     }
 
     @GetMapping(API_BASE_USER + "/category")

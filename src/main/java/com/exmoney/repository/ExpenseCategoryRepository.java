@@ -13,6 +13,10 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
     @Query("SELECT c FROM ExpenseCategory c WHERE c.id = :id AND c.status = 'ACTIVE'")
     Optional<ExpenseCategory> findById(Long id);
 
+    @Query("SELECT c FROM ExpenseCategory c " +
+            "WHERE c.id = :id AND c.status = 'ACTIVE' AND c.createdBy = :ownerId")
+    Optional<ExpenseCategory> findByIdAndOwner(Long id, Long ownerId);
+
     @Query("SELECT c FROM ExpenseCategory c WHERE c.name = :name AND c.type = 'DEFAULT'")
     Optional<ExpenseCategory> findDefaultByName(String name);
 
@@ -22,6 +26,20 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
             "OR (c.refId = :userId AND c.saveType = 'ACCOUNT') " +
             "AND c.status = 'ACTIVE'")
     Optional<ExpenseCategory> findByNameAndUserId(String name, Long userId);
+
+    @Query("SELECT c FROM ExpenseCategory c " +
+            "WHERE c.name = :name " +
+            "AND c.saveType = :saveType " +
+            "AND c.id <> :currentId " +
+            "AND c.status = 'ACTIVE'")
+    List<ExpenseCategory> findDuplicateByName(String name, String saveType, Long currentId);
+
+    @Query("SELECT c FROM ExpenseCategory c " +
+            "WHERE c.name = :name " +
+            "AND (c.refId = :walletId AND c.saveType = 'WALLET') " +
+            "AND c.status = 'ACTIVE'")
+    //còn TH category default nhưng khong decode dc
+    List<ExpenseCategory> findByNameAndWalletId(String name, Long walletId);
 
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE (" +

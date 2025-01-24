@@ -5,6 +5,7 @@ import com.exmoney.entity.ExpenseCategory;
 import com.exmoney.entity.Wallet;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
+import com.exmoney.payload.enumerate.ErrorCode;
 import com.exmoney.payload.mapper.ExpenseCategoryMapper;
 import com.exmoney.payload.request.expenseCategory.ExpenseCategoryRequest;
 import com.exmoney.payload.response.expenseCategory.ExpenseCategoryResponse;
@@ -27,6 +28,7 @@ import static com.exmoney.util.Constant.RecordType.CUSTOM;
 import static com.exmoney.util.Constant.RecordType.DEFAULT;
 import static com.exmoney.util.Constant.Role.ADMIN_ROLE;
 import static com.exmoney.util.Constant.Role.USER_ROLE;
+import static com.exmoney.util.Constant.Status.DELETED;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -46,6 +48,9 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     @Value("${exmoney.application.action_log.expense_category_update}")
     private String categoryUpdateLog;
 
+    @Value("${exmoney.application.action_log.expense_category_delete}")
+    private String categoryDeleteLog;
+
     @Override
     public ResponseEntity<BaseResponse<ExpenseCategory>> createDefaultForAdmin(String name, String desc, Locale locale) {
         if (commonService.getCurrentUser().getAuthorities().stream().filter(r -> r.getAuthority().equals(ADMIN_ROLE)).toList().isEmpty()) {
@@ -63,7 +68,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<ExpenseCategory>> create(ExpenseCategoryRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<ExpenseCategoryResponse>> create(ExpenseCategoryRequest request, Locale locale) {
 
         Long currentUserId = commonService.getCurrentUserId();
 
@@ -76,22 +81,27 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
         } else if (request.getSaveType().equals(ACCOUNT)) {
             request.setRefId(currentUserId);
             if (categoryRepository.findByNameAndUserId(request.getName(), currentUserId).isPresent()) {
-                commonService.throwException(CATEGORY_NAME_EXISTED, locale, null, request.getName());
+                commonService.throwException(CATEGORY_NAME_EXISTED_BY_ACCOUNT, locale, null, request.getName());
             }
-        } else if (request.getSaveType().equals(WALLET)
-                && walletRepository.findByIdAndUser(request.getRefId(), currentUserId).isEmpty()) {
-            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        } else if (request.getSaveType().equals(WALLET)) {
+            if (walletRepository.findByIdAndUser(request.getRefId(), currentUserId).isEmpty()) {
+                commonService.throwException(WALLET_NOT_FOUND, locale, null);
+            }
+
+            if (!categoryRepository.findByNameAndWalletId(request.getName(), request.getRefId()).isEmpty()) {
+                commonService.throwException(CATEGORY_NAME_EXISTED_BY_WALLET, locale, null, request.getName());
+            }
         }
 
         ExpenseCategory category = categoryMapper.toEntity(request);
         category.setCreatedAt(getNow());
         category.setCreatedBy(currentUserId);
         category.setType(CUSTOM);
-        return responseFactory.success(categoryCreateLog, categoryRepository.save(category));
+        return responseFactory.success(categoryCreateLog, categoryMapper.entityToResponse(categoryRepository.save(category)));
     }
 
     @Override
-    public ResponseEntity<BaseResponse<ExpenseCategory>> update(Long id, ExpenseCategoryRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<ExpenseCategoryResponse>> update(Long id, ExpenseCategoryRequest request, Locale locale) {
 
         Optional<ExpenseCategory> category = categoryRepository.findById(id);
         if (category.isEmpty()) {
@@ -104,15 +114,35 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
         }
 
         Long currentUserId = commonService.getCurrentUserId();
-        Optional<ExpenseCategory> existedCategory = categoryRepository.findByNameAndUserId(request.getName(), currentUserId);
+        List<ExpenseCategory> existedCategories = categoryRepository.findDuplicateByName(request.getName(), entity.getSaveType(), entity.getId());
         //nếu cập nhật tên trùng với tên hiện tại của chính nó thì ko sao
-        if (existedCategory.isPresent() && !existedCategory.get().getId().equals(entity.getId())) {
-            commonService.throwException(CATEGORY_NAME_EXISTED, locale, null, request.getName());
+        if (!existedCategories.isEmpty()) {
+            ErrorCode errorCode = entity.getSaveType().equals(ACCOUNT) ? CATEGORY_NAME_EXISTED_BY_ACCOUNT : CATEGORY_NAME_EXISTED_BY_WALLET;
+            commonService.throwException(errorCode, locale, null, request.getName());
         }
 
         entity = categoryMapper.toEntity(request, entity); //mapping ignore refId and saveType filed
         entity.setUpdatedAt(getNow());
-        return responseFactory.success(categoryUpdateLog, categoryRepository.save(entity));
+        return responseFactory.success(categoryUpdateLog, categoryMapper.entityToResponse(categoryRepository.save(entity)));
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<Boolean>> delete(Long id, Locale locale) {
+        Long currentUserId = commonService.getCurrentUserId();
+        Optional<ExpenseCategory> category = categoryRepository.findByIdAndOwner(id, currentUserId);
+        if (category.isEmpty()) {
+            commonService.throwException(CATEGORY_NOT_FOUND, locale, null);
+        }
+
+        ExpenseCategory entity = category.get();
+        if (!entity.getType().equals(CUSTOM)) {
+            commonService.throwException(DEFAULT_CATEGORY_CANNOT_UPDATE, locale, null, entity.getName());
+        }
+
+        entity.setStatus(DELETED);
+        entity.setUpdatedAt(getNow());
+        categoryRepository.save(entity);
+        return responseFactory.success(categoryDeleteLog, true);
     }
 
     @Override
