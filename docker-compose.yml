@@ -4,6 +4,8 @@ services:
   redis:
     container_name: redis
     image: "redis"
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
 
   app:
     container_name: exmoney-app
