@@ -27,6 +27,8 @@ public class ExpenseResponse {
     public static final String PROP_WALLET_ID = "walletId";
     public static final String PROP_WALLET_NAME = "walletName";
     public static final String PROP_CATEGORY_ID = "categoryId";
+    public static final String PROP_PARENT_CATEGORY_ID = "parentCategoryId";
+    public static final String PROP_PARENT_CATEGORY_NAME = "parentCategoryName";
     public static final String PROP_CATEGORY_NAME = "categoryName";
     public static final String PROP_CREATED_AT = "createdAt";
     public static final String PROP_CREATED_BY = "createdBy";
@@ -49,6 +51,8 @@ public class ExpenseResponse {
     private String userName;
     private Long categoryId;
     private String categoryName;
+    private Long parentCategoryId;
+    private String parentCategoryName;
     private LocalDateTime createdAt;
     private String createdBy;
     private LocalDateTime updatedAt = LocalDateTime.now();
@@ -69,6 +73,8 @@ public class ExpenseResponse {
         this.walletName = (String) response.get(PROP_WALLET_NAME);
         this.categoryId = (Long) response.get(PROP_CATEGORY_ID);
         this.categoryName = (String) response.get(PROP_CATEGORY_NAME);
+        this.parentCategoryId = (Long) response.get(PROP_PARENT_CATEGORY_ID);
+        this.parentCategoryName = (String) response.get(PROP_PARENT_CATEGORY_NAME);
         this.createdAt = (LocalDateTime) response.get(PROP_CREATED_AT);
         this.createdBy = (String) response.get(PROP_CREATED_BY);
         this.updatedAt = (LocalDateTime) response.get(PROP_UPDATED_AT);

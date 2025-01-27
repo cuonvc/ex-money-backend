@@ -175,6 +175,7 @@ public class WalletServiceImpl implements WalletService {
                     e.setWalletName(response.getName());
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
+                    e.setParentCategoryName(commonService.getMessageSrc(e.getParentCategoryName(), locale));
                 })
                 .toList();
         response.setMembers(memberList);

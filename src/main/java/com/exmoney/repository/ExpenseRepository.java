@@ -29,6 +29,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   , e.description AS " + PROP_DESC + ", e.amount AS " + PROP_AMOUNT + ", e.newBalance AS " + PROP_NEW_BALANCE +
             "   , e.currencyUnit AS " + PROP_CURRENCY_UNIT + ", e.type AS " + PROP_TYPE + ", e.walletId AS " + PROP_WALLET_ID +
             "   , w.name AS " + PROP_WALLET_NAME +
+            "   , COALESCE(cParent.id, c.id) AS " + PROP_PARENT_CATEGORY_ID + ", COALESCE(cParent.name, c.name) AS " + PROP_PARENT_CATEGORY_NAME +
             "   , e.categoryId AS " + PROP_CATEGORY_ID + ", c.name AS " + PROP_CATEGORY_NAME + ", e.createdAt AS " + PROP_CREATED_AT +
             "   , u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
@@ -37,6 +38,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   INNER JOIN User u1 ON u1.id = e.userId " +
             "   LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "   INNER JOIN ExpenseCategory c ON c.id = e.categoryId " +
+            "   LEFT JOIN ExpenseCategory cParent ON c.parentId = cParent.id AND cParent.status <> 'DELETED' " +
             "WHERE e.status <> 'DELETED' " +
             //filter by wallet
             "   AND (" +
