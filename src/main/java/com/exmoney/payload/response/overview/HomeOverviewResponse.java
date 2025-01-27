@@ -1,6 +1,7 @@
 package com.exmoney.payload.response.overview;
 
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.notification.NotificationResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ import java.util.Objects;
 public class HomeOverviewResponse {
     private int currentMonth;
     private UserResponse user;
+    private List<NotificationResponse> notifications;
     private BigDecimal totalExpenseAmount;
     private BigDecimal moreThanLastMonth;
     private List<ExpenseResponse> ownerExpenses;

@@ -32,6 +32,7 @@ public enum ErrorCode {
     EXPENSE_NOT_FOUND("EXPENSE_NOT_FOUND", "exception.expense_not_found", HttpStatus.NOT_FOUND.value()),
     EXPENSE_IS_ACTIVE("EXPENSE_IS_ACTIVE", "exception.expense_is_active", HttpStatus.NOT_FOUND.value()),
     EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE("EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE", "exception.expense_not_found_or_not_accessible", HttpStatus.NOT_FOUND.value()),
+    NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", "exception.notification_not_found", HttpStatus.NOT_FOUND.value()),
     ;
 
     private String status;

@@ -4,10 +4,12 @@ import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.notification.NotificationResponse;
 import com.exmoney.payload.response.overview.HomeOverviewResponse;
 import com.exmoney.payload.response.overview.WeekMapAmount;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.repository.ExpenseRepository;
+import com.exmoney.repository.NotificationRepository;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.OverviewService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class OverviewServiceImpl implements OverviewService {
     private final ExpenseRepository expenseRepository;
     private final UserMapper userMapper;
     private final ResponseFactory responseFactory;
+    private final NotificationRepository notificationRepository;
 
     @Override
     public ResponseEntity<BaseResponse<HomeOverviewResponse>> getHomeOverview(Integer month, Integer year, Locale locale) {
@@ -54,11 +57,14 @@ public class OverviewServiceImpl implements OverviewService {
                 .toList();
         BigDecimal totalAmount = expenses.stream().map(ExpenseResponse::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        List<NotificationResponse> notifications = notificationRepository.findAllByUser(userId,10, 0);
         return responseFactory.success(
                 null,
                 HomeOverviewResponse.builder()
                         .currentMonth(localDateTime.getMonthValue())
                         .user(userResponse)
+                        .notifications(notifications)
                         .totalExpenseAmount(totalAmount)
                         .moreThanLastMonth(BigDecimal.valueOf(300000)) //tạm
                         .ownerExpenses(expenses)

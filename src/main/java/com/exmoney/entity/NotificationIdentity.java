@@ -32,6 +32,9 @@ public class NotificationIdentity {
     @Column(name = "seen_at")
     private LocalDateTime seenAt;
 
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

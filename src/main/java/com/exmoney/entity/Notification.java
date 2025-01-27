@@ -32,6 +32,9 @@ public class Notification {
     @Column(name = "priority")
     private String priority; //LOW, NORMAL, HIGH, CRITICAL
 
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
