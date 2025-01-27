@@ -9,5 +9,7 @@ services:
     container_name: exmoney-app
     image: cuonvc/exmoney:staging
     build: .
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     ports:
       - "8081:8081"

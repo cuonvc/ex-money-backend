@@ -22,6 +22,7 @@ public interface NotificationIdentityRepository extends JpaRepository<Notificati
     @Modifying
     @Query("UPDATE NotificationIdentity ni " +
             "SET ni.seen = true, ni.seenAt = :now, ni.updatedAt = :now " +
-            "WHERE ni.userId = :userId")
+            "WHERE ni.userId = :userId " +
+            "   AND ni.seen = false ") //tránh bị update seenAt
     void remarkAllByUser(Long userId, LocalDateTime now);
 }

@@ -117,6 +117,10 @@ public class NotificationServiceImpl implements NotificationService {
             commonService.throwException(NOTIFICATION_NOT_FOUND, locale, null);
         }
 
+        if (identity.isSeen()) { //tránh update lại seenAt
+            responseFactory.success(null, true);
+        }
+
         LocalDateTime now = getNow();
         identity.setUpdatedAt(now);
         identity.setSeen(true);
