@@ -33,6 +33,10 @@ public enum ErrorCode {
     EXPENSE_IS_ACTIVE("EXPENSE_IS_ACTIVE", "exception.expense_is_active", HttpStatus.NOT_FOUND.value()),
     EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE("EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE", "exception.expense_not_found_or_not_accessible", HttpStatus.NOT_FOUND.value()),
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND", "exception.notification_not_found", HttpStatus.NOT_FOUND.value()),
+    TIME_INTERVAL_TYPE_NOT_FOUND("TIME_INTERVAL_TYPE_NOT_FOUND", "exception.time_interval_type_not_found", HttpStatus.NOT_FOUND.value()),
+    TIME_VALUE_NOT_MATCH_INTERVAL("TIME_VALUE_NOT_MATCH_INTERVAL", "exception.time_value_not_match_interval", HttpStatus.BAD_REQUEST.value()),
+    TASK_SCHEDULER_DUPLICATED("TASK_SCHEDULER_DUPLICATED", "exception.task_scheduler_duplicated", HttpStatus.BAD_REQUEST.value()),
+    TASK_SCHEDULER_NOT_FOUND("TASK_SCHEDULER_NOT_FOUND", "exception.task_scheduler_not_found", HttpStatus.NOT_FOUND.value()),
     ;
 
     private String status;

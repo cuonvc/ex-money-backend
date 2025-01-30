@@ -29,8 +29,7 @@ import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseEntryType.*;
-import static com.exmoney.util.Constant.ExpenseType.EXPENSE_TYPES;
-import static com.exmoney.util.Constant.ExpenseType.MANUAL;
+import static com.exmoney.util.Constant.ExpenseType.*;
 import static com.exmoney.util.Constant.NotificationComponent.*;
 import static com.exmoney.util.Constant.NotificationPriority.CRITICAL;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
@@ -207,8 +206,10 @@ public class ExpenseServiceImpl implements ExpenseService {
             expense.setEntryDate(entryDate);
         }
 
-        amountDivision(expense, wallet); //update lại số tiền
-        warningChecker(wallet, locale, currentUserId);
+        if (expense.getStatus().equals(ACTIVE) && !expense.getType().equals(SCHEDULE)) {
+            amountDivision(expense, wallet); //update lại số tiền
+            warningChecker(wallet, locale, currentUserId);
+        }
         expense = expenseRepository.save(expense);
         wallet = walletRepository.save(wallet);
 
@@ -232,7 +233,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ResponseEntity<BaseResponse<ExpenseResponse>> detail(Long id, Locale locale) {
         Long currentUserId = commonService.getCurrentUserId();
-        Optional<ExpenseResponse> optResponse = expenseRepository.accessibleById(id, currentUserId);
+        Optional<ExpenseResponse> optResponse = expenseRepository.accessibleById(id, currentUserId, ACTIVE);
         if (optResponse.isEmpty()) {
             commonService.throwException(EXPENSE_NOT_FOUND, locale, null);
         }
@@ -262,7 +263,9 @@ public class ExpenseServiceImpl implements ExpenseService {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
-        resetOldAmountInWallet(expense, wallet);
+        if (expense.getStatus().equals(ACTIVE) && !expense.getType().equals(SCHEDULE)) {
+            resetOldAmountInWallet(expense, wallet);
+        }
         expense.setUpdatedAt(getNow());
         expense.setStatus(DELETED);
         return responseFactory.success(actionLogExpenseDelete, "expense_delete.success", locale, null);

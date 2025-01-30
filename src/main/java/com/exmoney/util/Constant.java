@@ -11,10 +11,11 @@ public class Constant {
     public static final String API_BASE_USER = "/api";
 
     public static class Status {
-        public static final String ACTIVE = "ACTIVE";
+        public static final String ACTIVE = "ACTIVE"; //default
         public static final String PENDING = "PENDING";
         public static final String REJECTED = "REJECTED";
         public static final String INACTIVE = "INACTIVE";
+        public static final String SCHEDULED = "SCHEDULED"; //task scheduling
         public static final String DELETED = "DELETED";
     }
 
@@ -48,6 +49,7 @@ public class Constant {
     //ngoài manual ra thì tất cả loại khác đều phải qua bước xác nhận
     public static class ExpenseType {
         public static final String MANUAL = "MANUAL";
+        public static final String SCHEDULE = "SCHEDULE";
         public static final String FROM_NOTE = "FROM_NOTE";
         public static final String FROM_BANK_NOTI = "FROM_BANK_NOTI";
         public static final String FROM_BANK_1 = "FROM_BANK_1";
@@ -57,6 +59,41 @@ public class Constant {
 
         public static final List<String> EXPENSE_TYPES = List.of(
                 MANUAL, FROM_NOTE, FROM_BANK_NOTI, FROM_BANK_1, FROM_BANK_2, FROM_PAYPAL, FROM_MOMO
+        );
+    }
+
+    public static class SchedulerTaskName {
+        //language file
+        public static final String TASK_EXPENSE_AUTO = "task_name.expense_auto";
+        public static final String TASK_ABC_XYZ = "task_name.abc_xyz";
+    }
+
+    public static class TableName {
+        public static final String USER_TBL = "user";
+        public static final String ACTION_LOG_TBL = "action_log";
+        public static final String CURRENCY_UNIT_TBL = "currency_unit";
+        public static final String DEVICE_INFO_TBL = "device_info";
+        public static final String EXPENSE_CATEGORY_TBL = "expense_category";
+        public static final String EXPENSE_TBL = "expense";
+        public static final String EXPENSE_HISTORY_TBL = "expense_history";
+        public static final String NOTIFICATION_TBL = "notification";
+        public static final String NOTIFICATION_IDENTITY_TBL = "notification_identity";
+        public static final String REFRESH_TOKEN_TBL = "refresh_token";
+        public static final String TASK_SCHEDULER_CONFIG_TBL = "task_scheduler_config";
+        public static final String USER_WALLET_TBL = "user_wallet";
+        public static final String WALLET_TBL = "wallet";
+        public static final String WALLET_HISTORY_TBL = "wallet_history";
+    }
+
+    public static class ScheduleTimeIntervalType {
+        public static final String MONTHLY = "MONTHLY";
+        public static final String WEEKLY = "WEEKLY";
+        public static final String DAILY = "DAILY";
+        public static final String PER_HOUR = "PER_HOUR";
+        public static final String PER_MINUTE = "PER_MINUTE";
+
+        public static final List<String> TIME_INTERVAL_TYPE_LIST = List.of(
+                MONTHLY, WEEKLY, DAILY, PER_HOUR, PER_MINUTE
         );
     }
 

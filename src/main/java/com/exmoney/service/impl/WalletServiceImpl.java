@@ -4,17 +4,20 @@ import com.exmoney.entity.*;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
+import com.exmoney.payload.mapper.SchedulerMapper;
 import com.exmoney.payload.mapper.UserMapper;
 import com.exmoney.payload.mapper.WalletMapper;
 import com.exmoney.payload.request.wallet.WalletRequest;
 import com.exmoney.payload.request.wallet.WalletSettingRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
+import com.exmoney.payload.response.scheduler.SchedulerResponse;
 import com.exmoney.payload.response.user.UserResponse;
 import com.exmoney.payload.response.wallet.WalletResponse;
 import com.exmoney.repository.*;
 import com.exmoney.security.CustomUserDetail;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.NotificationService;
+import com.exmoney.service.TaskSchedulerService;
 import com.exmoney.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,8 +35,8 @@ import static com.exmoney.util.Constant.NotificationComponent.*;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
 import static com.exmoney.util.Constant.NotificationPriority.NORMAL;
 import static com.exmoney.util.Constant.NotificationType.WALLET;
-import static com.exmoney.util.Constant.Status.ACTIVE;
-import static com.exmoney.util.Constant.Status.DELETED;
+import static com.exmoney.util.Constant.Status.*;
+import static com.exmoney.util.Constant.TableName.EXPENSE_TBL;
 import static com.exmoney.util.Constant.WalletChangeUserAction.ADD;
 import static com.exmoney.util.Constant.WalletChangeUserAction.REMOVE;
 import static com.exmoney.util.Utils.getMaxWithZero;
@@ -52,6 +55,9 @@ public class WalletServiceImpl implements WalletService {
     private final ResponseFactory responseFactory;
     private final UserMapper userMapper;
     private final WalletHistoryRepository walletHistoryRepository;
+    private final TaskSchedulerService taskSchedulerService;
+    private final TaskSchedulerConfigRepository taskSchedulerConfigRepository;
+    private final SchedulerMapper schedulerMapper;
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
     private String actionWalletCreate;
@@ -178,8 +184,22 @@ public class WalletServiceImpl implements WalletService {
                     e.setParentCategoryName(commonService.getMessageSrc(e.getParentCategoryName(), locale));
                 })
                 .toList();
+        //hơi chậm tí mà thôi kệ
+        List<SchedulerResponse> schedulerResponses = taskSchedulerConfigRepository.findAllByOwnerAndExpenseRef(userId, wallet.getId())
+                .stream().map(s -> {
+                    SchedulerResponse scheduler = schedulerMapper.toResponse(s);
+                    scheduler.setTaskName(commonService.getMessageSrc(scheduler.getTaskName(), locale));
+                    Optional<ExpenseResponse> expense = expenseRepository.accessibleById(s.getRefId(), userId, SCHEDULED);
+                    expense.ifPresent(exp -> {
+                        exp.setCategoryName(commonService.getMessageSrc(exp.getCategoryName(), locale));
+                        exp.setParentCategoryName(commonService.getMessageSrc(exp.getParentCategoryName(), locale));
+                        scheduler.setData(exp);
+                    });
+                    return scheduler;
+                }).collect(Collectors.toList());
         response.setMembers(memberList);
         response.setExpenses(expenseResponses);
+        response.setSchedulers(schedulerResponses);
         return response;
     }
 
