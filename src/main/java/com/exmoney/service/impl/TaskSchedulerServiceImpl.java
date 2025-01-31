@@ -1,10 +1,8 @@
 package com.exmoney.service.impl;
 
-import com.exmoney.entity.Expense;
-import com.exmoney.entity.ExpenseCategory;
-import com.exmoney.entity.TaskSchedulerConfig;
-import com.exmoney.entity.Wallet;
+import com.exmoney.entity.*;
 import com.exmoney.payload.common.BaseResponse;
+import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.ExpenseMapper;
 import com.exmoney.payload.mapper.SchedulerMapper;
@@ -12,11 +10,9 @@ import com.exmoney.payload.request.scheduler.ExpenseSchedulerRequest;
 import com.exmoney.payload.request.expense.ExpenseCreateRequest;
 import com.exmoney.payload.response.expense.ExpenseResponse;
 import com.exmoney.payload.response.scheduler.SchedulerResponse;
-import com.exmoney.repository.ExpenseCategoryRepository;
-import com.exmoney.repository.ExpenseRepository;
-import com.exmoney.repository.TaskSchedulerConfigRepository;
-import com.exmoney.repository.WalletRepository;
+import com.exmoney.repository.*;
 import com.exmoney.service.CommonService;
+import com.exmoney.service.NotificationService;
 import com.exmoney.service.TaskSchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +21,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.ExpenseType.SCHEDULE;
+import static com.exmoney.util.Constant.NotificationComponent.*;
+import static com.exmoney.util.Constant.NotificationPriority.HIGH;
+import static com.exmoney.util.Constant.NotificationType.EXPENSE;
 import static com.exmoney.util.Constant.ScheduleTimeIntervalType.*;
 import static com.exmoney.util.Constant.SchedulerTaskName.TASK_EXPENSE_AUTO;
 import static com.exmoney.util.Constant.Status.ACTIVE;
@@ -49,6 +48,9 @@ public class TaskSchedulerServiceImpl implements TaskSchedulerService {
     private final ResponseFactory responseFactory;
     private final ExpenseRepository expenseRepository;
     private final SchedulerMapper schedulerMapper;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
+    private final UserWalletRepository userWalletRepository;
 
     @Value("${exmoney.application.action_log.task_schedule_expense}")
     private String actionScheduleExpenseConfig;
@@ -61,7 +63,8 @@ public class TaskSchedulerServiceImpl implements TaskSchedulerService {
 
         timeIntervalTypeChecking(request, locale);
 
-        if (walletRepository.findByIdAndOwner(request.getExpense().getWalletId(), currentUserId).isEmpty()) {
+        Optional<Wallet> wallet = walletRepository.findByIdAndOwner(request.getExpense().getWalletId(), currentUserId);
+        if (wallet.isEmpty()) {
             commonService.throwException(WALLET_NOT_FOUND, locale, null);
         }
 
@@ -87,7 +90,46 @@ public class TaskSchedulerServiceImpl implements TaskSchedulerService {
                         .build()
         );
 
+        ExpenseCategory category = categoryRepository.findById(expense.getCategoryId()).get();
+
+        String title = commonService.getMessageSrc(
+                "notify.title.task_expense_scheduler",
+                locale
+        );
+        String content = commonService.getMessageSrcWithParam(
+                "notify.content.task_expense_scheduler",
+                locale,
+                wallet.get().getName(), expense.getAmount(), category.getName(),
+                 getIntervalMessage(configured.getTimeInterval(), configured.getTimeValue(), locale)
+        );
+
+        Set<Long> userIds = userWalletRepository.findUserByWallet(wallet.get().getId())
+                .stream().map(User::getId).collect(Collectors.toSet());
+
+        notificationService.pushNotification(
+                NotificationBuilder.builder()
+                        .userIdList(userIds)
+                        .priority(HIGH)
+                        .fcmData(Map.of(
+                                TITLE, title,
+                                CONTENT, content,
+                                TYPE, EXPENSE
+                        ))
+                        .build()
+        );
+
         return responseFactory.success(actionScheduleExpenseConfig, toResponse(configured, currentUserId, locale));
+    }
+
+    private String getIntervalMessage(String type, int val, Locale locale) {
+        return switch (type) {
+            case MONTHLY -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.monthly", locale, val);
+            case WEEKLY -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.weekly", locale, val);
+            case DAILY -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.daily", locale, val);
+            case PER_HOUR -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.per_hour", locale, val);
+            case PER_MINUTE -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.per_minute", locale, val);
+            default -> "";
+        };
     }
 
     private Expense initExpenseData(ExpenseCreateRequest request, Long currentUserId, Locale locale) {

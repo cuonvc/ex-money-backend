@@ -1,6 +1,5 @@
 package com.exmoney.controller;
 
-import com.exmoney.entity.TaskSchedulerConfig;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.scheduler.ExpenseSchedulerRequest;
 import com.exmoney.payload.response.scheduler.SchedulerResponse;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Locale;
 
 import static com.exmoney.util.Constant.API_BASE_USER;
