@@ -99,7 +99,7 @@ public class TaskSchedulerServiceImpl implements TaskSchedulerService {
         String content = commonService.getMessageSrcWithParam(
                 "notify.content.task_expense_scheduler",
                 locale,
-                wallet.get().getName(), expense.getAmount(), category.getName(),
+                wallet.get().getName(), expense.getAmount(), commonService.getMessageSrc(category.getName(), locale),
                  getIntervalMessage(configured.getTimeInterval(), configured.getTimeValue(), locale)
         );
 
