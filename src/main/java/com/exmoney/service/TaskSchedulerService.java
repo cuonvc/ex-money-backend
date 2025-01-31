@@ -12,4 +12,6 @@ public interface TaskSchedulerService {
 
     ResponseEntity<BaseResponse<SchedulerResponse>> create(ExpenseSchedulerRequest request, Locale locale);
     ResponseEntity<BaseResponse<SchedulerResponse>> update(Long id, ExpenseSchedulerRequest request, Locale locale);
+
+    String getIntervalMessage(String type, int val, Locale locale);
 }

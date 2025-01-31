@@ -100,7 +100,7 @@ public class TaskSchedulerServiceImpl implements TaskSchedulerService {
                 "notify.content.task_expense_scheduler",
                 locale,
                 wallet.get().getName(), expense.getAmount(), commonService.getMessageSrc(category.getName(), locale),
-                 getIntervalMessage(configured.getTimeInterval(), configured.getTimeValue(), locale)
+                 this.getIntervalMessage(configured.getTimeInterval(), configured.getTimeValue(), locale)
         );
 
         Set<Long> userIds = userWalletRepository.findUserByWallet(wallet.get().getId())
@@ -121,7 +121,8 @@ public class TaskSchedulerServiceImpl implements TaskSchedulerService {
         return responseFactory.success(actionScheduleExpenseConfig, toResponse(configured, currentUserId, locale));
     }
 
-    private String getIntervalMessage(String type, int val, Locale locale) {
+    @Override
+    public String getIntervalMessage(String type, int val, Locale locale) {
         return switch (type) {
             case MONTHLY -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.monthly", locale, val);
             case WEEKLY -> commonService.getMessageSrcWithParam("message.expense_scheduler.interval_message.weekly", locale, val);
