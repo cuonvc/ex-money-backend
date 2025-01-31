@@ -118,6 +118,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     )
     List<ExpenseResponse> findAllByOwner(Long userId, int year, int month);
 
+    @Query("SELECT e FROM Expense e " +
+            "WHERE e.status = 'SCHEDULED' " +
+            "AND e.id = :id " +
+            "AND e.type = 'SCHEDULE'")
+    Optional<Expense> findByIdScheduled(Long id);
+
 //    @Query("SELECT new map ( " +
 //            "   DATE_TRUNC('WEEK', e.entryDate) AS " + PROP_DATE +
 //            "   ,0 AS " + PROP_WEEK + //map later

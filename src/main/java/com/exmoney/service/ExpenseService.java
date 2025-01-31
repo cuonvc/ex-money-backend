@@ -1,5 +1,6 @@
 package com.exmoney.service;
 
+import com.exmoney.entity.TaskSchedulerConfig;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expense.ExpenseCreateRequest;
 import com.exmoney.payload.request.expense.ExpenseUpdateRequest;
@@ -21,4 +22,5 @@ public interface ExpenseService {
     ResponseEntity<BaseResponse<List<ExpenseResponse>>> listByUser(Long walletId, String keyword, Long categoryId, Long createdBy, String startTime, String endTime, Locale locale);
     ResponseEntity<BaseResponse<ExpenseEditResource>> getResourceForExpenseEdit(Long walletId, Locale locale);
     void rollback(Long id, Locale locale);
+    void executeFromScheduler(TaskSchedulerConfig config, Locale locale, LocalDateTime now);
 }

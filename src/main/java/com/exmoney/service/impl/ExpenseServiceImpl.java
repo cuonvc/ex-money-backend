@@ -381,6 +381,31 @@ public class ExpenseServiceImpl implements ExpenseService {
         amountDivision(expense, wallet);
     }
 
+    @Override
+    @Transactional
+    public void executeFromScheduler(TaskSchedulerConfig config, Locale locale, LocalDateTime now) {
+        Expense expenseOrg = expenseRepository.findByIdScheduled(config.getRefId()).orElse(null);
+
+        if (expenseOrg != null) {
+            Wallet walletOrg = walletRepository.findById(expenseOrg.getWalletId()).orElse(null);
+            if (walletOrg != null) {
+                Expense expense = expenseMapper.cloneToNew(expenseOrg);
+                expense.setType(FROM_SCHEDULE);
+                expense.setStatus(ACTIVE);
+                expense.setEntryDate(now);
+                expense.setUpdatedAt(now);
+                expense.setUpdatedBy(0L);
+                expense.setCreatedAt(now);
+                expense.setCreatedBy(0L);
+                expenseRepository.save(expense); //persist để lấy ID nếu cần
+
+                amountDivision(expense, walletOrg);
+                warningChecker(walletOrg, locale, expenseOrg.getCreatedBy());
+                walletRepository.save(walletOrg);
+            }
+        }
+    }
+
     private void resetOldAmountInWallet(Expense expense, Wallet wallet) {
         //khôi phục số dư ví khi chưa thêm expense
         BigDecimal oldBalance;

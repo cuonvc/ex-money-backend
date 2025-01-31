@@ -18,6 +18,15 @@ public interface ExpenseMapper {
     @Mapping(target = PROP_ENTRY_DATE, ignore = true)
     Expense toEntity(ExpenseCreateRequest request);
 
+    @Mapping(target = PROP_ID, ignore = true)
+    @Mapping(target = PROP_STATUS, ignore = true)
+    @Mapping(target = PROP_TYPE, ignore = true)
+    @Mapping(target = PROP_CREATED_AT, ignore = true)
+    @Mapping(target = PROP_UPDATED_AT, ignore = true)
+    @Mapping(target = PROP_CREATED_BY, ignore = true)
+    @Mapping(target = PROP_UPDATED_BY, ignore = true)
+    Expense cloneToNew(Expense expense);
+
     ExpenseResponse toResponse(Expense expense);
 
     @Mapping(target = "expenseId", source = "id")

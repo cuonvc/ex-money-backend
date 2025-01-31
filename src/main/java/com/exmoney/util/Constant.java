@@ -50,7 +50,8 @@ public class Constant {
     //ngoài manual ra thì tất cả loại khác đều phải qua bước xác nhận
     public static class ExpenseType {
         public static final String MANUAL = "MANUAL";
-        public static final String SCHEDULE = "SCHEDULE";
+        public static final String FROM_SCHEDULE = "FROM_SCHEDULE"; //sau khi clone từ origin
+        public static final String SCHEDULE = "SCHEDULE"; //dùng cho origin expense (thuộc task)
         public static final String FROM_NOTE = "FROM_NOTE";
         public static final String FROM_BANK_NOTI = "FROM_BANK_NOTI";
         public static final String FROM_BANK_1 = "FROM_BANK_1";

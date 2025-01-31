@@ -1,7 +1,10 @@
 package com.exmoney.worker;
 
+import com.exmoney.entity.Expense;
 import com.exmoney.entity.TaskSchedulerConfig;
+import com.exmoney.repository.ExpenseRepository;
 import com.exmoney.repository.TaskSchedulerConfigRepository;
+import com.exmoney.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
+import static com.exmoney.util.Constant.ExpenseEntryType.EXPENSE;
 import static com.exmoney.util.Constant.ScheduleTimeIntervalType.*;
 import static com.exmoney.util.Constant.SchedulerTaskName.TASK_EXPENSE_AUTO;
 import static com.exmoney.util.Constant.Status.ACTIVE;
@@ -23,6 +28,8 @@ import static com.exmoney.util.Utils.getNow;
 public class ExpenseSchedulerExecuteWorker {
 
     private final TaskSchedulerConfigRepository taskSchedulerConfigRepository;
+    private final ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
 
     @Scheduled(cron = "0 * * * * *")
     public void run() {
@@ -43,16 +50,19 @@ public class ExpenseSchedulerExecuteWorker {
                 if (now.getHour() == timePoint) {
                     log.info("\n-----> Trigger DAILY task executing...");
                     updateConfig(task, now);
+                    expenseService.executeFromScheduler(task, Locale.getDefault(), now);
                 }
             } else if (interval.equals(WEEKLY)) {
                 if (now.getDayOfWeek().getValue() == timePoint) {
                     log.info("\n-----> Trigger WEEKLY task executing...");
                     updateConfig(task, now);
+                    expenseService.executeFromScheduler(task, Locale.getDefault(), now);
                 }
             } else if (interval.equals(MONTHLY)) {
                 if (now.getDayOfMonth() == timePoint) {
                     log.info("\n-----> Trigger MONTHLY task executing...");
                     updateConfig(task, now);
+                    expenseService.executeFromScheduler(task, Locale.getDefault(), now);
                 }
             }
         });
