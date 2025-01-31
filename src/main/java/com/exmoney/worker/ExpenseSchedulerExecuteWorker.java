@@ -109,7 +109,7 @@ public class ExpenseSchedulerExecuteWorker {
                     "notify.content.task_expense_scheduler.execute",
                     Locale.getDefault(),
                     expense.getAmount(),
-                    category != null ? category.getName() : "",
+                    category != null ? commonService.getMessageSrc(category.getName(), Locale.getDefault()) : "",
                     taskSchedulerService.getIntervalMessage(config.getTimeInterval(), config.getTimeValue(), Locale.getDefault())
             );
 
