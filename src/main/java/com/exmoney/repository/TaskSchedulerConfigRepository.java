@@ -18,6 +18,16 @@ public interface TaskSchedulerConfigRepository extends JpaRepository<TaskSchedul
 
     @Query("SELECT t FROM TaskSchedulerConfig t " +
             "WHERE t.refTable = :refTable " +
+            "AND t.taskName = :taskName " +
+            "AND t.status = 'ACTIVE' ")
+    List<TaskSchedulerConfig> findAllByExpenseScheduling(String refTable, String taskName);
+
+    @Query("SELECT t FROM TaskSchedulerConfig t " +
+            "WHERE t.status = 'EXECUTED'")
+    List<TaskSchedulerConfig> findAllByExecuted();
+
+    @Query("SELECT t FROM TaskSchedulerConfig t " +
+            "WHERE t.refTable = :refTable " +
             "   AND t.taskName = :taskName " +
             "   AND t.timeInterval = :timeInterval " +
             "   AND t.timeValue = :timeVal " +
