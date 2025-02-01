@@ -74,4 +74,5 @@ exmoney:
       expense_create: "action.expense_create"
       expense_update: "action.expense_update"
       expense_delete: "action.expense_delete"
+      expense_speech_to_text: "action.expense_speech_to_text"
       task_schedule_expense: "action.task_schedule_expense"

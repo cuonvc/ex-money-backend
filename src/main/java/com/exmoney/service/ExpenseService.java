@@ -4,6 +4,7 @@ import com.exmoney.entity.TaskSchedulerConfig;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expense.ExpenseCreateRequest;
 import com.exmoney.payload.request.expense.ExpenseUpdateRequest;
+import com.exmoney.payload.response.expense.ExpenseConfirmResponse;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
@@ -16,6 +17,8 @@ import java.util.Locale;
 public interface ExpenseService {
     ResponseEntity<BaseResponse<ExpenseResponse>> create(ExpenseCreateRequest request, Locale locale);
     ResponseEntity<BaseResponse<ExpenseResponse>> update(Long id, ExpenseUpdateRequest request, Locale locale);
+
+    ResponseEntity<BaseResponse<ExpenseConfirmResponse>> suggestFromSpeech(String textFromSpeech, Locale locale);
     ResponseEntity<BaseResponse<ExpenseResponse>> detail(Long id, Locale locale);
     ResponseEntity<BaseResponse<String>> delete(Long id, Locale locale);
     ResponseEntity<BaseResponse<ExpenseFilterResource>> getResourceForExpenseFilter(Long walletId, Locale locale);

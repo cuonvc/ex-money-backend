@@ -66,4 +66,15 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
             "    )" +
             ")")
     Optional<ExpenseCategory> findByIdAndAccess(Long id, Long walletId, Long userId);
+
+    @Query("SELECT c FROM ExpenseCategory c " +
+            "WHERE c.status = 'ACTIVE' " +
+            "AND (" +
+            "    c.type = 'DEFAULT'" +
+            "    OR (" +
+            "        (c.saveType = 'WALLET' AND c.refId = :walletId)" +
+            "        OR (c.saveType = 'ACCOUNT' AND c.refId = :userId)" +
+            "    )" +
+            ")")
+    List<ExpenseCategory> findAllByUserAndWallet(Long walletId, Long userId);
 }

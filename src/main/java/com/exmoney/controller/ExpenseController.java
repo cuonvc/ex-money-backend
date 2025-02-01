@@ -3,6 +3,7 @@ package com.exmoney.controller;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.request.expense.ExpenseCreateRequest;
 import com.exmoney.payload.request.expense.ExpenseUpdateRequest;
+import com.exmoney.payload.response.expense.ExpenseConfirmResponse;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
@@ -37,6 +38,12 @@ public class ExpenseController {
                                                                 @Valid @RequestBody ExpenseUpdateRequest request,
                                                                 @RequestParam Locale locale) {
         return expenseService.update(id, request, locale);
+    }
+
+    @PostMapping(API_BASE_USER + "/expense/speech")
+    public ResponseEntity<BaseResponse<ExpenseConfirmResponse>> suggestFromSpeech(@RequestParam Locale locale,
+                                                                                  @RequestBody String textFromSpeech) {
+        return expenseService.suggestFromSpeech(textFromSpeech, locale);
     }
 
     @GetMapping(API_BASE_USER + "/expense/{id}")

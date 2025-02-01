@@ -22,7 +22,7 @@ import static com.exmoney.util.Utils.getNow;
 @SpringBootApplication
 @Slf4j
 @RequiredArgsConstructor
-@EnableScheduling
+//@EnableScheduling
 public class ExmoneyApplication implements CommandLineRunner {
 
 	private final ExpenseCategoryRepository categoryRepository;

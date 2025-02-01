@@ -7,6 +7,7 @@ import com.exmoney.payload.common.ResponseFactory;
 import com.exmoney.payload.mapper.ExpenseMapper;
 import com.exmoney.payload.request.expense.ExpenseCreateRequest;
 import com.exmoney.payload.request.expense.ExpenseUpdateRequest;
+import com.exmoney.payload.response.expense.ExpenseConfirmResponse;
 import com.exmoney.payload.response.expense.ExpenseEditResource;
 import com.exmoney.payload.response.expense.ExpenseFilterResource;
 import com.exmoney.payload.response.expense.ExpenseResponse;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
@@ -67,6 +70,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Value("${exmoney.application.action_log.expense_update}")
     private String actionLogExpenseUpdate;
+
+    @Value("${exmoney.application.action_log.expense_speech_to_text}")
+    private String actionLogExpenseSpeechToText;
 
     @Value("${exmoney.application.action_log.expense_delete}")
     private String actionLogExpenseDelete;
@@ -153,6 +159,10 @@ public class ExpenseServiceImpl implements ExpenseService {
     private static BigDecimal getPercentReached(Wallet wallet) {
         BigDecimal percentReached = BigDecimal.ZERO;
 
+        if (wallet.getExpenseLimit().compareTo(BigDecimal.ZERO) == 0) {
+            return percentReached;
+        }
+
         BigDecimal newPercent = wallet.getTotalExpense()
                 .divide(wallet.getExpenseLimit(), 4, BigDecimal.ROUND_HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
@@ -214,6 +224,90 @@ public class ExpenseServiceImpl implements ExpenseService {
         wallet = walletRepository.save(wallet);
 
         return doResponse(expense, wallet, optCategory.get(), userDetail, locale, false);
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<ExpenseConfirmResponse>> suggestFromSpeech(String textFromSpeech, Locale locale) {
+        //format ex: "50.000" "đổ xăng" ví "cá nhân" - AI chạy bằng cơm
+        // không nhận diện được tiền -> throw
+        // không nhận diện được category -> lấy other category
+        // không nhận diện đụược ví -> lấy ví mặc định
+
+        Long currentUserId = commonService.getCurrentUserId();
+        BigDecimal amount = null;
+        Wallet wallet = null;
+        ExpenseCategory category = null;
+
+        //get amount
+        amount = getAmountFromSpeech(textFromSpeech);
+        //get wallet
+        wallet = getWalletFromSpeech(textFromSpeech, currentUserId, locale);
+        //get category
+        if (wallet != null) {
+            category = getCategoryFromSpeech(textFromSpeech, currentUserId, wallet.getId(), locale);
+        }
+
+        ExpenseConfirmResponse response = ExpenseConfirmResponse.builder()
+                .description(textFromSpeech)
+                .amount(amount)
+                .build();
+        if (wallet != null) {
+            response.setWalletId(wallet.getId());
+            response.setWalletName(commonService.getMessageSrc(wallet.getName(), locale));
+        }
+        if (category != null) {
+            response.setCategoryId(category.getId());
+            response.setCategoryName(commonService.getMessageSrc(category.getName(), locale));
+        }
+
+        return responseFactory.success(actionLogExpenseSpeechToText, response); //tạm
+    }
+
+    private BigDecimal getAmountFromSpeech(String text) {
+        Pattern pattern = Pattern.compile("([\\d.,]+)\\s*(triệu|đ|nghìn)?", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
+        BigDecimal amount = null;
+
+        while (matcher.find()) {
+            String numberStr = matcher.group(1);
+            String unit = matcher.group(2);
+
+            if ("triệu".equalsIgnoreCase(unit)) {
+                // Handle decimal separator for "triệu"
+                numberStr = numberStr.replace(",", ".");
+                double value = Double.parseDouble(numberStr);
+                amount = BigDecimal.valueOf(Math.round(value * 1_000_000));
+            } else if ("nghìn".equalsIgnoreCase(unit)) {
+                // Handle decimal separator for "ngìn"
+                numberStr = numberStr.replace(",", ".");
+                double value = Double.parseDouble(numberStr);
+                amount = BigDecimal.valueOf(Math.round(value * 1_000));
+            } else {
+                // Handle thousand separators for plain numbers
+                numberStr = numberStr.replace(".", "").replace(",", "");
+                amount = BigDecimal.valueOf(Integer.parseInt(numberStr));
+            }
+        }
+
+        return amount;
+    }
+
+    private Wallet getWalletFromSpeech(String textFromSpeech, Long userId, Locale locale) {
+        List<Wallet> list = walletRepository.findByUserId(userId, false);
+        Wallet result = list.stream()
+                .filter(wallet -> textFromSpeech.toUpperCase().contains(commonService.getMessageSrc(wallet.getName(), locale).toUpperCase()))
+                .findFirst().orElse(null);
+        if (result == null) {
+            result = list.stream().filter(Wallet::getIsDefault).findFirst().orElse(null);
+        }
+        return result;
+    }
+
+    private ExpenseCategory getCategoryFromSpeech(String textFromSpeech, Long userId, Long walletId, Locale locale) {
+        return categoryRepository.findAllByUserAndWallet(walletId, userId)
+                .stream()
+                .filter(category -> textFromSpeech.toUpperCase().contains(commonService.getMessageSrc(category.getName(), locale).toUpperCase()))
+        .findFirst().orElse(null);
     }
 
     private ResponseEntity<BaseResponse<ExpenseResponse>> doResponse(Expense expense, Wallet wallet,
