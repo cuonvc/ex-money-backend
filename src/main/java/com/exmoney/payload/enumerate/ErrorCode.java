@@ -37,6 +37,7 @@ public enum ErrorCode {
     TIME_VALUE_NOT_MATCH_INTERVAL("TIME_VALUE_NOT_MATCH_INTERVAL", "exception.time_value_not_match_interval", HttpStatus.BAD_REQUEST.value()),
     TASK_SCHEDULER_DUPLICATED("TASK_SCHEDULER_DUPLICATED", "exception.task_scheduler_duplicated", HttpStatus.BAD_REQUEST.value()),
     TASK_SCHEDULER_NOT_FOUND("TASK_SCHEDULER_NOT_FOUND", "exception.task_scheduler_not_found", HttpStatus.NOT_FOUND.value()),
+    NOTE_NOT_FOUND("NOTE_NOT_FOUND", "exception.note_not_found", HttpStatus.NOT_FOUND.value()),
     ;
 
     private String status;

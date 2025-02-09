@@ -15,6 +15,7 @@ public class Constant {
         public static final String PENDING = "PENDING";
         public static final String REJECTED = "REJECTED";
         public static final String INACTIVE = "INACTIVE";
+        public static final String ARCHIVED = "ARCHIVED"; //for note
         public static final String EXECUTED = "EXECUTED";
         public static final String SCHEDULED = "SCHEDULED"; //task scheduling
         public static final String DELETED = "DELETED";
