@@ -66,21 +66,21 @@ public class ExpenseSchedulerExecuteWorker {
                 if (now.getHour() == timePoint) {
                     log.info("\n-----> Trigger DAILY task executing...");
                     updateConfig(task, now);
-                    expenseService.executeFromScheduler(task, Locale.getDefault(), now);
+                    expenseService.executeFromScheduler(task, new Locale("vi", "VN"), now);
                     pushNotification(task, now);
                 }
             } else if (interval.equals(WEEKLY)) {
                 if (now.getDayOfWeek().getValue() == timePoint) {
                     log.info("\n-----> Trigger WEEKLY task executing...");
                     updateConfig(task, now);
-                    expenseService.executeFromScheduler(task, Locale.getDefault(), now);
+                    expenseService.executeFromScheduler(task, new Locale("vi", "VN"), now);
                     pushNotification(task, now);
                 }
             } else if (interval.equals(MONTHLY)) {
                 if (now.getDayOfMonth() == timePoint) {
                     log.info("\n-----> Trigger MONTHLY task executing...");
                     updateConfig(task, now);
-                    expenseService.executeFromScheduler(task, Locale.getDefault(), now);
+                    expenseService.executeFromScheduler(task, new Locale("vi", "VN"), now);
                     pushNotification(task, now);
                 }
             }
