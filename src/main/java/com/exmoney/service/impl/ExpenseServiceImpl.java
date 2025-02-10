@@ -264,7 +264,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     private BigDecimal getAmountFromSpeech(String text) {
-        Pattern pattern = Pattern.compile("([\\d.,]+)\\s*(triệu|đ|nghìn)?", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("([\\d.,]+)\\s*(triệu|đ|nghìn|ngàn|k|ca)?", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(text);
         BigDecimal amount = null;
 
@@ -277,7 +277,8 @@ public class ExpenseServiceImpl implements ExpenseService {
                 numberStr = numberStr.replace(",", ".");
                 double value = Double.parseDouble(numberStr);
                 amount = BigDecimal.valueOf(Math.round(value * 1_000_000));
-            } else if ("nghìn".equalsIgnoreCase(unit)) {
+            } else if ("nghìn".equalsIgnoreCase(unit) || "ngàn".equalsIgnoreCase(unit)
+                    || "ca".equalsIgnoreCase(unit) || "k".equalsIgnoreCase(unit)) {
                 // Handle decimal separator for "ngìn"
                 numberStr = numberStr.replace(",", ".");
                 double value = Double.parseDouble(numberStr);
@@ -304,10 +305,19 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     private ExpenseCategory getCategoryFromSpeech(String textFromSpeech, Long userId, Long walletId, Locale locale) {
-        return categoryRepository.findAllByUserAndWallet(walletId, userId)
-                .stream()
+        List<ExpenseCategory> all = categoryRepository.findAllByUserAndWallet(walletId, userId);
+
+        ExpenseCategory matchedCategory = all.stream()
                 .filter(category -> textFromSpeech.toUpperCase().contains(commonService.getMessageSrc(category.getName(), locale).toUpperCase()))
-        .findFirst().orElse(null);
+                .findFirst().orElse(null);
+
+        if (matchedCategory == null) {
+            matchedCategory = all.stream()
+                    .filter(category -> category.getName().equals("default.category.other"))
+                    .findFirst().orElse(null);
+        }
+
+        return matchedCategory;
     }
 
     private ResponseEntity<BaseResponse<ExpenseResponse>> doResponse(Expense expense, Wallet wallet,
