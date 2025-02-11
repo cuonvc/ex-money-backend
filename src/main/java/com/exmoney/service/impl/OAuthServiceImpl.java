@@ -1,5 +1,6 @@
 package com.exmoney.service.impl;
 
+import com.exmoney.entity.DeviceInfo;
 import com.exmoney.entity.RefreshToken;
 import com.exmoney.entity.User;
 import com.exmoney.payload.OAuthUserInfo;
@@ -9,14 +10,20 @@ import com.exmoney.payload.dto.AccessTokenDto;
 import com.exmoney.payload.mapper.OAuthUserMapper;
 import com.exmoney.payload.mapper.TokenMapper;
 import com.exmoney.payload.mapper.UserMapper;
+import com.exmoney.payload.request.auth.DeviceInfoRequest;
+import com.exmoney.payload.request.auth.OAuth2Request;
 import com.exmoney.payload.response.auth.GithubResponseToken;
 import com.exmoney.payload.response.auth.GithubResponseUser;
 import com.exmoney.payload.response.auth.GoogleResponseUser;
+import com.exmoney.repository.DeviceInfoRepository;
 import com.exmoney.repository.RefreshTokenRepository;
 import com.exmoney.repository.UserRepository;
 import com.exmoney.security.jwt.JwtTokenProvider;
 import com.exmoney.service.OAuthService;
 import com.exmoney.service.TokenService;
+import com.exmoney.service.UserService;
+import com.exmoney.service.WalletService;
+import com.exmoney.util.Constant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +32,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.LocalDateTime;
+import java.util.Locale;
 
 import static com.exmoney.util.Constant.Role.USER_ROLE;
 import static com.exmoney.util.Constant.Status.ACTIVE;
@@ -38,6 +48,8 @@ import static com.exmoney.util.Utils.getNow;
 public class OAuthServiceImpl implements OAuthService {
 
     private final UserMapper userMapper;
+    private final DeviceInfoRepository deviceInfoRepository;
+    private final WalletService walletService;
     @Value("${exmoney.application.oauth.google.api-get-info}")
     private String googleApiGetInfo;
 
@@ -61,6 +73,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     private final RestTemplate restTemplate;
     private final UserRepository userRepository;
+    private final UserServiceImpl userServiceImpl;
     private final TokenService tokenService;
     private final RefreshTokenRepository tokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -69,9 +82,9 @@ public class OAuthServiceImpl implements OAuthService {
     private final OAuthUserMapper oAuthUserMapper;
 
     @Override
-    public ResponseEntity<BaseResponse<Object>> validateGoogleToken(String token) {
+    public ResponseEntity<BaseResponse<Object>> validateGoogleToken(OAuth2Request oAuth2Request, Locale locale) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + oAuth2Request.getToken());
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
@@ -79,7 +92,7 @@ public class OAuthServiceImpl implements OAuthService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 GoogleResponseUser data = response.getBody();
                 log.info("response_user_info - {}", data);
-                return saveUser(ActionGoogleSignIn, oAuthUserMapper.toUserInfo(data), GOOGLE_PROVIDER);
+                return saveUser(ActionGoogleSignIn, oAuthUserMapper.toUserInfo(data), oAuth2Request, locale);
 
             } else {
                 log.info("Failure...");
@@ -92,8 +105,8 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Object>> validateGithubCode(String code) {
-        log.info("Logging github - {}", code);
+    public ResponseEntity<BaseResponse<Object>> validateGithubCode(OAuth2Request oAuth2Request, Locale locale) {
+        log.info("Logging github - {}", oAuth2Request.getToken());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -101,7 +114,7 @@ public class OAuthServiceImpl implements OAuthService {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(githubApiValidToken)
                 .queryParam("client_id", githubClientId)
                 .queryParam("client_secret", githubClientSecret)
-                .queryParam("code", code);
+                .queryParam("code", oAuth2Request.getToken());
 
         HttpEntity<?> request = new HttpEntity<>(headers);
         ResponseEntity<GithubResponseToken> response = restTemplate.exchange(
@@ -114,7 +127,7 @@ public class OAuthServiceImpl implements OAuthService {
         if (response.getStatusCode().is2xxSuccessful()) {
             log.info("Token - {}", response.getBody().getAccess_token());
             GithubResponseUser userInfo = getGithubUserInfo(response.getBody());
-            return saveUser(ActionGithubSignIn, oAuthUserMapper.toUserInfo(userInfo), GITHUB_PROVIDER);
+            return saveUser(ActionGithubSignIn, oAuthUserMapper.toUserInfo(userInfo), oAuth2Request, locale);
 
         } else {
             log.info("Failure...");
@@ -143,18 +156,24 @@ public class OAuthServiceImpl implements OAuthService {
         return null;
     }
 
-    private ResponseEntity<BaseResponse<Object>> saveUser(String log, OAuthUserInfo userInfo, String provider) {
+    private ResponseEntity<BaseResponse<Object>> saveUser(String log, OAuthUserInfo userInfo, OAuth2Request request, Locale locale) {
+        LocalDateTime now = getNow();
+
         User user = userRepository.findByEmail(userInfo.getEmail())
                 .orElse(User.builder()
                         .name(userInfo.getName())
                         .email(userInfo.getEmail())
                         .avatarUrl(userInfo.getAvatarUrl())
-                        .createdAt(getNow())
+                        .createdAt(now)
                         .role(USER_ROLE)
-                        .userProvider(provider)
+                        .notificationOn(true)
+                        .userProvider(request.getProvider())
                         .status(ACTIVE)
                         .build());
         user = userRepository.save(user);
+
+        userServiceImpl.persistDeviceToken(request.getDeviceInfo(), user.getId());
+        walletService.initDefaultWallet(user.getId(), locale);
 
         RefreshToken refreshToken = tokenRepository.findByUserId(user.getId())
                 .orElse(RefreshToken.builder()
@@ -166,6 +185,6 @@ public class OAuthServiceImpl implements OAuthService {
         AccessTokenDto accessToken = jwtTokenProvider.generateToken(user.getEmail());
 
         Object[] response = {accessToken, refreshToken, userMapper.entityToResponse(user)};
-        return responseFactory.success(log, "Success", response);
+        return responseFactory.success(null, "sign_in.success", locale, response); //tạm thời không ghi log do không xác định được context user
     }
 }

@@ -131,28 +131,32 @@ public class UserServiceImpl implements UserService {
         RefreshToken refreshToken = tokenService.generateTokenObject(user);
         UserResponse userResponse = userMapper.entityToResponse(user);
 
-        DeviceInfoRequest deviceInfo = request.getDeviceInfo();
-        if (deviceInfo != null) {
-            LocalDateTime now = getNow();
-            DeviceInfo device = deviceInfoRepository.findByUserId(user.getId())
-                    .orElse(DeviceInfo.builder()
-                            .userId(user.getId())
-                            .createdAt(now)
-                            .build());
-
-            device.setOs(deviceInfo.getOs());
-            device.setDeviceId(deviceInfo.getDeviceId());
-            device.setVersion(deviceInfo.getVersion());
-            device.setDeviceName(deviceInfo.getDeviceName());
-            device.setDeviceToken(deviceInfo.getDeviceToken());
-            device.setStatus(ACTIVE);
-            device.setUpdatedAt(now);
-            deviceInfoRepository.save(device);
-        }
+        persistDeviceToken(request.getDeviceInfo(), user.getId());
 
         Object[] repsonse = {accessTokenObj, tokenMapper.mapToDto(refreshToken), userResponse};
 
         return responseFactory.success(action_user_sign_in, "sign_in.success", locale, repsonse);
+    }
+
+    @Transactional
+    protected void persistDeviceToken(DeviceInfoRequest deviceInfoRequest, Long userId) {
+        if (deviceInfoRequest != null) {
+            LocalDateTime now = getNow();
+            DeviceInfo device = deviceInfoRepository.findByUserId(userId)
+                    .orElse(DeviceInfo.builder()
+                            .userId(userId)
+                            .createdAt(now)
+                            .build());
+
+            device.setOs(deviceInfoRequest.getOs());
+            device.setDeviceId(deviceInfoRequest.getDeviceId());
+            device.setVersion(deviceInfoRequest.getVersion());
+            device.setDeviceName(deviceInfoRequest.getDeviceName());
+            device.setDeviceToken(deviceInfoRequest.getDeviceToken());
+            device.setStatus(ACTIVE);
+            device.setUpdatedAt(now);
+            deviceInfoRepository.save(device);
+        }
     }
 
     @Override

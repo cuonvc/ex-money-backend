@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in",
                                 "/api/auth/active-account", "/api/auth/token/renew",
+                                "/api/auth/oauth2/validate",
                                 "/api/test/**")
                         .permitAll()
                         .requestMatchers("/api/auth/admin/*").hasAnyAuthority("ADMIN")

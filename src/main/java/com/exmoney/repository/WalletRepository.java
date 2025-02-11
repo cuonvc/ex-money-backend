@@ -10,6 +10,12 @@ import java.util.Optional;
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
     @Query("SELECT w FROM Wallet w " +
+            "WHERE w.ownerUserId = :ownerId " +
+            "AND w.isDefault " +
+            "AND w.status = 'ACTIVE'")
+    Optional<Wallet> findDefaultByOwner(Long ownerId);
+
+    @Query("SELECT w FROM Wallet w " +
             "INNER JOIN UserWallet uw ON uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "WHERE w.id = :id " +
             "AND w.status = 'ACTIVE' " +

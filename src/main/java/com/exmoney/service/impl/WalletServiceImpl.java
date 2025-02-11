@@ -79,22 +79,28 @@ public class WalletServiceImpl implements WalletService {
 //        if (!walletRepository.findByUserId(userId).isEmpty()) {
 //            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
 //        }
-        Wallet wallet = new Wallet();
-        wallet.setCreatedAt(getNow());
-        wallet.setCreatedBy(0L);
-        wallet.setName(defaultWalletName); //lưu là default.wallet_name luôn để có thể get dynamic
-        wallet.setDescription(defaultWalletDescription);
-        wallet.setOwnerUserId(userId);
-        walletRepository.save(wallet);
+        LocalDateTime now = LocalDateTime.now();
 
-        userWalletRepository.save(
-                UserWallet.builder()
-                        .userId(userId)
-                        .walletId(wallet.getId())
-                        .updatedAt(getNow())
-                        .status(ACTIVE)
-                        .build()
-        );
+        //login qua email thì chắc chắn là mới rồi, còn login qua OAuth thì sẽ luôn đi qua đây nên phải check
+        Wallet wallet = walletRepository.findDefaultByOwner(userId)
+                        .orElse(new Wallet());
+
+        if (wallet.getId() == null) { //lần đầu
+            wallet.setCreatedAt(now);
+            wallet.setCreatedBy(0L);
+            wallet.setName(defaultWalletName); //lưu là default.wallet_name luôn để có thể get dynamic
+            wallet.setDescription(defaultWalletDescription);
+            wallet.setOwnerUserId(userId);
+            walletRepository.save(wallet);
+
+            userWalletRepository.save(
+                    UserWallet.builder()
+                            .userId(userId)
+                            .walletId(wallet.getId())
+                            .updatedAt(now)
+                            .status(ACTIVE)
+                            .build());
+        }
     }
 
     @Override
