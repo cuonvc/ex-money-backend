@@ -157,7 +157,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<BaseResponse<String>> signOut(Locale locale) {
+        Long userId = commonService.getCurrentUserId();
         tokenService.clearToken(commonService.getCurrentUserId());
+        deviceInfoRepository.findByUserId(userId).ifPresent(deviceInfo -> {
+            deviceInfo.setOs(null);
+            deviceInfo.setVersion(null);
+            deviceInfo.setDeviceId(null);
+            deviceInfo.setDeviceName(null);
+            deviceInfo.setUpdatedAt(getNow());
+            deviceInfo.setDeviceToken(null);
+            deviceInfoRepository.save(deviceInfo);
+        });
         return responseFactory.success(action_user_sign_out, "sign_out.success", locale);
     }
 
