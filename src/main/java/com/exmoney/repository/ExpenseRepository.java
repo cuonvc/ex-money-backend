@@ -34,12 +34,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   , u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
             "   INNER JOIN Wallet w ON e.walletId = w.id " +
-            "   LEFT JOIN UserWallet uw ON uw.walletId = :walletId AND uw.userId = :currentUserId AND uw.status = 'ACTIVE' " +
+            "   INNER JOIN UserWallet uw ON uw.walletId = e.walletId AND uw.status = 'ACTIVE' " +
             "   INNER JOIN User u1 ON u1.id = e.userId " +
             "   LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "   INNER JOIN ExpenseCategory c ON c.id = e.categoryId " +
             "   LEFT JOIN ExpenseCategory cParent ON c.parentId = cParent.id AND cParent.status = 'ACTIVE' " +
             "WHERE e.status = 'ACTIVE' " +
+            "   AND uw.userId = :currentUserId " +
             //filter by wallet
             "   AND (" +
             "       e.walletId = :walletId " +
