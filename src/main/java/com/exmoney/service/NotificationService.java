@@ -13,5 +13,6 @@ public interface NotificationService {
 
     ResponseEntity<BaseResponse<Boolean>> markRead(long id, Locale locale);
     ResponseEntity<BaseResponse<Boolean>> markReadAll(Locale locale);
+    ResponseEntity<BaseResponse<Boolean>> turn(Locale locale, boolean on);
     ResponseEntity<BaseResponse<List<NotificationResponse>>> getAll(int offset, int limit, Locale locale);
 }

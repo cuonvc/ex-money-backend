@@ -24,24 +24,24 @@ public class UserController {
     private final UserService userService;
 
     @PutMapping("/account/edit")
-    public ResponseEntity<BaseResponse<UserResponse>> editProfile(@RequestHeader(value = "Accept-Language") Locale locale,
+    public ResponseEntity<BaseResponse<UserResponse>> editProfile(@RequestParam Locale locale,
                                                                   @Valid @RequestBody ProfileRequest request) {
         return userService.editProfile(request, locale);
     }
 
     @PutMapping("/password-change")
-    public ResponseEntity<BaseResponse<String>> changePassword(@RequestHeader(value = "Accept-Language") Locale locale,
+    public ResponseEntity<BaseResponse<String>> changePassword(@RequestParam Locale locale,
                                                                @Valid @RequestBody PasswordChangeRequest request) {
         return userService.changePassword(request, locale);
     }
 
     @GetMapping("/account")
-    public ResponseEntity<BaseResponse<UserResponse>> getProfile(@RequestHeader(value = "Accept-Language") Locale locale) {
+    public ResponseEntity<BaseResponse<UserResponse>> getProfile(@RequestParam Locale locale) {
         return userService.getAccount(locale);
     }
 
     @GetMapping("/moderator/account-list")
-    public ResponseEntity<BaseResponse<PageResponseUsers>> getAllAccount(@RequestHeader(value = "Accept-Language") Locale locale,
+    public ResponseEntity<BaseResponse<PageResponseUsers>> getAllAccount(@RequestParam Locale locale,
                                                                          @RequestParam(value = "pageNo",
                                                                                 defaultValue = PAGE_NO, required = false) Integer pageNo,
                                                                          @RequestParam(value = "pageSize",
@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @PutMapping("/account/avatar")
-    public ResponseEntity<BaseResponse<UserResponse>> uploadAvatar(@RequestHeader(value = "Accept-Language") Locale locale,
+    public ResponseEntity<BaseResponse<UserResponse>> uploadAvatar(@RequestParam Locale locale,
                                                                    @RequestPart(name = "image") MultipartFile file) {
         return userService.uploadAvatar(file, locale);
     }

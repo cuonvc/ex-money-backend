@@ -2,6 +2,7 @@ package com.exmoney.service.impl;
 
 import com.exmoney.entity.Notification;
 import com.exmoney.entity.NotificationIdentity;
+import com.exmoney.entity.User;
 import com.exmoney.payload.common.BaseResponse;
 import com.exmoney.payload.common.NotificationBuilder;
 import com.exmoney.payload.common.ResponseFactory;
@@ -9,6 +10,7 @@ import com.exmoney.payload.response.notification.NotificationResponse;
 import com.exmoney.repository.DeviceInfoRepository;
 import com.exmoney.repository.NotificationIdentityRepository;
 import com.exmoney.repository.NotificationRepository;
+import com.exmoney.repository.UserRepository;
 import com.exmoney.service.CommonService;
 import com.exmoney.service.NotificationService;
 import com.google.firebase.messaging.*;
@@ -26,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.NOTIFICATION_NOT_FOUND;
+import static com.exmoney.payload.enumerate.ErrorCode.USER_NOT_FOUND;
 import static com.exmoney.util.Constant.NotificationComponent.*;
 import static com.exmoney.util.Constant.Status.ACTIVE;
 import static com.exmoney.util.Utils.getNow;
@@ -41,6 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final DeviceInfoRepository deviceInfoRepository;
     private final CommonService commonService;
     private final ResponseFactory responseFactory;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -140,6 +144,19 @@ public class NotificationServiceImpl implements NotificationService {
 
         notificationIdentityRepository.remarkAllByUser(currentUserId, getNow());
         return responseFactory.success(null, true);
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<Boolean>> turn(Locale locale, boolean on) {
+        Long currentUserId = commonService.getCurrentUserId();
+        User user = userRepository.findById(currentUserId).orElse(null);
+        if (user == null) {
+            commonService.throwException(USER_NOT_FOUND, locale, null);
+        }
+
+        user.setNotificationOn(on);
+        userRepository.save(user);
+        return responseFactory.success(null, on);
     }
 
     @Override

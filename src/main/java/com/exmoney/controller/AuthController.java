@@ -20,19 +20,19 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<BaseResponse<UserResponse>> signUp(@RequestHeader(value = "Accept-Language") Locale locale,
+    public ResponseEntity<BaseResponse<UserResponse>> signUp(@RequestParam Locale locale,
                                                              @Valid @RequestBody RegRequest request) {
         return userService.register(request, locale);
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<BaseResponse<Object>> signIn(@RequestHeader(value = "Accept-Language") Locale locale,
+    public ResponseEntity<BaseResponse<Object>> signIn(@RequestParam Locale locale,
                                                                      @Valid @RequestBody LoginRequest request) {
         return userService.signIn(request, locale);
     }
 
     @PostMapping("/sign-out")
-    public ResponseEntity<BaseResponse<String>> signOut(@RequestHeader(value = "Accept-Language") Locale locale) {
+    public ResponseEntity<BaseResponse<String>> signOut(@RequestParam Locale locale) {
         return userService.signOut(locale);
     }
 

@@ -27,4 +27,10 @@ public class NotificationController {
     public ResponseEntity<BaseResponse<Boolean>> markReadAll(@RequestParam Locale locale) {
         return notificationService.markReadAll(locale);
     }
+
+    @PutMapping(API_BASE_USER + "/notification/turn")
+    public ResponseEntity<BaseResponse<Boolean>> turn(@RequestParam Locale locale,
+                                                             @RequestParam boolean on) {
+        return notificationService.turn(locale, on);
+    }
 }

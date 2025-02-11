@@ -38,6 +38,9 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "notification_on")
+    private boolean notificationOn;
+
     @Column(name = "role")
     private String role = USER_ROLE;
 

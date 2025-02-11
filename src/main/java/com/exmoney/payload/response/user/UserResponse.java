@@ -21,4 +21,5 @@ public class UserResponse {
     private LocalDateTime modifiedAt;
     private String status;
     private String deviceToken;
+    private boolean notificationOn;
 }
