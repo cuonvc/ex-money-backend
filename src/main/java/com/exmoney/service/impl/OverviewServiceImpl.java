@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.exmoney.util.Utils.divideAmount;
+import static com.exmoney.util.Utils.getExpenseTypeDisp;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +54,7 @@ public class OverviewServiceImpl implements OverviewService {
                 .stream().peek(e -> {
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));
+                    e.setType(commonService.getMessageSrc(getExpenseTypeDisp(e.getType()), locale));
                 })
                 .toList();
         BigDecimal totalAmount = expenses.stream().map(ExpenseResponse::getAmount)

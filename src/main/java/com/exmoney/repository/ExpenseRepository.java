@@ -21,8 +21,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT e FROM Expense e " +
             "WHERE e.id = :id " +
             "AND e.createdBy = :userId " +
-            "AND e.status IN ('ACTIVE', 'SCHEDULED')")
-    Expense findByIdAndOwner(Long id, Long userId);
+            "AND e.status IN ('ACTIVE')")
+    Expense findByIdToUpdate(Long id, Long userId);
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
             "   , e.entryType AS " + PROP_ENTRY_TYPE + ", c.iconImage AS " +PROP_CATEGORY_ICON_IMAGE +

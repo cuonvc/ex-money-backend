@@ -38,8 +38,7 @@ import static com.exmoney.util.Constant.NotificationPriority.CRITICAL;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
 import static com.exmoney.util.Constant.NotificationType.WALLET;
 import static com.exmoney.util.Constant.Status.*;
-import static com.exmoney.util.Utils.clientToLocalDateTime;
-import static com.exmoney.util.Utils.getNow;
+import static com.exmoney.util.Utils.*;
 
 @Slf4j
 @Service
@@ -184,7 +183,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     public ResponseEntity<BaseResponse<ExpenseResponse>> update(Long id, ExpenseUpdateRequest request, Locale locale) {
         CustomUserDetail userDetail = commonService.getCurrentUser();
         Long currentUserId = userDetail.getId();
-        Expense expense = expenseRepository.findByIdAndOwner(id, currentUserId);
+        Expense expense = expenseRepository.findByIdToUpdate(id, currentUserId);
         if (expense == null) {
             commonService.throwException(EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE, locale, null);
         }
@@ -329,6 +328,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         response.setCategoryIconImage(category.getIconImage());
         response.setCategoryName(commonService.getMessageSrc(category.getName(), locale));
         response.setDescription(commonService.getMessageSrc(response.getDescription(), locale));
+        response.setType(commonService.getMessageSrc(getExpenseTypeDisp(response.getType()), locale));
 
         String log = doCreate ? actionLogExpenseCreate : actionLogExpenseUpdate;
         return responseFactory.success(log, response);
@@ -353,7 +353,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Transactional
     public ResponseEntity<BaseResponse<String>> delete(Long id, Locale locale) {
         Long currentUserId = commonService.getCurrentUserId();
-        Expense expense = expenseRepository.findByIdAndOwner(id, currentUserId);
+        Expense expense = expenseRepository.findByIdToUpdate(id, currentUserId);
         if (expense == null) {
             commonService.throwException(EXPENSE_NOT_FOUND_OR_NOT_ACCESSIBLE, locale, null);
         }
@@ -425,6 +425,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .stream().peek(e -> {
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
+                    e.setType(commonService.getMessageSrc(getExpenseTypeDisp(e.getType()), locale));
                 }).toList();
         return responseFactory.success(null, list);
     }

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static com.exmoney.payload.enumerate.ErrorCode.INTERNAL_SERVER_ERROR;
+import static com.exmoney.util.Constant.ExpenseType.*;
 
 public class Utils {
 
@@ -38,5 +39,14 @@ public class Utils {
 
     public static BigDecimal getMaxWithZero(BigDecimal amount) {
         return amount.max(BigDecimal.ZERO);
+    }
+
+    public static String getExpenseTypeDisp(String expenseType) {
+        return switch (expenseType) {
+            case MANUAL -> "display.expense_type.manual";
+            case FROM_SCHEDULE -> "display.expense_type.from_schedule";
+            case SCHEDULE -> "display.expense_type.schedule";
+            default -> "";
+        };
     }
 }

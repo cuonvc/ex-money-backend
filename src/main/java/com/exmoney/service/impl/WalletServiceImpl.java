@@ -39,8 +39,7 @@ import static com.exmoney.util.Constant.Status.*;
 import static com.exmoney.util.Constant.TableName.EXPENSE_TBL;
 import static com.exmoney.util.Constant.WalletChangeUserAction.ADD;
 import static com.exmoney.util.Constant.WalletChangeUserAction.REMOVE;
-import static com.exmoney.util.Utils.getMaxWithZero;
-import static com.exmoney.util.Utils.getNow;
+import static com.exmoney.util.Utils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -157,6 +156,7 @@ public class WalletServiceImpl implements WalletService {
                     e.setWalletName(response.getName());
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
+                    e.setType(commonService.getMessageSrc(getExpenseTypeDisp(e.getType()), locale));
                 })
                 .toList();
         response.setExpenses(expenseResponses);
@@ -188,6 +188,7 @@ public class WalletServiceImpl implements WalletService {
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                     e.setParentCategoryName(commonService.getMessageSrc(e.getParentCategoryName(), locale));
+                    e.setType(commonService.getMessageSrc(getExpenseTypeDisp(e.getType()), locale));
                 })
                 .toList();
         //hơi chậm tí mà thôi kệ
@@ -199,6 +200,7 @@ public class WalletServiceImpl implements WalletService {
                     expense.ifPresent(exp -> {
                         exp.setCategoryName(commonService.getMessageSrc(exp.getCategoryName(), locale));
                         exp.setParentCategoryName(commonService.getMessageSrc(exp.getParentCategoryName(), locale));
+                        exp.setType(commonService.getMessageSrc(getExpenseTypeDisp(exp.getType()), locale));
                         scheduler.setData(exp);
                     });
                     return scheduler;
