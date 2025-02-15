@@ -8,11 +8,12 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT u FROM User u WHERE u.email = :email AND u.status != 'INACTIVE'")
+    @Query("SELECT u FROM User u WHERE u.email = :email AND u.status NOT IN ('INACTIVE', 'DELETED')")
     Optional<User> findByEmail(String email);
 
     @Query("SELECT u FROM User u " +
             "INNER JOIN RefreshToken r ON r.userId = u.id " +
-            "WHERE r.token = :refreshToken")
+            "WHERE r.token = :refreshToken " +
+            "AND u.status NOT IN ('INACTIVE', 'DELETED')")
     Optional<User> findByRfToken(String refreshToken);
 }

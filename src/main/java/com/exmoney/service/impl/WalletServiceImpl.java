@@ -89,6 +89,7 @@ public class WalletServiceImpl implements WalletService {
         if (wallet.getId() == null) { //lần đầu
             wallet.setCreatedAt(now);
             wallet.setCreatedBy(0L);
+            wallet.setIsDefault(true);
             wallet.setName(defaultWalletName); //lưu là default.wallet_name luôn để có thể get dynamic
             wallet.setDescription(defaultWalletDescription);
             wallet.setOwnerUserId(userId);
@@ -186,7 +187,7 @@ public class WalletServiceImpl implements WalletService {
                 .toList();
         List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId(), null, null, null, null, null, DEFAULT_PAGE_OFFSET, DEFAULT_PAGE_SIZE)
                 .stream().peek(e -> {
-                    e.setWalletName(response.getName());
+                    e.setWalletName(commonService.getMessageSrc(wallet.getName(), locale));
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                     e.setParentCategoryName(commonService.getMessageSrc(e.getParentCategoryName(), locale));
@@ -334,7 +335,7 @@ public class WalletServiceImpl implements WalletService {
                 "notify.title.wallet_change_limit", locale);
         String notiContent = commonService.getMessageSrcWithParam(
                 "notify.content.wallet_change_limit",
-                locale, walletObj.getName(), history.getExpenseLimit(), walletObj.getExpenseLimit());
+                locale, commonService.getMessageSrc(walletObj.getName(), locale), history.getExpenseLimit(), walletObj.getExpenseLimit());
 
         notificationService.pushNotification(
                 NotificationBuilder.builder()
