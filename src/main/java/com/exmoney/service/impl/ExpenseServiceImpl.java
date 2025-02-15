@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
+import static com.exmoney.util.Constant.DEFAULT_PAGE_OFFSET;
+import static com.exmoney.util.Constant.DEFAULT_PAGE_SIZE;
 import static com.exmoney.util.Constant.ExpenseEntryType.*;
 import static com.exmoney.util.Constant.ExpenseType.*;
 import static com.exmoney.util.Constant.NotificationComponent.*;
@@ -421,7 +423,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                                                                           Locale locale) {
         LocalDateTime startDateVal = clientToLocalDateTime(startTime);
         LocalDateTime endDateVal = clientToLocalDateTime(endTime);
-        List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId, keyword, categoryId, createdby, startDateVal, endDateVal)
+        List<ExpenseResponse> list = expenseRepository.findAccessByUser(commonService.getCurrentUserId(), walletId, keyword, categoryId, createdby, startDateVal, endDateVal, 0, 100 /*tạm*/)
                 .stream().peek(e -> {
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));

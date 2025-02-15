@@ -9,6 +9,8 @@ public class Constant {
     public static final Locale DEFAULT_LOCALE = Locale.forLanguageTag("us");
     public static final String API_BASE_ADMIN = "/api/admin";
     public static final String API_BASE_USER = "/api";
+    public static final Integer DEFAULT_PAGE_OFFSET = 0;
+    public static final Integer DEFAULT_PAGE_SIZE = 20;
 
     public static class Status {
         public static final String ACTIVE = "ACTIVE"; //default

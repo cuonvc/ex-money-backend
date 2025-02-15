@@ -72,10 +72,11 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "       (cast(:startDate as DATE) IS NULL OR cast(:endDate as DATE) IS NULL) " +
             "       OR (e.entryDate BETWEEN :startDate AND :endDate) " +
             "   )" +
-            "ORDER BY e.updatedAt DESC, e.id DESC "
+            "ORDER BY e.updatedAt DESC, e.id DESC " +
+            "LIMIT :limit OFFSET :offset"
     )
         //có thể không phải người tạo nhưng chung ví với người tạo thì vẫn xem được (nhưng không update được)
-    List<ExpenseResponse> findAccessByUser(Long currentUserId, Long walletId, String keyword, Long categoryId, Long createdBy, LocalDateTime startDate, LocalDateTime endDate);
+    List<ExpenseResponse> findAccessByUser(Long currentUserId, Long walletId, String keyword, Long categoryId, Long createdBy, LocalDateTime startDate, LocalDateTime endDate, int offset, int limit);
 
 
     @Query("SELECT new map (e.id AS " + PROP_ID + ", e.status AS " + PROP_STATUS + ", e.entryDate AS " + PROP_ENTRY_DATE +
@@ -115,9 +116,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   AND e.status = 'ACTIVE' " +
             "   AND EXTRACT(YEAR FROM e.entryDate) = :year " +
             "   AND EXTRACT(MONTH FROM e.entryDate) = :month " +
-            "ORDER BY e.createdAt DESC"
+            "ORDER BY e.createdAt DESC " +
+            "LIMIT :limit OFFSET :offset"
     )
-    List<ExpenseResponse> findAllByOwner(Long userId, int year, int month);
+    List<ExpenseResponse> findAllByOwner(Long userId, int year, int month, int offset, int limit);
 
     @Query("SELECT e FROM Expense e " +
             "WHERE e.status = 'SCHEDULED' " +

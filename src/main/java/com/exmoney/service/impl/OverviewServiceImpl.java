@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.exmoney.util.Constant.DEFAULT_PAGE_OFFSET;
+import static com.exmoney.util.Constant.DEFAULT_PAGE_SIZE;
 import static com.exmoney.util.Utils.divideAmount;
 import static com.exmoney.util.Utils.getExpenseTypeDisp;
 
@@ -50,7 +52,7 @@ public class OverviewServiceImpl implements OverviewService {
         }
 
         log.info("LOCAL DATE TIME - {}", localDateTime);
-        List<ExpenseResponse> expenses = expenseRepository.findAllByOwner(userId, localDateTime.getYear(), localDateTime.getMonthValue())
+        List<ExpenseResponse> expenses = expenseRepository.findAllByOwner(userId, localDateTime.getYear(), localDateTime.getMonthValue(), DEFAULT_PAGE_OFFSET, DEFAULT_PAGE_SIZE)
                 .stream().peek(e -> {
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                     e.setWalletName(commonService.getMessageSrc(e.getWalletName(), locale));

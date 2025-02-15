@@ -31,6 +31,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
+import static com.exmoney.util.Constant.DEFAULT_PAGE_OFFSET;
+import static com.exmoney.util.Constant.DEFAULT_PAGE_SIZE;
 import static com.exmoney.util.Constant.NotificationComponent.*;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
 import static com.exmoney.util.Constant.NotificationPriority.NORMAL;
@@ -151,7 +153,7 @@ public class WalletServiceImpl implements WalletService {
                 .toList();
         response.setOtherWallets(walletMap);
 
-        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId, null, null, null, null, null)
+        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(currentUserId, walletId, null, null, null, null, null, DEFAULT_PAGE_OFFSET, DEFAULT_PAGE_SIZE)
                 .stream().peek(e -> {
                     e.setWalletName(response.getName());
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
@@ -182,7 +184,7 @@ public class WalletServiceImpl implements WalletService {
         List<UserResponse> memberList = userWalletRepository.findUserByWallet(wallet.getId())
                 .stream().map(userMapper::entityToResponse)
                 .toList();
-        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId(), null, null, null, null, null)
+        List<ExpenseResponse> expenseResponses = expenseRepository.findAccessByUser(userId, wallet.getId(), null, null, null, null, null, DEFAULT_PAGE_OFFSET, DEFAULT_PAGE_SIZE)
                 .stream().peek(e -> {
                     e.setWalletName(response.getName());
                     e.setDescription(commonService.getMessageSrc(e.getDescription(), locale));
