@@ -1,0 +1,15 @@
+SERVER_PORT: 8081
+
+DB_HOST: host.docker.internal
+DB_PORT: 5432
+DB_NAME: exmoney
+DB_DEFAULT_SCHEMA: exmoney-dev
+DB_USERNAME: abc
+DB_PASSWORD: xyz
+
+REDIS_HOST: abc
+REDIS_PORT: xyz
+REDIS_URL: redis://redis:6379
+REDIS_PASSWORD: abcxyz
+
+MAIL_PASSWORD: abcxyz
