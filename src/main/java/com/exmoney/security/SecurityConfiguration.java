@@ -41,7 +41,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(handle -> handle.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in",
-                                "/api/auth/active-account", "/api/auth/token/renew",
+                                "/api/auth/sign-up/validate-email", "/api/auth/token/renew",
                                 "/api/auth/oauth2/validate",
                                 "/api/test/**")
                         .permitAll()

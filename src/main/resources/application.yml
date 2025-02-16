@@ -30,7 +30,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: exmoneysuppport@gmail.com
+    username: exmoneyapplication@gmail.com
     password: ${MAIL_PASSWORD}
     properties:
       mail:
@@ -42,7 +42,6 @@ spring:
     redis:
       port: ${REDIS_PORT}
       host: ${REDIS_HOST}
-      url: ${REDIS_URL}
       password: ${REDIS_PASSWORD}
 
   servlet:
@@ -65,6 +64,7 @@ exmoney:
       wallet_description: "default.wallet_description"
       expense_income_name: "default.expense_income_name"
       expense_income_description: "default.expense_income_description"
+      otp_code_expire_time: 5 #5 minutes
 #      categories:
 #        - "default.category_home"
 #        - "default.category_food"
@@ -75,6 +75,7 @@ exmoney:
 #        - "default.category_tech"
 #        - "default.category_other"
     action_log:
+      email_send_to_client: "action.email_send_to_client"
       user_sign_in_google: "action.google_sign_in"
       user_sign_in_github: "action.github_sign_in"
       user_sign_in: "action.user_sign_in"

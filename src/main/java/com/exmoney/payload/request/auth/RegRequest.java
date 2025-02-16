@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegRequest {
+public class RegRequest implements Serializable {
 
     @NotNull(message = "validate.name_empty")
     @NotBlank(message = "validate.name_empty")

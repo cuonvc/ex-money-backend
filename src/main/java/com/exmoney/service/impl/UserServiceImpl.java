@@ -21,10 +21,7 @@ import com.exmoney.repository.RefreshTokenRepository;
 import com.exmoney.repository.UserRepository;
 import com.exmoney.security.CustomUserDetailService;
 import com.exmoney.security.jwt.JwtTokenProvider;
-import com.exmoney.service.CommonService;
-import com.exmoney.service.TokenService;
-import com.exmoney.service.UserService;
-import com.exmoney.service.WalletService;
+import com.exmoney.service.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,10 +47,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.exmoney.payload.enumerate.ErrorCode.*;
 import static com.exmoney.util.Constant.DEFAULT_LOCALE;
 import static com.exmoney.util.Constant.DeviceStatus.ACTIVE;
+import static com.exmoney.util.Utils.generateOtpCode;
 import static com.exmoney.util.Utils.getNow;
 
 @Service
@@ -75,6 +75,9 @@ public class UserServiceImpl implements UserService {
     @Value("${exmoney.application.action_log.user_update_avatar}")
     private String action_user_update_avatar;
 
+    @Value("${exmoney.application.default.otp_code_expire_time}")
+    private String otpCodeExpireTime;
+
     private final CustomUserDetailService customUserDetailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -89,10 +92,12 @@ public class UserServiceImpl implements UserService {
     private final EntityManager entityManager;
     private final CommonService commonService;
     private final MessageSource messageSource;
+    private final EmailService emailService;
+    private final RedisTemplate<RegRequest, String> redisRegRequestTemplate;
 
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse<UserResponse>> register(RegRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<String>> register(RegRequest request, Locale locale) {
 
         request.setEmail(request.getEmail().trim().toLowerCase());
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -103,14 +108,36 @@ public class UserServiceImpl implements UserService {
             commonService.throwException(PASSWORD_NOT_MATCHED, locale, null);
         }
 
+        String activeCode = generateOtpCode();
+        log.info("Active code generated ----------> : {}", activeCode);
+        redisRegRequestTemplate.opsForValue().set(request, activeCode);
+        redisRegRequestTemplate.expire(request, Integer.parseInt(otpCodeExpireTime), TimeUnit.MINUTES);
+
+        String subject = commonService.getMessageSrc("mail.subject.sign_up", locale);
+        String content = commonService.getMessageSrcWithParam("mail.content.sign_up", locale, activeCode, otpCodeExpireTime);
+        emailService.send(request.getEmail(), subject, content, locale);
+        return responseFactory.success(null, "sign_up.request.success", locale, request.getEmail(), otpCodeExpireTime);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BaseResponse<UserResponse>> validateEmail(RegRequest request, String otpCode, Locale locale) {
+        String otpCodeCached = redisRegRequestTemplate.opsForValue().get(request);
+        if (otpCodeCached == null) {
+            commonService.throwException(OTP_CODE_EXPIRED, locale, null);
+        } else if (!otpCodeCached.equals(otpCode)) {
+            commonService.throwException(OTP_CODE_NOT_MATCHED, locale, null);
+        }
+
         User user = userMapper.regRequestToEntity(request);
         user.setCreatedAt(getNow());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         entityManager.persist(user);
         tokenService.initRefreshToken(user);
         walletService.initDefaultWallet(user.getId(), locale);
-        UserResponse response = userMapper.entityToResponse(user);
-        return responseFactory.success(null, response);
+        //active xong rồi thì clear cached
+        redisRegRequestTemplate.delete(request);
+        return responseFactory.success(null, "sign_up.email_validate.success", locale);
     }
 
     @Override

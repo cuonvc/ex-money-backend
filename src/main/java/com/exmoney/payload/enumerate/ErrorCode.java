@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     RESOURCE_DO_NOT_ACCESS("RESOURCE_DO_NOT_ACCESS", "exception.resource_do_no_access", HttpStatus.FORBIDDEN.value()),
+    ERROR_SEND_EMAIL("ERROR_SEND_EMAIL", "exception.send_email", HttpStatus.BAD_REQUEST.value()),
+    OTP_CODE_EXPIRED("OTP_CODE_EXPIRED", "exception.otp_code_expired", HttpStatus.BAD_REQUEST.value()),
+    OTP_CODE_NOT_MATCHED("OTP_CODE_NOT_MATCHED", "exception.otp_code_not_matched", HttpStatus.BAD_REQUEST.value()),
     JWT_INVALID_SIGNATURE("JWT_INVALID_SIGNATURE", "exception.jwt.invalid_signature", HttpStatus.UNAUTHORIZED.value()),
     JWT_INVALID_TOKEN("JWT_INVALID_TOKEN", "exception.jwt.invalid_token", HttpStatus.UNAUTHORIZED.value()),
     JWT_EXPIRED_TOKEN("JWT_EXPIRED_TOKEN", "exception.jwt.expired_token", HttpStatus.UNAUTHORIZED.value()),

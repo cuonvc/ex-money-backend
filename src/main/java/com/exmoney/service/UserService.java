@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.Locale;
 
 public interface UserService {
-    ResponseEntity<BaseResponse<UserResponse>> register(RegRequest request, Locale locale);
+    ResponseEntity<BaseResponse<String>> register(RegRequest request, Locale locale);
+    ResponseEntity<BaseResponse<UserResponse>> validateEmail(RegRequest request, String otpCode, Locale locale);
 
     ResponseEntity<BaseResponse<Object>> signIn(LoginRequest request, Locale locale);
 

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 import static com.exmoney.payload.enumerate.ErrorCode.INTERNAL_SERVER_ERROR;
 import static com.exmoney.util.Constant.ExpenseType.*;
@@ -48,5 +49,9 @@ public class Utils {
             case SCHEDULE -> "display.expense_type.schedule";
             default -> "";
         };
+    }
+
+    public static String generateOtpCode() {
+        return String.valueOf(new Random().nextInt(900000) + 100000);
     }
 }

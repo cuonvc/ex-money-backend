@@ -20,9 +20,16 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<BaseResponse<UserResponse>> signUp(@RequestParam Locale locale,
+    public ResponseEntity<BaseResponse<String>> signUp(@RequestParam Locale locale,
                                                              @Valid @RequestBody RegRequest request) {
         return userService.register(request, locale);
+    }
+
+    @PostMapping("/sign-up/validate-email")
+    public ResponseEntity<BaseResponse<UserResponse>> signUpValidateEmail(@RequestParam Locale locale,
+                                                                          @RequestBody RegRequest request,
+                                                                          @RequestParam String otpCode) {
+        return userService.validateEmail(request, otpCode, locale);
     }
 
     @PostMapping("/sign-in")

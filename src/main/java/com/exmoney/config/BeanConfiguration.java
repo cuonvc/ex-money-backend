@@ -1,9 +1,12 @@
 package com.exmoney.config;
 
+import com.exmoney.payload.request.auth.RegRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.LocaleResolver;
@@ -43,5 +46,12 @@ public class BeanConfiguration {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.setValidationMessageSource(messageSource);
         return validator;
+    }
+
+    @Bean
+    public RedisTemplate<RegRequest, String> redisRegRequestTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<RegRequest, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
     }
 }
