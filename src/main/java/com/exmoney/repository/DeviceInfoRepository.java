@@ -13,6 +13,7 @@ public interface DeviceInfoRepository extends JpaRepository<DeviceInfo, Long> {
     @Query("SELECT dv.deviceToken FROM DeviceInfo dv " +
             "INNER JOIN User u ON u.notificationOn = TRUE " +
             "WHERE dv.userId IN :userIds " +
+            "AND dv.deviceToken IS NOT NULL " +
             "AND dv.status <> 'DELETED'")
     Set<String> findListDeviceToken(Set<Long> userIds);
 
