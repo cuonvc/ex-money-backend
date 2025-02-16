@@ -27,6 +27,23 @@ spring:
           google:
             client-id: dasd
             client-secret: dsd
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: exmoneysuppport@gmail.com
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      url: ${REDIS_URL}
+      password: ${REDIS_PASSWORD}
 
   servlet:
     multipart:
@@ -35,6 +52,8 @@ spring:
 
 exmoney:
   application:
+    sender:
+      email: exmoneysuppport@gmail.com
     oauth:
       google:
         api-get-info: https://www.googleapis.com/oauth2/v3/userinfo

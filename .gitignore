@@ -6,6 +6,7 @@ target/
 
 src/main/resources/firebase-private-key.json
 src/main/resources/application-staging.yml
+src/main/resources/application-dev.yml
 
 ### STS ###
 .apt_generated
