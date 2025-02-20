@@ -98,7 +98,7 @@ public class ExpenseSchedulerExecuteWorker {
     }
 
     private void pushNotification(TaskSchedulerConfig config, LocalDateTime now) {
-        Expense expense = expenseRepository.findById(config.getRefId()).orElse(null);
+        Expense expense = expenseRepository.findByIdScheduled(config.getRefId()).orElse(null);
         if (expense != null) {
             ExpenseCategory category = expenseCategoryRepository.findById(expense.getCategoryId()).orElse(null);
             String title = commonService.getMessageSrc(

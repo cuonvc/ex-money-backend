@@ -515,26 +515,30 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private void resetOldAmountInWallet(Expense expense, Wallet wallet) {
         //khôi phục số dư ví khi chưa thêm expense
-        BigDecimal oldBalance;
-        if (expense.getEntryType().equals(INCOME)) {
-            oldBalance = wallet.getBalance().subtract(expense.getAmount()); //trừ đi số tiền đã thêm vào
-            wallet.setTotalIncome(wallet.getTotalIncome().subtract(expense.getAmount())); //trừ đi số tiền đã thêm vào income
-        } else {
-            oldBalance = wallet.getBalance().add(expense.getAmount()); //cộng lại số tiền đã bị trừ bởi chi tiêu này
-            wallet.setTotalExpense(wallet.getTotalExpense().subtract(expense.getAmount())); //trừ đi số tiền đã thêm vào expense
+        BigDecimal oldBalance = wallet.getBalance();
+        if (!expense.getType().equals(SCHEDULE)) {
+            if (expense.getEntryType().equals(INCOME)) {
+                oldBalance = wallet.getBalance().subtract(expense.getAmount()); //trừ đi số tiền đã thêm vào
+                wallet.setTotalIncome(wallet.getTotalIncome().subtract(expense.getAmount())); //trừ đi số tiền đã thêm vào income
+            } else {
+                oldBalance = wallet.getBalance().add(expense.getAmount()); //cộng lại số tiền đã bị trừ bởi chi tiêu này
+                wallet.setTotalExpense(wallet.getTotalExpense().subtract(expense.getAmount())); //trừ đi số tiền đã thêm vào expense
+            }
         }
 
         wallet.setBalance(oldBalance);
     }
 
     private void amountDivision(Expense expense, Wallet wallet) {
-        BigDecimal newBalance;
-        if (expense.getEntryType().equals(INCOME)) {
-            newBalance = wallet.getBalance().add(expense.getAmount());
-            wallet.setTotalIncome(wallet.getTotalIncome().add(expense.getAmount()));
-        } else {
-            newBalance = wallet.getBalance().subtract(expense.getAmount());
-            wallet.setTotalExpense(wallet.getTotalExpense().add(expense.getAmount()));
+        BigDecimal newBalance = wallet.getBalance();
+        if (!expense.getType().equals(SCHEDULE)) {
+            if (expense.getEntryType().equals(INCOME)) {
+                newBalance = wallet.getBalance().add(expense.getAmount());
+                wallet.setTotalIncome(wallet.getTotalIncome().add(expense.getAmount()));
+            } else {
+                newBalance = wallet.getBalance().subtract(expense.getAmount());
+                wallet.setTotalExpense(wallet.getTotalExpense().add(expense.getAmount()));
+            }
         }
 
         expense.setNewBalance(newBalance);
