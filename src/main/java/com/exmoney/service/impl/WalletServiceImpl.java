@@ -202,6 +202,7 @@ public class WalletServiceImpl implements WalletService {
                     Optional<ExpenseResponse> expense = expenseRepository.accessibleById(s.getRefId(), userId, SCHEDULED);
                     expense.ifPresent(exp -> {
                         exp.setCategoryName(commonService.getMessageSrc(exp.getCategoryName(), locale));
+                        exp.setWalletName(commonService.getMessageSrc(exp.getWalletName(), locale));
                         exp.setParentCategoryName(commonService.getMessageSrc(exp.getParentCategoryName(), locale));
                         exp.setType(commonService.getMessageSrc(getExpenseTypeDisp(exp.getType()), locale));
                         scheduler.setData(exp);
