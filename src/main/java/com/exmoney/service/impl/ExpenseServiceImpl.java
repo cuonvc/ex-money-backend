@@ -59,6 +59,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final UserRepository userRepository;
     private final ExpenseHistoryRepository expenseHistoryRepository;
     private final NotificationService notificationService;
+    private final TaskSchedulerConfigRepository taskSchedulerConfigRepository;
 
     @Value("${exmoney.application.default.expense_income_name}")
     private String expenseIncomeName;
@@ -372,6 +373,14 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (expense.getStatus().equals(ACTIVE) && !expense.getType().equals(SCHEDULE)) {
             resetOldAmountInWallet(expense, wallet);
         }
+
+        if (expense.getType().equals(SCHEDULE)) {
+            TaskSchedulerConfig task = taskSchedulerConfigRepository.findByRef(expense.getId(), Constant.TableName.EXPENSE_TBL);
+            if (task != null) {
+                taskSchedulerConfigRepository.delete(task);
+            }
+        }
+
         expense.setUpdatedAt(getNow());
         expense.setStatus(DELETED);
         return responseFactory.success(actionLogExpenseDelete, "expense_delete.success", locale, null);

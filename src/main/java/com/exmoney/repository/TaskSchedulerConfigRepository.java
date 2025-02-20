@@ -17,6 +17,12 @@ public interface TaskSchedulerConfigRepository extends JpaRepository<TaskSchedul
     TaskSchedulerConfig findByIdAndOwner(Long id, Long ownerId);
 
     @Query("SELECT t FROM TaskSchedulerConfig t " +
+            "WHERE t.refId = :refId " +
+            "AND t.refTable = :refTable " +
+            "AND t.status <> 'DELETED'")
+    TaskSchedulerConfig findByRef(Long refId, String refTable);
+
+    @Query("SELECT t FROM TaskSchedulerConfig t " +
             "WHERE t.refTable = :refTable " +
             "AND t.taskName = :taskName " +
             "AND t.status = 'ACTIVE' ")
