@@ -512,7 +512,6 @@ public class ExpenseServiceImpl implements ExpenseService {
                 expense.setUpdatedAt(now);
                 expense.setUpdatedBy(0L);
                 expense.setCreatedAt(now);
-                expense.setCreatedBy(0L);
                 expenseRepository.save(expense); //persist để lấy ID nếu cần
 
                 amountDivision(expense, walletOrg);

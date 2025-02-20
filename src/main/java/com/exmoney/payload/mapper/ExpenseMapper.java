@@ -23,7 +23,6 @@ public interface ExpenseMapper {
     @Mapping(target = PROP_TYPE, ignore = true)
     @Mapping(target = PROP_CREATED_AT, ignore = true)
     @Mapping(target = PROP_UPDATED_AT, ignore = true)
-    @Mapping(target = PROP_CREATED_BY, ignore = true)
     @Mapping(target = PROP_UPDATED_BY, ignore = true)
     Expense cloneToNew(Expense expense);
 
