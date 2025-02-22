@@ -209,6 +209,7 @@ public class WalletServiceImpl implements WalletService {
                     });
                     return scheduler;
                 }).collect(Collectors.toList());
+        response.setCurrentUserId(userId);
         response.setMembers(memberList);
         response.setExpenses(expenseResponses);
         response.setSchedulers(schedulerResponses);

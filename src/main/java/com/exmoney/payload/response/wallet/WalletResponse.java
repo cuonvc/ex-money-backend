@@ -14,6 +14,7 @@ public class WalletResponse {
     private Long id;
     private String status;
     private Long ownerUserId;
+    private Long currentUserId;
     private List<UserResponse> members;
     private String name;
     private String description;
