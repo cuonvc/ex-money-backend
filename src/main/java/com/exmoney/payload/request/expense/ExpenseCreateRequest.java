@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 public class ExpenseCreateRequest {
 
-    @Size(max = 100, message = "validate.expense_desc_length")
+    @Size(max = 200, message = "validate.expense_desc_length")
     private String description;
 
     @Range(min = 0, max = 100000000, message = "validate.expense_amount_size")

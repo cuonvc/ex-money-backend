@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static com.exmoney.util.Constant.DEFAULT_LOCALE_VI;
 import static com.exmoney.util.Constant.ExpenseEntryType.EXPENSE;
 import static com.exmoney.util.Constant.NotificationComponent.*;
 import static com.exmoney.util.Constant.NotificationPriority.HIGH;
@@ -103,14 +104,14 @@ public class ExpenseSchedulerExecuteWorker {
             ExpenseCategory category = expenseCategoryRepository.findById(expense.getCategoryId()).orElse(null);
             String title = commonService.getMessageSrc(
                     "notify.title.task_expense_scheduler.execute",
-                    Locale.getDefault()
+                    DEFAULT_LOCALE_VI
             );
             String content = commonService.getMessageSrcWithParam(
                     "notify.content.task_expense_scheduler.execute",
-                    Locale.getDefault(),
+                    DEFAULT_LOCALE_VI,
                     expense.getAmount(),
-                    category != null ? commonService.getMessageSrc(category.getName(), Locale.getDefault()) : "",
-                    taskSchedulerService.getIntervalMessage(config.getTimeInterval(), config.getTimeValue(), Locale.getDefault())
+                    category != null ? commonService.getMessageSrc(category.getName(), DEFAULT_LOCALE_VI) : "",
+                    taskSchedulerService.getIntervalMessage(config.getTimeInterval(), config.getTimeValue(), DEFAULT_LOCALE_VI)
             );
 
             notificationService.pushNotification(

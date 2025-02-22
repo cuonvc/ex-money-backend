@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.text.MessageFormat;
 import java.util.*;
 
+import static com.exmoney.util.Constant.DEFAULT_LOCALE_VI;
 import static com.exmoney.util.Utils.getNowStr;
 
 @ControllerAdvice
@@ -35,11 +36,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
         List<String> errors = new ArrayList<>();
-        Locale locale = request.getLocale();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             if (error.getDefaultMessage() != null) {
                 try {
-                    String message = messageSource.getMessage(error.getDefaultMessage(), null, locale);
+                    String message = messageSource.getMessage(error.getDefaultMessage(), null, DEFAULT_LOCALE_VI);
                     //add params to string message
                     if (error.getArguments() != null) {
                         Object[] args = new Object[error.getArguments().length - 1];
