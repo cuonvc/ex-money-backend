@@ -51,7 +51,8 @@ public interface TaskSchedulerConfigRepository extends JpaRepository<TaskSchedul
             "   INNER JOIN Wallet w ON w.id = e.walletId AND w.id = :walletId " +
             "WHERE t.createdBy = :ownerId " +
             "   AND t.refTable = 'expense' " +
-            "   AND t.status <> 'DELETED' ")
+            "   AND t.status <> 'DELETED' " +
+            "ORDER BY t.updatedAt DESC, t.id DESC ")
     //find list Expense scheduler
     List<TaskSchedulerConfig> findAllByOwnerAndExpenseRef(Long ownerId, Long walletId);
 }
