@@ -42,6 +42,10 @@ public class Utils {
         return amount.max(BigDecimal.ZERO);
     }
 
+    public static BigDecimal getMinWithHundred(BigDecimal amount) {
+        return amount.min(BigDecimal.valueOf(100));
+    }
+
     public static String getExpenseTypeDisp(String expenseType) {
         return switch (expenseType) {
             case MANUAL -> "display.expense_type.manual";

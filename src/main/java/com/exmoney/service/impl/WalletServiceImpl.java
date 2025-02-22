@@ -318,16 +318,16 @@ public class WalletServiceImpl implements WalletService {
         history.setCreatedBy(userId);
 
         if (request.getTotalExpenseLimit() != null) {
-            walletObj.setExpenseLimit(getMaxWithZero(request.getTotalExpenseLimit()));
+            walletObj.setExpenseLimit(getMaxWithZero(getMinWithHundred(request.getTotalExpenseLimit())));
         }
         if (request.getExpenseWarningLevel1() != null) {
-            walletObj.setExpenseWarningLevel1(getMaxWithZero(request.getExpenseWarningLevel1()));
+            walletObj.setExpenseWarningLevel1(getMaxWithZero(getMinWithHundred(request.getExpenseWarningLevel1())));
         }
         if (request.getExpenseWarningLevel2() != null) {
-            walletObj.setExpenseWarningLevel2(getMaxWithZero(request.getExpenseWarningLevel2()));
+            walletObj.setExpenseWarningLevel2(getMaxWithZero(getMinWithHundred(request.getExpenseWarningLevel2())));
         }
         if (request.getExpenseWarningLevel3() != null) {
-            walletObj.setExpenseWarningLevel3(getMaxWithZero(request.getExpenseWarningLevel3()));
+            walletObj.setExpenseWarningLevel3(getMaxWithZero(getMinWithHundred(request.getExpenseWarningLevel3())));
         }
 
         walletRepository.save(walletObj);
