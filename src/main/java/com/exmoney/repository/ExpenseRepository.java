@@ -6,6 +6,7 @@ import com.exmoney.payload.response.overview.WeekMapAmount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -120,6 +121,27 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "LIMIT :limit OFFSET :offset"
     )
     List<ExpenseResponse> findAllByOwner(Long userId, int year, int month, int offset, int limit);
+
+    @Query("SELECT " +
+            "   SUM(CASE" +
+            "   WHEN EXTRACT(YEAR FROM e.entryDate) = :year " +
+            "       AND EXTRACT(MONTH FROM e.entryDate) = :month " +
+            "       AND EXTRACT(DAY FROM e.entryDate) <= :dayOfMonth " +
+            "   THEN e.amount " +
+            "   ELSE 0 " +
+            "   END ), " +
+
+            "   SUM(CASE" +
+            "   WHEN (CASE WHEN :month = 1 THEN (EXTRACT(YEAR FROM e.entryDate) = (:year - 1)) ELSE (EXTRACT(YEAR FROM e.entryDate) = :year) END) " +
+            "       AND (CASE WHEN :month = 1 THEN (EXTRACT(MONTH FROM e.entryDate) = 12) ELSE (EXTRACT(MONTH FROM e.entryDate) = (:month - 1)) END) " +
+            "       AND EXTRACT(DAY FROM e.entryDate) <= :dayOfMonth " +
+            "   THEN e.amount " +
+            "   ELSE 0 " +
+            "   END ) " +
+            "FROM Expense e " +
+            "WHERE e.userId = :userId " +
+            "   AND e.status = 'ACTIVE' ")
+    Object compareWithPrevMonth(Long userId, int year, int month, int dayOfMonth);
 
     @Query("SELECT e FROM Expense e " +
             "WHERE e.status = 'SCHEDULED' " +
