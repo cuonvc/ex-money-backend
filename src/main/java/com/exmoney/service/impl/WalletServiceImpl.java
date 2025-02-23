@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -168,6 +169,77 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    //Request này có thể bị spam phía client -> giải pháp là
+    //-> Sử dụng Redis locking (trong này không dùng)
+    //-> insert thằng vào DB luôn kèm điều kiện ON CONFLICT, nếu return 0 -> đã tồn tại, return 1 -> đã lưu (cái này phải set constraint cho DB)
+    //-> Sử dụng @Transactional(isolation = Isolation.SERIALIZABLE) - nó sẽ lock cả table -> insert phải dùng
+    //-> Sử dụng @Lock(LockModeType.PESSIMISTIC_WRITE) ở repo, nó sẽ lock bản ghi đang select lại -> chỉ áp dụng khi update
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public ResponseEntity<BaseResponse<WalletResponse>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
+        CustomUserDetail userDetail = commonService.getCurrentUser();
+        LocalDateTime now = getNow();
+        User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
+        if (targetUser.getId().equals(userDetail.getId())) {
+            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
+        }
+        if (walletRepository.findByIdAndOwner(walletId, userDetail.getId()).isEmpty()) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, null);
+        }
+
+        UserWallet uw = userWalletRepository.findByUserAndWallet(targetUser.getId(), walletId);
+        UserWallet userWallet = new UserWallet();
+        String actionLog = "";
+        String notiTitle = "";
+        String notiContent = "";
+        Wallet toResponse = walletRepository.findById(walletId).get();
+        if (action.equals(ADD)) {
+            if (uw != null) {
+                commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
+            }
+            //must empty
+            userWallet = UserWallet.builder()
+                    .userId(targetUser.getId())
+                    .walletId(walletId)
+                    .updatedAt(now)
+                    .status(ACTIVE)
+                    .build();
+            actionLog = actionWalletAddUser;
+            notiTitle = commonService.getMessageSrcWithParam("notify.title.wallet_add_user", locale);
+            notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_add_user", locale, userDetail.getUsername(), toResponse.getName());
+        } else if (action.equals(REMOVE)) {
+            if (uw == null) {
+                commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
+            }
+            //must exist
+            userWallet = uw;
+            userWallet.setStatus(DELETED);
+            actionLog = actionWalletRemoveUser;
+            notiTitle = commonService.getMessageSrcWithParam("notify.title.wallet_remove_user", locale);
+            notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_remove_user", locale, userDetail.getUsername(), toResponse.getName());
+        } else {
+            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
+        }
+
+
+        userWalletRepository.save(userWallet);
+
+        WalletResponse response = toResponse != null
+                ? toWalletResponse(toResponse, userDetail.getId(), locale)
+                : new WalletResponse();
+
+        notificationService.pushNotification(NotificationBuilder.builder()
+                .userIdList(Set.of(targetUser.getId()))
+                .priority(HIGH)
+                .fcmData(Map.of(
+                        TITLE, notiTitle,
+                        CONTENT, notiContent,
+                        TYPE, WALLET))
+                .build());
+
+        return responseFactory.success(actionLog, response);
+    }
+
+    @Override
     public ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(boolean isOwner, Locale locale) {
         Long userId = commonService.getCurrentUserId();
         List<WalletResponse> responseList = walletRepository.findByUserId(userId, isOwner)
@@ -214,71 +286,6 @@ public class WalletServiceImpl implements WalletService {
         response.setExpenses(expenseResponses);
         response.setSchedulers(schedulerResponses);
         return response;
-    }
-
-    @Override
-    @Transactional
-    public ResponseEntity<BaseResponse<WalletResponse>> changeUser(String action, Long walletId, String userEmail, Locale locale) {
-        CustomUserDetail userDetail = commonService.getCurrentUser();
-        User targetUser = commonService.findUserByEmailOrThrow(userEmail, locale, null);
-        if (targetUser.getId().equals(userDetail.getId())) {
-            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
-        }
-        if (walletRepository.findByIdAndOwner(walletId, userDetail.getId()).isEmpty()) {
-            commonService.throwException(WALLET_NOT_FOUND, locale, null);
-        }
-
-        Optional<Wallet> wallet = walletRepository.findByIdAndUser(walletId, targetUser.getId());
-        UserWallet userWallet = new UserWallet();
-        String actionLog = "";
-        String notiTitle = "";
-        String notiContent = "";
-        Wallet toResponse = walletRepository.findById(walletId).get();
-        if (action.equals(ADD)) {
-            if (wallet.isPresent()) {
-                commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
-            }
-            //must empty
-            userWallet = UserWallet.builder()
-                    .userId(targetUser.getId())
-                    .walletId(walletId)
-                    .updatedAt(getNow())
-                    .status(ACTIVE)
-                    .build();
-            actionLog = actionWalletAddUser;
-            notiTitle = commonService.getMessageSrcWithParam("notify.title.wallet_add_user", locale);
-            notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_add_user", locale, userDetail.getUsername(), toResponse.getName());
-        } else if (action.equals(REMOVE)) {
-            if (wallet.isEmpty()) {
-                commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
-            }
-            //must exist
-            userWallet = userWalletRepository.findByUserAndWallet(targetUser.getId(), walletId);
-            userWallet.setStatus(DELETED);
-            actionLog = actionWalletRemoveUser;
-            notiTitle = commonService.getMessageSrcWithParam("notify.title.wallet_remove_user", locale);
-            notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_remove_user", locale, userDetail.getUsername(), toResponse.getName());
-        } else {
-            commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
-        }
-
-
-        userWalletRepository.save(userWallet);
-
-        WalletResponse response = toResponse != null
-                ? toWalletResponse(toResponse, userDetail.getId(), locale)
-                : new WalletResponse();
-
-        notificationService.pushNotification(NotificationBuilder.builder()
-                .userIdList(Set.of(targetUser.getId()))
-                .priority(HIGH)
-                .fcmData(Map.of(
-                        TITLE, notiTitle,
-                        CONTENT, notiContent,
-                        TYPE, WALLET))
-                .build());
-
-        return responseFactory.success(actionLog, response);
     }
 
     @Override
