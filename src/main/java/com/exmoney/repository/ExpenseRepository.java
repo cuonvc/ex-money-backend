@@ -34,7 +34,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   , e.categoryId AS " + PROP_CATEGORY_ID + ", c.name AS " + PROP_CATEGORY_NAME + ", e.createdAt AS " + PROP_CREATED_AT +
             "   , u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
-            "   INNER JOIN Wallet w ON e.walletId = w.id " +
+            "   INNER JOIN Wallet w ON e.walletId = w.id AND w.status = 'ACTIVE' " +
             "   INNER JOIN UserWallet uw ON uw.walletId = e.walletId AND uw.status = 'ACTIVE' " +
             "   INNER JOIN User u1 ON u1.id = e.userId " +
             "   LEFT JOIN User u2 ON u2.id = e.updatedBy " +
@@ -89,7 +89,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   , e.categoryId AS " + PROP_CATEGORY_ID + ", c.name AS " + PROP_CATEGORY_NAME + ", e.createdAt AS " + PROP_CREATED_AT +
             "   , u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
-            "   INNER JOIN Wallet w ON e.walletId = w.id " +
+            "   INNER JOIN Wallet w ON e.walletId = w.id AND w.status = 'ACTIVE' " +
             "   INNER JOIN UserWallet uw ON uw.userId = :ownerId AND uw.walletId = w.id AND uw.status = 'ACTIVE' " +
             "   INNER JOIN User u1 ON u1.id = e.userId " +
             "   LEFT JOIN User u2 ON u2.id = e.updatedBy " +
@@ -109,7 +109,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   , e.categoryId AS " + PROP_CATEGORY_ID + ", c.name AS " + PROP_CATEGORY_NAME + ", e.createdAt AS " + PROP_CREATED_AT +
             "   , u1.name AS " + PROP_CREATED_BY + ", e.updatedAt AS " + PROP_UPDATED_AT + ", u2.name AS " + PROP_UPDATED_BY + ") " +
             "FROM Expense e " +
-            "   INNER JOIN Wallet w ON e.walletId = w.id " +
+            "   INNER JOIN Wallet w ON e.walletId = w.id AND w.status = 'ACTIVE' " +
             "   INNER JOIN User u1 ON u1.id = e.userId " +
             "   LEFT JOIN User u2 ON u2.id = e.updatedBy " +
             "   INNER JOIN ExpenseCategory c ON c.id = e.categoryId " +
@@ -139,11 +139,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "   ELSE 0 " +
             "   END ) " +
             "FROM Expense e " +
+            "INNER JOIN Wallet w ON w.id = e.walletId AND w.status = 'ACTIVE' " +
             "WHERE e.userId = :userId " +
             "   AND e.status = 'ACTIVE' ")
     Object compareWithPrevMonth(Long userId, int year, int month, int dayOfMonth);
 
     @Query("SELECT e FROM Expense e " +
+            "INNER JOIN Wallet w ON w.id = e.walletId AND w.status = 'ACTIVE' " +
             "WHERE e.status = 'SCHEDULED' " +
             "AND e.id = :id " +
             "AND e.type = 'SCHEDULE'")

@@ -88,6 +88,7 @@ exmoney:
       expense_category_update: "action.expense_category_update"
       expense_category_delete: "action.expense_category_delete"
       wallet_create: "action.wallet_create"
+      wallet_delete: "action.wallet_delete"
       wallet_add_user: "action.wallet_add_user"
       wallet_remove_user: "action.wallet_remove_user"
       wallet_change_expense_limit: "action.wallet_change_expense_limit"

@@ -63,6 +63,8 @@ public class WalletServiceImpl implements WalletService {
 
     @Value("${exmoney.application.action_log.wallet_create}") //chu y
     private String actionWalletCreate;
+    @Value("${exmoney.application.action_log.wallet_delete}")
+    private String actionWalletDelete;
     @Value("${exmoney.application.action_log.wallet_add_user}")
     private String actionWalletAddUser;
     @Value("${exmoney.application.action_log.wallet_remove_user}")
@@ -108,10 +110,10 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse<Wallet>> create(WalletRequest request, Locale locale) {
+    public ResponseEntity<BaseResponse<WalletResponse>> create(WalletRequest request, Locale locale) {
         Long userId = commonService.getCurrentUserId();
         if (walletRepository.findByNameOfUser(request.getName(), userId).isPresent()) {
-            commonService.throwException(WALLET_NAME_ALREADY_EXISTED, locale, null, request.getName());
+            commonService.throwException(WALLET_NAME_ALREADY_EXISTED, locale, actionWalletCreate, request.getName());
         }
         Wallet wallet = walletMapper.toEntity(request);
         wallet.setCreatedAt(getNow());
@@ -128,7 +130,23 @@ public class WalletServiceImpl implements WalletService {
                         .status(ACTIVE)
                         .build()
         );
-        return responseFactory.success(actionWalletCreate, wallet);
+        return responseFactory.success(actionWalletCreate, "wallet.create.success", locale, toWalletResponse(wallet, userId, locale));
+    }
+
+    @Override
+    public ResponseEntity<BaseResponse<String>> delete(Long id, Locale locale) {
+        Long currentUserId = commonService.getCurrentUserId();
+        Wallet wallet = walletRepository.findByIdAndOwner(id, currentUserId).orElse(null);
+        if (wallet == null) {
+            commonService.throwException(WALLET_NOT_FOUND, locale, actionWalletDelete, id);
+        }
+        if (wallet.getIsDefault()) {
+            commonService.throwException(DEFAULT_WALLET_CANNOT_DELETE, locale, actionWalletDelete, id);
+        }
+        wallet.setStatus(DELETED);
+        wallet.setUpdatedAt(getNow());
+        walletRepository.save(wallet);
+        return responseFactory.success(actionWalletDelete, "wallet.delete.success", locale);
     }
 
     @Override
@@ -194,7 +212,7 @@ public class WalletServiceImpl implements WalletService {
         Wallet toResponse = walletRepository.findById(walletId).get();
         if (action.equals(ADD)) {
             if (uw != null) {
-                commonService.throwException(WALLET_IN_USE_BY_USER, locale, null);
+                commonService.throwException(WALLET_IN_USE_BY_USER, locale, actionWalletAddUser);
             }
             //must empty
             userWallet = UserWallet.builder()
@@ -208,7 +226,7 @@ public class WalletServiceImpl implements WalletService {
             notiContent = commonService.getMessageSrcWithParam("notify.content.wallet_add_user", locale, userDetail.getUsername(), toResponse.getName());
         } else if (action.equals(REMOVE)) {
             if (uw == null) {
-                commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, null);
+                commonService.throwException(WALLET_NOT_CONTAINS_USER, locale, actionWalletRemoveUser);
             }
             //must exist
             userWallet = uw;

@@ -13,7 +13,8 @@ import java.util.Locale;
 
 public interface WalletService {
     void initDefaultWallet(Long userId, Locale locale);
-    ResponseEntity<BaseResponse<Wallet>> create(WalletRequest wallet, Locale locale);
+    ResponseEntity<BaseResponse<WalletResponse>> create(WalletRequest wallet, Locale locale);
+    ResponseEntity<BaseResponse<String>> delete(Long id, Locale locale);
     ResponseEntity<BaseResponse<WalletResponse>> detail(Long walletId, Locale locale);
     ResponseEntity<BaseResponse<List<WalletResponse>>> listByUser(boolean isOwner, Locale locale);
     ResponseEntity<BaseResponse<WalletResponse>> changeUser(String action, Long walletId, String userEmail, Locale locale);

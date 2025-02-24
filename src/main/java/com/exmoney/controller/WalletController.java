@@ -24,9 +24,15 @@ public class WalletController {
     private final WalletService walletService;
 
     @PostMapping(API_BASE_USER + "/wallet")
-    public ResponseEntity<BaseResponse<Wallet>> create(@RequestParam Locale locale,
+    public ResponseEntity<BaseResponse<WalletResponse>> create(@RequestParam Locale locale,
                                                        @Valid @RequestBody WalletRequest request) {
         return walletService.create(request, locale);
+    }
+
+    @DeleteMapping(API_BASE_USER + "/wallet/{id}")
+    public ResponseEntity<BaseResponse<String>> delete(@PathVariable Long id,
+                                                       @RequestParam Locale locale) {
+        return walletService.delete(id, locale);
     }
 
     @GetMapping(API_BASE_USER + "/wallet/detail")
