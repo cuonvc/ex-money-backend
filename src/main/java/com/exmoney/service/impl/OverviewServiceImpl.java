@@ -63,9 +63,16 @@ public class OverviewServiceImpl implements OverviewService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         Object compareWithPrevMonth = expenseRepository.compareWithPrevMonth(userId, localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth());
 
-        Object[] array = (Object[]) compareWithPrevMonth;
-        BigDecimal sumOfCurrentMonth = (BigDecimal) array[0];
-        BigDecimal sumOfPrevMonth = (BigDecimal) array[1];
+        BigDecimal moreThanLasMonth = BigDecimal.ZERO;
+        if (compareWithPrevMonth != null) {
+            Object[] array = (Object[]) compareWithPrevMonth;
+            BigDecimal sumOfCurrentMonth = (BigDecimal) array[0];
+            BigDecimal sumOfPrevMonth = (BigDecimal) array[1];
+            if (sumOfCurrentMonth != null && sumOfPrevMonth != null) {
+                moreThanLasMonth = sumOfCurrentMonth.subtract(sumOfPrevMonth);
+            }
+        }
+
         List<NotificationResponse> notifications = notificationRepository.findAllByUser(userId,10, 0);
         return responseFactory.success(
                 null,
@@ -74,7 +81,7 @@ public class OverviewServiceImpl implements OverviewService {
                         .user(userResponse)
                         .notifications(notifications)
                         .totalExpenseAmount(totalAmount)
-                        .moreThanLastMonth(sumOfCurrentMonth.subtract(sumOfPrevMonth))
+                        .moreThanLastMonth(moreThanLasMonth)
                         .ownerExpenses(expenses)
                         .weekMapAmount(weekMapAmount(expenses))
                         .build()

@@ -130,6 +130,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userMapper.regRequestToEntity(request);
+        user.setNotificationOn(true);
         user.setCreatedAt(getNow());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         entityManager.persist(user);
@@ -149,6 +150,7 @@ public class UserServiceImpl implements UserService {
         setUserPrincipal(request.getEmail(), locale);
 
         User user = commonService.findUserByEmailOrThrow(request.getEmail(), locale, action_user_sign_in);
+        user.setNotificationOn(true);
 
         if (!validPassword(request.getPassword(), user.getPassword())) {
             commonService.throwException(PASSWORD_INCORRECT, locale, action_user_sign_in);
