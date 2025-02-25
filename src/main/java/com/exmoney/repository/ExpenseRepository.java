@@ -55,7 +55,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "       OR (" +
             "           e.description LIKE CONCAT('%', :keyword, '%') " +
             "           OR CAST(e.amount AS string) LIKE CONCAT('%', :keyword, '%') " +
-            "           OR EXISTS (SELECT sc.id FROM ExpenseCategory sc WHERE sc.name LIKE CONCAT('%', :keyword, '%'))" +
+            //Không like theo danh mục vì có filter rồi
+//            "           OR EXISTS (SELECT sc.id FROM ExpenseCategory sc WHERE sc.name LIKE CONCAT('%', :keyword, '%'))" +
             "       ) " +
             "   ) " +
             //filter by category

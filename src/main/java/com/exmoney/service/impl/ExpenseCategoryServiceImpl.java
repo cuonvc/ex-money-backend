@@ -163,11 +163,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
             walletId = wallet.get().getId();
         }
 
-        final String fnKeyword = keyword == null || keyword.isEmpty() ? "" : keyword.toLowerCase();
-        categoryRepository.findAllParentAccessByWallet(currentUserId, walletId)
-                .stream().filter(category -> fnKeyword.isEmpty()
-                        || commonService.getMessageSrc(category.getName(), locale).toLowerCase().contains(fnKeyword)
-                        || commonService.getMessageSrc(category.getDescription(), locale).toLowerCase().contains(fnKeyword))
+        getAllParentAccessByWalletAndKeyword(currentUserId, walletId, keyword, locale)
                 .forEach(parent -> {
                     ExpenseCategoryResponse response = categoryMapper.entityToResponse(parent);
                     response.setName(commonService.getMessageSrc(response.getName(), locale));
@@ -177,6 +173,14 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
                 });
 
         return responseFactory.success(null, result);
+    }
+
+    public Set<ExpenseCategory> getAllParentAccessByWalletAndKeyword(Long currentUserId, Long walletId, String keyword, Locale locale) {
+        final String fnKeyword = keyword == null || keyword.isEmpty() ? "" : keyword.toLowerCase();
+        return categoryRepository.findAllParentAccessByWallet(currentUserId, walletId)
+                .stream().filter(category -> fnKeyword.isEmpty()
+                        || commonService.getMessageSrc(category.getName(), locale).toLowerCase().contains(fnKeyword)
+                        || commonService.getMessageSrc(category.getDescription(), locale).toLowerCase().contains(fnKeyword)).collect(Collectors.toSet());
     }
 
     @Override
