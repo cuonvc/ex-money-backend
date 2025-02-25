@@ -404,7 +404,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .collect(Collectors.toSet());
 
         ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>>
-                categories = categoryService.getAll(Constant.CategorySaveType.WALLET, walletId, locale);
+                categories = categoryService.getAll(walletId, locale);
 
         Set<Map<Long, String>> categoryMap = categories.getBody().getData()[0]
                 .stream().map(c -> Map.of(c.getId(), c.getName()))
@@ -438,6 +438,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                     e.setCategoryName(commonService.getMessageSrc(e.getCategoryName(), locale));
                     e.setType(commonService.getMessageSrc(getExpenseTypeDisp(e.getType()), locale));
                 }).toList();
+//        List<ExpenseCategory> categoryListByUser = categoryRepository.findAllByUserAndWallet()
         return responseFactory.success(null, list);
     }
 
@@ -459,7 +460,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .toList();
 
         ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>>
-                categories = categoryService.getAll(Constant.CategorySaveType.WALLET, walletId, locale);
+                categories = categoryService.getAll(walletId, locale);
 
         Set<ExpenseCategoryResponse> categoryResponses = categories.getBody().getData()[0];
 

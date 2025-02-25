@@ -52,9 +52,8 @@ public class ExpenseCategoryController {
 
     @GetMapping(API_BASE_USER + "/category")
     public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(@RequestParam Locale locale,
-                                                                             @RequestParam(value = "save_type", required = false) String saveType,
-                                                                             @RequestParam(value = "ref_id", required = false) Long refId) {
-        return expenseCategoryService.getAll(saveType, refId, locale);
+                                                                             @RequestParam Long walletId) {
+        return expenseCategoryService.getAll(walletId, locale);
     }
 
     @GetMapping(API_BASE_USER + "/category/default-name-test")

@@ -17,6 +17,17 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
             "WHERE c.id = :id AND c.status = 'ACTIVE' AND c.createdBy = :ownerId")
     Optional<ExpenseCategory> findByIdAndOwner(Long id, Long ownerId);
 
+    @Query("SELECT c FROM ExpenseCategory c " +
+            "WHERE c.status = 'ACTIVE' " +
+            "AND (" +
+            "    c.type = 'DEFAULT'" +
+            "    OR (" +
+            "        (c.saveType = 'WALLET' AND c.refId = :walletId)" +
+            "        OR (c.saveType = 'ACCOUNT' AND c.refId = :userId)" +
+            "    )" +
+            ")")
+    List<ExpenseCategory> findAllAccessByUser(Long userId); //dùng cho search expense
+
     @Query("SELECT c FROM ExpenseCategory c WHERE c.name = :name AND c.type = 'DEFAULT'")
     Optional<ExpenseCategory> findDefaultByName(String name);
 
@@ -41,14 +52,33 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
     //còn TH category default nhưng khong decode dc
     List<ExpenseCategory> findByNameAndWalletId(String name, Long walletId);
 
-    @Query("SELECT c FROM ExpenseCategory c " +
-            "WHERE (" +
-            "   (c.refId = :refId AND c.saveType = :saveType) " +
-            "   OR c.type = 'DEFAULT' " +
-            ") " +
-            "AND c.parentId IS NULL " +
-            "AND c.status = 'ACTIVE'")
-    Set<ExpenseCategory> findAllParentByRefIdAndSaveType(Long refId, String saveType);
+//    @Query("SELECT c FROM ExpenseCategory c " +
+//            "WHERE (" +
+//            "   (c.refId = :refId AND c.saveType = :saveType) " +
+//            "   OR c.type = 'DEFAULT' " +
+//            ") " +
+//            "AND c.parentId IS NULL " +
+//            "AND c.status = 'ACTIVE'")
+//    Set<ExpenseCategory> findAllParentByRefIdAndSaveType(Long refId, String saveType);
+
+    @Query(
+            "SELECT c FROM ExpenseCategory c " +
+            "WHERE c.status = 'ACTIVE' " +
+            "   AND c.parentId IS NULL " +
+            "   AND (" +
+            "       c.type = 'DEFAULT' " +
+            "       OR (" +
+            "           (c.saveType = 'WALLET' AND c.refId IN (" +
+            "              SELECT uw.walletId FROM UserWallet uw " +
+            "              WHERE uw.userId = :userId " +
+            "              AND uw.walletId = :walletId " +
+            "              AND uw.status = 'ACTIVE') " +
+            "           ) " +
+            "           OR (c.saveType = 'ACCOUNT' AND c.refId = :userId)" +
+            "       )" +
+            "   )"
+    )
+    Set<ExpenseCategory> findAllParentAccessByWallet(Long userId, Long walletId);
 
     @Query("SELECT c FROM ExpenseCategory c " +
             "WHERE c.parentId = :parentId " +

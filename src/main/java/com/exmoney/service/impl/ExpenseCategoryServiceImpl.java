@@ -146,16 +146,16 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(String saveType, Long refId, Locale locale) {
+    public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(Long walletId, Locale locale) {
         Set<ExpenseCategoryResponse> result = new HashSet<>();
-        if (saveType == null || !List.of(ACCOUNT, WALLET).contains(saveType)) {
-            saveType = null;
-            refId = null;
-        } else if (saveType.equals(ACCOUNT)) {
-            refId = commonService.getCurrentUserId();
-        }
+//        if (saveType == null || !List.of(ACCOUNT, WALLET).contains(saveType)) {
+//            saveType = null;
+//            refId = null;
+//        } else if (saveType.equals(ACCOUNT)) {
+//            refId = commonService.getCurrentUserId();
+//        }
 
-        categoryRepository.findAllParentByRefIdAndSaveType(refId, saveType)
+        categoryRepository.findAllParentAccessByWallet(commonService.getCurrentUserId(), walletId)
                 .forEach(parent -> {
                     ExpenseCategoryResponse response = categoryMapper.entityToResponse(parent);
                     response.setName(commonService.getMessageSrc(response.getName(), locale));
