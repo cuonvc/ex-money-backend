@@ -146,7 +146,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
     }
 
     @Override
-    public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(Long walletId, Locale locale) {
+    public ResponseEntity<BaseResponse<Set<ExpenseCategoryResponse>>> getAll(Long walletId, String keyword, Locale locale) {
         Set<ExpenseCategoryResponse> result = new HashSet<>();
 //        if (saveType == null || !List.of(ACCOUNT, WALLET).contains(saveType)) {
 //            saveType = null;
@@ -154,8 +154,20 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
 //        } else if (saveType.equals(ACCOUNT)) {
 //            refId = commonService.getCurrentUserId();
 //        }
+        Long currentUserId = commonService.getCurrentUserId();
+        if (walletId == null) {
+            Optional<Wallet> wallet = walletRepository.findDefaultByOwner(currentUserId);
+            if (wallet.isEmpty()) {
+                commonService.throwException(INTERNAL_SERVER_ERROR, locale, null);
+            }
+            walletId = wallet.get().getId();
+        }
 
-        categoryRepository.findAllParentAccessByWallet(commonService.getCurrentUserId(), walletId)
+        final String fnKeyword = keyword == null || keyword.isEmpty() ? "" : keyword.toLowerCase();
+        categoryRepository.findAllParentAccessByWallet(currentUserId, walletId)
+                .stream().filter(category -> fnKeyword.isEmpty()
+                        || commonService.getMessageSrc(category.getName(), locale).toLowerCase().contains(fnKeyword)
+                        || commonService.getMessageSrc(category.getDescription(), locale).toLowerCase().contains(fnKeyword))
                 .forEach(parent -> {
                     ExpenseCategoryResponse response = categoryMapper.entityToResponse(parent);
                     response.setName(commonService.getMessageSrc(response.getName(), locale));
