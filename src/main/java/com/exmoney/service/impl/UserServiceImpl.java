@@ -207,6 +207,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<BaseResponse<Object>> renewAccessToken(String refreshToken) {
 
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            commonService.throwException(INVALID_CREDENTIAL, DEFAULT_LOCALE, null);
+        }
+
         User user = userRepository.findByRfToken(refreshToken)
                 .orElseThrow(() -> new ServiceException(
                         messageSource.getMessage(USER_NOT_FOUND.getMessageCode(), null, DEFAULT_LOCALE),
